@@ -5,6 +5,8 @@ import type { FilterStatus } from './components/StatsBar';
 import { ArticleCard } from './components/ArticleCard';
 import { ArticleModal } from './components/ArticleModal';
 import { ProfileModal } from './components/ProfileModal';
+import { ConsoleSecurityBanner } from './components/ConsoleSecurityBanner';
+import { SecurityShield } from './components/SecurityShield';
 import type { Article, CreatorProfile, AWSCategory } from './types';
 import { INITIAL_ARTICLES, CURRENT_USER_MOCK } from './data/initialData';
 import { AWS_CATEGORIES } from './data/categories';
@@ -160,7 +162,9 @@ export function App() {
   const totalCommunityLikes = articles.reduce((acc, curr) => acc + curr.likesCount, 0);
 
   return (
-    <div className="min-h-screen bg-background text-ink flex flex-col font-sans transition-colors duration-200">
+    <SecurityShield>
+      <ConsoleSecurityBanner />
+      <div className="min-h-screen bg-background text-ink flex flex-col font-sans transition-colors duration-200">
       
       {/* Barra de Navegación Oficial */}
       <Navbar
@@ -348,6 +352,7 @@ export function App() {
       />
 
     </div>
+    </SecurityShield>
   );
 }
 
