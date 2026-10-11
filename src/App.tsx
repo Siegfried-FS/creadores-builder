@@ -10,6 +10,7 @@ import { SecurityShield } from './components/SecurityShield';
 import type { Article, CreatorProfile, AWSCategory } from './types';
 import { INITIAL_ARTICLES, CURRENT_USER_MOCK } from './data/initialData';
 import { AWS_CATEGORIES } from './data/categories';
+import { getNextMonthFirstDay } from './utils/sanitizer';
 import { Search, Sparkles, BookOpen, HeartHandshake } from 'lucide-react';
 
 export function App() {
@@ -117,6 +118,7 @@ export function App() {
         authorBuilderHandle: currentUser.builderHandle,
         authorAvatarUrl: currentUser.avatarUrl,
         createdAt: new Date().toISOString(),
+        expiresAt: getNextMonthFirstDay(),
         likesCount: 0,
       };
       setArticles((prev) => [newArt, ...prev]);

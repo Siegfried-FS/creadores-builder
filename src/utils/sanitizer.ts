@@ -95,3 +95,25 @@ export function isValidLinkedInPostUrl(url: string): { isValid: boolean; error?:
     return { isValid: false, error: 'URL de LinkedIn no válida (debe incluir https://)' };
   }
 }
+
+// Calcula la fecha de expiración para el primer día del mes siguiente (DynamoDB TTL)
+export function getNextMonthFirstDay(): string {
+  const now = new Date();
+  const nextMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0));
+  return nextMonth.toISOString();
+}
+
+// Retorna los días restantes del ciclo actual
+export function getDaysUntilNextMonth(): number {
+  const now = new Date();
+  const nextMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0));
+  const diffTime = nextMonth.getTime() - now.getTime();
+  return Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+}
+
+// Retorna el nombre del ciclo actual (ej: "Octubre 2026")
+export function getCurrentCycleName(): string {
+  const now = new Date();
+  return now.toLocaleDateString('es-MX', { month: 'long', year: 'numeric' });
+}
+

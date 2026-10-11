@@ -35,6 +35,7 @@ export interface Article {
   authorAvatarUrl?: string;
   createdAt: string;
   updatedAt?: string;
+  expiresAt?: string;
   likesCount: number;
 }
 

@@ -100,7 +100,10 @@ export const ArticleCard: FC<ArticleCardProps> = ({
             </div>
           </div>
 
-          <span className="text-[11px] text-muted font-mono">{formattedDate}</span>
+          <div className="flex flex-col items-end text-[11px] text-muted font-mono">
+            <span>{formattedDate}</span>
+            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">Ciclo activo</span>
+          </div>
         </div>
       </div>
 

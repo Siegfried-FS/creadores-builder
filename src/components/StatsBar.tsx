@@ -1,5 +1,6 @@
 import type { FC } from 'react';
-import { CheckCircle2, Clock, Sparkles, BookOpen, Users, Heart } from 'lucide-react';
+import { CheckCircle2, Clock, Sparkles, BookOpen, Users, Heart, Calendar, RotateCcw } from 'lucide-react';
+import { getCurrentCycleName, getDaysUntilNextMonth } from '../utils/sanitizer';
 
 export type FilterStatus = 'all' | 'pending' | 'liked';
 
@@ -22,9 +23,30 @@ export const StatsBar: FC<StatsBarProps> = ({
 }) => {
   const percentage = totalArticles > 0 ? Math.round((likedCount / totalArticles) * 100) : 0;
   const pendingCount = Math.max(0, totalArticles - likedCount);
+  const cycleName = getCurrentCycleName();
+  const daysLeft = getDaysUntilNextMonth();
 
   return (
     <div className="bg-white dark:bg-gray-900 border border-border rounded-2xl p-5 shadow-sm mb-8 transition-colors">
+      
+      {/* Banner de Ciclo Mensual y Auto-Renovación */}
+      <div className="flex flex-wrap items-center justify-between gap-2 pb-4 mb-4 border-b border-border/80 text-xs">
+        <div className="flex items-center space-x-2">
+          <span className="p-1.5 rounded-lg bg-aws-orange/15 text-amber-700 dark:text-amber-400 font-semibold flex items-center gap-1.5 capitalize">
+            <Calendar className="w-3.5 h-3.5" />
+            <span>Ciclo: {cycleName}</span>
+          </span>
+          <span className="text-muted hidden sm:inline">&bull;</span>
+          <span className="text-muted">
+            Quedan <strong className="text-ink">{daysLeft} días</strong> para renovar lista y dar paso a nuevas publicaciones.
+          </span>
+        </div>
+        <div className="flex items-center space-x-1.5 text-muted font-mono text-[11px] bg-slate-50 dark:bg-gray-800 px-2.5 py-1 rounded-lg">
+          <RotateCcw className="w-3 h-3 text-emerald-500" />
+          <span>Renovación el día 1 (TTL $0)</span>
+        </div>
+      </div>
+
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         
         {/* Progreso Personal / Gamificación del To-Do */}
