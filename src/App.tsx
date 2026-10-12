@@ -66,6 +66,7 @@ export function App() {
               authorAvatarUrl: updated.avatarUrl,
               authorBuilderUrl: updated.builderUrl,
               authorLinkedinUrl: updated.linkedinUrl,
+              authorGithubUrl: updated.githubUrl,
               authorInstagramUrl: updated.instagramUrl,
             }
           : art
@@ -225,6 +226,7 @@ export function App() {
         authorAvatarUrl: currentUser.avatarUrl || '/images/mascot_opt.png',
         authorBuilderUrl: currentUser.builderUrl,
         authorLinkedinUrl: currentUser.linkedinUrl,
+        authorGithubUrl: currentUser.githubUrl,
         authorInstagramUrl: currentUser.instagramUrl,
         createdAt: new Date().toISOString(),
         expiresAt: new Date(now + 30 * 24 * 60 * 60 * 1000).toISOString(),
@@ -245,6 +247,7 @@ export function App() {
           authorAvatarUrl: currentUser.avatarUrl || '/images/mascot_opt.png',
           authorBuilderUrl: currentUser.builderUrl,
           authorLinkedinUrl: currentUser.linkedinUrl,
+          authorGithubUrl: currentUser.githubUrl,
           authorInstagramUrl: currentUser.instagramUrl,
         });
         if (savedDynamo && savedDynamo.id) {
@@ -348,7 +351,7 @@ export function App() {
             <div className="max-w-2xl flex-1">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full badge-accent text-xs font-bold mb-3 sm:mb-4">
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Bootcamp Creadores de Contenido LATAM</span>
+                <span>Comunidad Abierta &middot; AWS Builder Center & Creadores LATAM</span>
               </div>
 
               <h1 className="font-display font-extrabold text-2xl sm:text-4xl text-ink tracking-tight leading-tight mb-3">
@@ -357,7 +360,7 @@ export function App() {
               </h1>
 
               <p className="text-xs sm:text-sm text-muted leading-relaxed mb-6">
-                Lee, apoya y amplifica los artículos técnicos de la comunidad. Marca en tu checklist los que ya apoyaste en AWS Builder Center y LinkedIn para no perder el hilo.
+                Lee, apoya y amplifica los artículos técnicos de la comunidad. Aunque esta plataforma nació inspirada en el Bootcamp de Creación de Contenido LATAM, está abierta para que cualquier builder comparta sus aprendizajes, dé visibilidad a sus publicaciones y lleve su propio checklist interactivo.
               </p>
 
               {/* Aviso de acción según estado de sesión */}
@@ -410,10 +413,10 @@ export function App() {
                     </div>
                     <div>
                       <p className="text-xs font-bold text-ink">
-                        ¿Participas en el Bootcamp de Creadores?
+                        ¿Creas o compartes contenido técnico en AWS?
                       </p>
                       <p className="text-[11px] text-muted">
-                        Inicia sesión con tu perfil para registrar tus artículos de AWS Builder Center.
+                        Cualquier builder de la comunidad puede iniciar sesión para registrar sus posts de AWS Builder Center, dar difusión y recibir apoyo.
                       </p>
                     </div>
                   </div>

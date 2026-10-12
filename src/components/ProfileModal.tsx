@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, type FC, type FormEvent } from 'react';
 import { X, User, Edit3, PlusCircle, AtSign, Check, ExternalLink, Camera, Image as ImageIcon, Trash2, AlertTriangle } from 'lucide-react';
 import type { CreatorProfile } from '../types';
-import { formatBuilderUrl, formatLinkedInUrl, formatInstagramUrl, cleanUsername } from '../utils/sanitizer';
+import { formatBuilderUrl, formatLinkedInUrl, formatInstagramUrl, formatGitHubUrl, cleanUsername } from '../utils/sanitizer';
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -26,6 +26,7 @@ export const ProfileModal: FC<ProfileModalProps> = ({
   const [avatarUrl, setAvatarUrl] = useState(currentUser.avatarUrl || '/images/mascot_opt.png');
   const [builderHandle, setBuilderHandle] = useState(currentUser.builderHandle || '');
   const [linkedinUrl, setLinkedinUrl] = useState(currentUser.linkedinUrl || '');
+  const [githubUrl, setGithubUrl] = useState(currentUser.githubUrl || '');
   const [instagramUrl, setInstagramUrl] = useState(currentUser.instagramUrl || '');
   const [savedNotice, setSavedNotice] = useState(false);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
@@ -40,6 +41,7 @@ export const ProfileModal: FC<ProfileModalProps> = ({
       setAvatarUrl(currentUser.avatarUrl || '/images/mascot_opt.png');
       setBuilderHandle(currentUser.builderHandle || '');
       setLinkedinUrl(currentUser.linkedinUrl || '');
+      setGithubUrl(currentUser.githubUrl || '');
       setInstagramUrl(currentUser.instagramUrl || '');
       setIsConfirmingDelete(false);
     }
@@ -77,6 +79,7 @@ export const ProfileModal: FC<ProfileModalProps> = ({
       builderHandle: cleanHandle,
       builderUrl: formatBuilderUrl(builderHandle || cleanHandle),
       linkedinUrl: linkedinUrl ? formatLinkedInUrl(linkedinUrl) : undefined,
+      githubUrl: githubUrl ? formatGitHubUrl(githubUrl) : undefined,
       instagramUrl: instagramUrl ? formatInstagramUrl(instagramUrl) : undefined,
     };
 
@@ -290,7 +293,7 @@ export const ProfileModal: FC<ProfileModalProps> = ({
 
               <div>
                 <label className="block text-[11px] font-medium text-muted mb-1">
-                  Perfil de LinkedIn (Opcional)
+                  Perfil de LinkedIn (Opcional - Red Profesional)
                 </label>
                 <input
                   type="text"
@@ -303,7 +306,20 @@ export const ProfileModal: FC<ProfileModalProps> = ({
 
               <div>
                 <label className="block text-[11px] font-medium text-muted mb-1">
-                  Perfil de Instagram (Opcional)
+                  Perfil de GitHub (Opcional - Código & Repositorios)
+                </label>
+                <input
+                  type="text"
+                  value={githubUrl}
+                  onChange={(e) => setGithubUrl(e.target.value)}
+                  placeholder="usuario o https://github.com/usuario"
+                  className="w-full bg-surface border border-border rounded-xl px-3 py-2 text-xs text-ink focus:outline-none focus:border-purple-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-medium text-muted mb-1">
+                  Perfil de Instagram (Opcional - Comunidad & Red Social)
                 </label>
                 <input
                   type="text"
@@ -357,7 +373,7 @@ export const ProfileModal: FC<ProfileModalProps> = ({
               <div className="p-3 rounded-xl bg-surface-hover border border-border flex items-center justify-between">
                 <div>
                   <div className="text-[10px] text-muted uppercase font-bold tracking-wider">
-                    LinkedIn
+                    LinkedIn (Red Profesional)
                   </div>
                   <div className="text-xs font-semibold text-ink truncate max-w-[280px]">
                     {currentUser.linkedinUrl || 'No configurado'}
@@ -375,6 +391,28 @@ export const ProfileModal: FC<ProfileModalProps> = ({
                   </a>
                 )}
               </div>
+
+              {currentUser.githubUrl && (
+                <div className="p-3 rounded-xl bg-surface-hover border border-border flex items-center justify-between">
+                  <div>
+                    <div className="text-[10px] text-muted uppercase font-bold tracking-wider">
+                      GitHub (Código & Repositorios)
+                    </div>
+                    <div className="text-xs font-semibold text-ink truncate max-w-[280px]">
+                      {currentUser.githubUrl}
+                    </div>
+                  </div>
+                  <a
+                    href={currentUser.githubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-1.5 rounded-lg border border-border hover:border-purple-500/50 text-muted hover:text-purple-400 transition-colors"
+                    title="Ver GitHub"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              )}
 
               {currentUser.instagramUrl && (
                 <div className="p-3 rounded-xl bg-surface-hover border border-border flex items-center justify-between">

@@ -18,6 +18,7 @@ export interface CreatorProfile {
   builderHandle: string;
   builderUrl: string;
   linkedinUrl?: string;
+  githubUrl?: string;
   instagramUrl?: string;
   xUrl?: string;
   avatarUrl?: string;
@@ -41,6 +42,7 @@ export interface Article {
   authorAvatarUrl?: string;
   authorBuilderUrl: string;
   authorLinkedinUrl?: string;
+  authorGithubUrl?: string;
   authorInstagramUrl?: string;
   authorXUrl?: string;
 

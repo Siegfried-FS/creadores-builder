@@ -48,6 +48,50 @@ export function formatInstagramUrl(input: string): string {
   return `https://www.instagram.com/${clean}`;
 }
 
+// Limpia y valida el nombre de usuario de GitHub (solo alfanuméricos y guiones)
+export function cleanGitHubUsername(input: string): string {
+  if (!input) return '';
+  return input.trim().replace(/^@+/, '').replace(/[^a-zA-Z0-9-]/g, '');
+}
+
+// Genera la URL de GitHub (admite handle limpio o URL completa con dominio github.com)
+export function formatGitHubUrl(input: string): string {
+  if (!input) return '';
+  const trimmed = input.trim();
+
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    try {
+      const parsed = new URL(trimmed);
+      if (parsed.hostname === 'github.com' || parsed.hostname === 'www.github.com') {
+        return trimmed;
+      }
+    } catch {
+      // Si la URL es inválida, se limpia como username
+    }
+  }
+
+  const clean = cleanGitHubUsername(trimmed);
+  return clean ? `https://github.com/${clean}` : '';
+}
+
+// Valida si un enlace de GitHub es legítimo
+export function isValidGitHubUrl(input: string): { isValid: boolean; error?: string } {
+  if (!input) return { isValid: true }; // Opcional
+  try {
+    const formatted = formatGitHubUrl(input);
+    if (!formatted) {
+      return { isValid: false, error: 'Usuario de GitHub no válido (solo letras, números y guiones)' };
+    }
+    const parsed = new URL(formatted);
+    if (parsed.hostname !== 'github.com' && parsed.hostname !== 'www.github.com') {
+      return { isValid: false, error: 'Debe ser un perfil legítimo de github.com' };
+    }
+    return { isValid: true };
+  } catch {
+    return { isValid: false, error: 'URL de GitHub inválida' };
+  }
+}
+
 // Valida si una URL de artículo pertenece a un dominio legítimo de AWS
 export function isValidAWSArticleUrl(url: string): { isValid: boolean; error?: string } {
   if (!url) {
