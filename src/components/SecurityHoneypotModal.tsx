@@ -1,10 +1,9 @@
 import { useEffect, useState, type FC } from 'react';
-import { ShieldAlert, ExternalLink, ArrowLeft, Terminal, Lock } from 'lucide-react';
+import { ShieldAlert, ExternalLink, ArrowLeft, Terminal } from 'lucide-react';
 
 export const SecurityHoneypotModal: FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [triggeredPath, setTriggeredPath] = useState('');
-  const [attackType, setAttackType] = useState<'admin' | 'sqli' | 'xss' | 'traversal'>('admin');
 
   useEffect(() => {
     const inspectPath = () => {
@@ -18,21 +17,8 @@ export const SecurityHoneypotModal: FC = () => {
       const xssPatterns = /(<script|javascript:|onerror|onload|alert\(|eval\(|%3cscript)/i;
       const traversalPatterns = /(\.\.\/)|(\.\.\\)|(\.\.%2f)/i;
 
-      if (adminPatterns.test(full)) {
-        setAttackType('admin');
-        setTriggeredPath(window.location.pathname);
-        setIsOpen(true);
-      } else if (sqlPatterns.test(full)) {
-        setAttackType('sqli');
-        setTriggeredPath(full);
-        setIsOpen(true);
-      } else if (xssPatterns.test(full)) {
-        setAttackType('xss');
-        setTriggeredPath(full);
-        setIsOpen(true);
-      } else if (traversalPatterns.test(full)) {
-        setAttackType('traversal');
-        setTriggeredPath(full);
+      if (adminPatterns.test(full) || sqlPatterns.test(full) || xssPatterns.test(full) || traversalPatterns.test(full)) {
+        setTriggeredPath(window.location.pathname || full);
         setIsOpen(true);
       }
     };
@@ -55,55 +41,44 @@ export const SecurityHoneypotModal: FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fadeIn">
-      <div className="relative w-full max-w-lg rounded-3xl glass-card border border-red-500/40 p-6 sm:p-8 shadow-2xl space-y-6 text-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
+      <div className="relative w-full max-w-lg rounded-3xl glass-card border border-border p-6 sm:p-8 shadow-2xl space-y-6 text-center">
         
         {/* Mascota y Shield */}
-        <div className="relative mx-auto w-20 h-20 flex items-center justify-center rounded-2xl bg-red-500/15 border-2 border-red-500/40 p-2 shadow-lg">
+        <div className="relative mx-auto w-20 h-20 flex items-center justify-center rounded-2xl bg-purple-500/10 border-2 border-purple-500/30 p-2 shadow-md">
           <img
             src="/images/mascot_opt.png"
             alt="AWS User Group Playa Vicente"
             className="w-full h-full object-contain filter drop-shadow"
           />
-          <div className="absolute -bottom-2 -right-2 p-1.5 rounded-xl bg-red-600 text-white shadow-md">
+          <div className="absolute -bottom-2 -right-2 p-1.5 rounded-xl bg-purple-600 text-white shadow-md">
             <ShieldAlert className="w-4 h-4" />
           </div>
         </div>
 
-        {/* Título de Detección */}
+        {/* Título Genérico Seguro (Sin revelar arquitectura interna) */}
         <div>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-bold bg-red-500/20 text-red-400 border border-red-500/30 uppercase tracking-wider mb-2">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-bold badge-accent uppercase tracking-wider mb-2">
             <Terminal className="w-3.5 h-3.5" />
-            <span>Auditoría DevSecOps · Honeypot Activo</span>
+            <span>Auditoría de Ruta · 404 No Encontrado</span>
           </span>
           <h2 className="font-display font-extrabold text-2xl text-ink">
-            {attackType === 'admin' ? '¿Buscando el Panel /admin?' : '¡Buen intento de auditoría!'}
+            Página No Encontrada
           </h2>
           <p className="text-xs text-muted mt-1 font-mono break-all px-2">
-            Ruta interceptada: <span className="text-red-400 font-bold">{triggeredPath}</span>
+            Ruta solicitada: <span className="text-ink font-bold">{triggeredPath}</span>
           </p>
         </div>
 
-        {/* Explicación Técnica (Estilo auténtico Playa Vicente) */}
+        {/* Mensaje Seguro de Comunidad (Estilo oficial de AWSUG Playa Vicente sin datos internos) */}
         <div className="p-4 rounded-2xl bg-surface-hover/80 border border-border text-left space-y-2.5 text-xs">
-          <div className="flex items-center gap-2 text-ink font-bold">
-            <Lock className="w-4 h-4 text-purple-400" />
-            <span>Arquitectura 100% Serverless & Decoupled</span>
-          </div>
-          
-          {attackType === 'admin' ? (
-            <p className="text-muted leading-relaxed">
-              En el <strong>Hub Comunitario de Creadores</strong> no existen servidores WordPress, paneles PHPMyAdmin ni rutas <code className="text-purple-300 font-mono">/admin</code> expuestas. El frontend es estático en Amazon CloudFront / S3, la base de datos es <strong>Amazon DynamoDB NoSQL</strong> y la autenticación se realiza con tokens federados con principio de mínimo privilegio.
-            </p>
-          ) : (
-            <p className="text-muted leading-relaxed">
-              Tu intento de explotación (<code className="text-red-400 font-mono">{attackType.toUpperCase()}</code>) fue interceptado por los controles de sanitización del cliente. Aquí no hay motores SQL relacionales ni comandos ejecutables en el servidor.
-            </p>
-          )}
+          <p className="text-muted leading-relaxed">
+            Esta ruta no existe en la plataforma. Este sitio web opera como una aplicación estática desacoplada sin paneles administrativos, archivos de configuración ni endpoints expuestos.
+          </p>
 
-          <div className="pt-2 border-t border-border/80 text-[11px] text-muted space-y-1">
-            <p>💡 <strong>¿Te apasiona la ciberseguridad cloud?</strong></p>
-            <p>En AWS User Group Playa Vicente practicamos DevSecOps, auditorías ISO 27001 y arquitecturas seguras sin humo comercial.</p>
+          <div className="pt-2 border-t border-border text-[11px] text-muted space-y-1">
+            <p className="font-bold text-ink">💡 ¿Te interesa la ciberseguridad cloud y el desarrollo en AWS?</p>
+            <p>En <strong>AWS User Group Playa Vicente</strong> organizamos talleres prácticos, laboratorios y charlas técnicas abiertas a la comunidad.</p>
           </div>
         </div>
 
@@ -124,7 +99,7 @@ export const SecurityHoneypotModal: FC = () => {
             className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-border bg-surface hover:bg-surface-hover text-ink text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
           >
             <span>Conoce la Comunidad</span>
-            <ExternalLink className="w-3.5 h-3.5 text-purple-400" />
+            <ExternalLink className="w-3.5 h-3.5 text-purple-600" />
           </a>
         </div>
 

@@ -9,7 +9,11 @@ interface Particle {
   color: string;
 }
 
-const PALETTE = ['#6d28d9', '#8b5cf6', '#a855f7', '#64748b', '#94a3b8'];
+// Paletas más vibrantes y notorias según el tema
+const PALETTES = {
+  light: ['#6d28d9', '#7c3aed', '#8b5cf6', '#2563eb', '#3b82f6', '#475569'],
+  dark: ['#c084fc', '#a855f7', '#7c3aed', '#38bdf8', '#818cf8', '#ec4899'],
+};
 
 export function ParticlesBg() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -23,6 +27,27 @@ export function ParticlesBg() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    const getTheme = (): 'light' | 'dark' => {
+      return document.documentElement.classList.contains('light') ? 'light' : 'dark';
+    };
+
+    let currentTheme = getTheme();
+    let currentPalette = PALETTES[currentTheme];
+
+    const updateThemePalette = () => {
+      currentTheme = getTheme();
+      currentPalette = PALETTES[currentTheme];
+      particles.current.forEach((p) => {
+        p.color = currentPalette[Math.floor(Math.random() * currentPalette.length)];
+      });
+    };
+
+    const observer = new MutationObserver(updateThemePalette);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+
     const resize = () => {
       const w = window.innerWidth;
       const h = window.innerHeight;
@@ -34,15 +59,16 @@ export function ParticlesBg() {
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
-      const count = Math.min(50, Math.max(22, Math.floor((w * h) / 25000)));
+      // Mayor densidad de partículas para que sean bien notorias
+      const count = Math.min(65, Math.max(30, Math.floor((w * h) / 18000)));
       if (particles.current.length === 0 || Math.abs(particles.current.length - count) > 15) {
         particles.current = Array.from({ length: count }, () => ({
           x: Math.random() * w,
           y: Math.random() * h,
-          vx: (Math.random() - 0.5) * 0.45,
-          vy: (Math.random() - 0.5) * 0.45,
-          size: Math.random() * 2 + 1,
-          color: PALETTE[Math.floor(Math.random() * PALETTE.length)],
+          vx: (Math.random() - 0.5) * 0.55,
+          vy: (Math.random() - 0.5) * 0.55,
+          size: Math.random() * 2.5 + 1.2, // Tamaño más visible
+          color: currentPalette[Math.floor(Math.random() * currentPalette.length)],
         }));
       }
     };
@@ -76,6 +102,8 @@ export function ParticlesBg() {
       ctx.clearRect(0, 0, w, h);
 
       const pts = particles.current;
+      const isLight = currentTheme === 'light';
+
       for (let i = 0; i < pts.length; i++) {
         const p = pts[i];
         p.x += p.vx;
@@ -89,7 +117,8 @@ export function ParticlesBg() {
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
-        ctx.globalAlpha = 0.5;
+        // Mayor opacidad para que resalten claramente
+        ctx.globalAlpha = isLight ? 0.75 : 0.85;
         ctx.fill();
 
         // Líneas entre partículas
@@ -98,13 +127,15 @@ export function ParticlesBg() {
           const dy = pts[i].y - pts[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
 
-          if (dist < 125) {
+          if (dist < 135) {
             ctx.beginPath();
             ctx.moveTo(pts[i].x, pts[i].y);
             ctx.lineTo(pts[j].x, pts[j].y);
             ctx.strokeStyle = pts[i].color;
-            ctx.globalAlpha = 0.15 * (1 - dist / 125);
-            ctx.lineWidth = 0.75;
+            ctx.globalAlpha = isLight
+              ? 0.28 * (1 - dist / 135)
+              : 0.32 * (1 - dist / 135);
+            ctx.lineWidth = 1.1;
             ctx.stroke();
           }
         }
@@ -116,13 +147,13 @@ export function ParticlesBg() {
         const dym = p.y - my;
         const distm = Math.sqrt(dxm * dxm + dym * dym);
 
-        if (distm < 140) {
+        if (distm < 150) {
           ctx.beginPath();
           ctx.moveTo(p.x, p.y);
           ctx.lineTo(mx, my);
           ctx.strokeStyle = p.color;
-          ctx.globalAlpha = 0.35 * (1 - distm / 140);
-          ctx.lineWidth = 1;
+          ctx.globalAlpha = 0.55 * (1 - distm / 150);
+          ctx.lineWidth = 1.4;
           ctx.stroke();
         }
       }
@@ -134,6 +165,7 @@ export function ParticlesBg() {
 
     return () => {
       cancelAnimationFrame(animRef.current);
+      observer.disconnect();
       window.removeEventListener('resize', resize);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('touchmove', handleTouchMove);
@@ -145,7 +177,7 @@ export function ParticlesBg() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 w-screen h-screen pointer-events-none opacity-75 z-0"
+      className="fixed inset-0 w-screen h-screen pointer-events-none opacity-90 z-0"
       aria-hidden="true"
     />
   );

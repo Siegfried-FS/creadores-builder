@@ -14,10 +14,16 @@
     <!-- Google Identity Services (GSI) -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     
-    <!-- Evitar FOUC / Flashazo Blanco: Fondo inmediato en gris suave slate #e2e8f0 -->
+    <!-- Evitar FOUC / Flashazo Blanco: Aplica tema guardado inmediatamente -->
     <script>
       (function() {
-        document.documentElement.style.backgroundColor = '#e2e8f0';
+        try {
+          var saved = localStorage.getItem('awsug_theme') || 'light';
+          document.documentElement.className = saved === 'dark' ? 'dark' : 'light';
+          document.documentElement.style.backgroundColor = saved === 'dark' ? '#080c16' : '#dbe2ea';
+        } catch (e) {
+          document.documentElement.style.backgroundColor = '#dbe2ea';
+        }
       })();
     </script>
   </head>

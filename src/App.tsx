@@ -9,11 +9,34 @@ import type { Article, AWSCategory, CreatorProfile } from './types';
 import { INITIAL_ARTICLES } from './data/initialData';
 import { AWS_CATEGORIES } from './data/categories';
 import { Search, Sparkles, CheckCircle, UserPlus, BookOpen, PlusCircle } from 'lucide-react';
-import { ConsoleSecurity, checkInputSecurity } from './components/ConsoleSecurity';
+import { ConsoleSecurity } from './components/ConsoleSecurity';
 import { SecurityHoneypotModal } from './components/SecurityHoneypotModal';
 import { getArticles, createArticle, updateArticle, deleteArticle, toggleLike } from './services/api';
 
 export function App() {
+  // 🎨 Gestión de los 2 Temas Oficiales Independientes (Diurno ☀️ vs Espectral 🌙)
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    return localStorage.getItem('awsug_theme') === 'dark' ? 'dark' : 'light';
+  });
+
+  const applyThemeToDOM = (t: 'dark' | 'light') => {
+    const el = document.documentElement;
+    el.classList.remove('dark', 'light');
+    el.classList.add(t);
+    localStorage.setItem('awsug_theme', t);
+  };
+
+  useEffect(() => {
+    applyThemeToDOM(theme);
+  }, [theme]);
+
+  const handleToggleTheme = () => {
+    setTheme((prev) => {
+      const next = prev === 'dark' ? 'light' : 'dark';
+      applyThemeToDOM(next);
+      return next;
+    });
+  };
 
   // 👤 Sesión de Usuario (Inicia como visitante si no hay guardada)
   const [currentUser, setCurrentUser] = useState<CreatorProfile | null>(() => {
@@ -318,8 +341,10 @@ export function App() {
       {/* 🔮 Barra superior espectral del UG Playa Vicente */}
       <div className="spectrum-bar" />
 
-      {/* 🧭 Navbar Cápsula Flotante Oficial */}
+      {/* 🧭 Navbar Cápsula Flotante Oficial con Selector de Temas */}
       <Navbar
+        theme={theme}
+        onToggleTheme={handleToggleTheme}
         currentUser={currentUser}
         onOpenAuth={() => setIsAuthModalOpen(true)}
         onOpenProfile={() => setIsProfileModalOpen(true)}
@@ -441,10 +466,7 @@ export function App() {
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  checkInputSecurity(e.target.value);
-                }}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar por título, tema o autor..."
                 className="w-full bg-surface border border-border rounded-xl pl-10 pr-4 py-2.5 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-purple-500 transition-colors shadow-sm"
               />

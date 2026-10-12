@@ -2,23 +2,44 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ☀️ Tema Diurno Neutral Profesional (Escala de Grises Mate & Slate — Cero blanco cegador, Cero fatiga visual) */
-:root, html {
-  --background: #e2e8f0;        /* Slate / gris medio suave mate que mata el blanco excesivo */
-  --surface: #f1f5f9;           /* Tarjetas gris perla suave con contraste descansado */
-  --surface-glass: rgba(241, 245, 249, 0.92);
-  --surface-hover: #e2e8f0;
+/* ☀️ 1. Tema Diurno Suave (Light — Gris Perla & Slate Suave, Cero brillo directo, 100% legible) */
+html.light {
+  --background: #dbe2ea;        /* Fondo gris slate suave que amortigua el brillo */
+  --surface: #e9eef5;           /* Tarjetas gris perla mate descansadas */
+  --surface-glass: rgba(233, 238, 245, 0.92);
+  --surface-hover: #d3dce6;
   --ink: #0f172a;               /* Tipografía negro carbón nítida */
   --muted: #475569;             /* Texto secundario slate medio */
-  --border-color: #cbd5e1;      /* Bordes nítidos en gris pizarra */
-  --accent: #6d28d9;            /* Acento púrpura institucional */
-  --accent-dark: #5b21b6;
-  --accent-light: rgba(109, 40, 217, 0.1);
+  --border-color: #b9c7d5;      /* Bordes nítidos bien definidos */
+  --accent: #6d28d9;            /* Púrpura elegante */
+  --accent-dark: #581c87;
+  --accent-light: rgba(109, 40, 217, 0.12);
   --gradient-btn: linear-gradient(135deg, #6d28d9, #7c3aed);
   --gradient-text: linear-gradient(135deg, #4c1d95, #6d28d9, #7c3aed);
   --spectrum-bar: linear-gradient(90deg, #4c1d95, #6d28d9, #8b5cf6, #38bdf8);
   --card-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
-  --card-shadow-hover: 0 10px 24px rgba(109, 40, 217, 0.16);
+  --card-shadow-hover: 0 10px 24px rgba(109, 40, 217, 0.18);
+  --particle-alpha: 0.65;
+}
+
+/* 🌙 2. Tema Espectral (Dark — Púrpura Cósmico Espacial Oficial de AWSUG Playa Vicente) */
+html.dark, :root {
+  --background: #080c16;
+  --surface: #10172a;
+  --surface-glass: rgba(16, 23, 42, 0.92);
+  --surface-hover: #1b253b;
+  --ink: #ffffff;
+  --muted: #cbd5e1;
+  --border-color: #1e293b;
+  --accent: #a855f7;
+  --accent-dark: #7c3aed;
+  --accent-light: rgba(168, 85, 247, 0.15);
+  --gradient-btn: linear-gradient(135deg, #7c3aed, #a855f7);
+  --gradient-text: linear-gradient(135deg, #e9d5ff, #c084fc, #a855f7);
+  --spectrum-bar: linear-gradient(90deg, #5b21b6, #7c3aed, #a855f7, #60a5fa);
+  --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  --card-shadow-hover: 0 20px 45px rgba(168, 85, 247, 0.3);
+  --particle-alpha: 0.85;
 }
 
 body {
@@ -27,6 +48,7 @@ body {
   color: var(--ink);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   min-height: 100vh;
+  transition: background-color 0.25s ease, color 0.25s ease;
   overflow-x: hidden;
 }
 
@@ -52,7 +74,7 @@ h1, h2, h3, h4, .font-display {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-color);
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
 }
 
 /* Tarjeta de superficie con micro-interacción */
@@ -79,20 +101,20 @@ h1, h2, h3, h4, .font-display {
   background: var(--gradient-btn);
   color: #ffffff;
   font-weight: 700;
-  box-shadow: 0 4px 14px rgba(109, 40, 217, 0.25);
+  box-shadow: 0 4px 16px rgba(109, 40, 217, 0.25);
   transition: all 0.2s ease;
 }
 .btn-primary-gradient:hover {
   filter: brightness(1.08);
   transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(109, 40, 217, 0.35);
+  box-shadow: 0 8px 22px rgba(168, 85, 247, 0.35);
 }
 
 /* Badges temáticos */
 .badge-accent {
   background-color: var(--accent-light);
   color: var(--accent);
-  border: 1px solid rgba(109, 40, 217, 0.25);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
 .badge-muted {
