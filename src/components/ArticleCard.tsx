@@ -50,8 +50,108 @@ export const ArticleCard: FC<ArticleCardProps> = ({
 
       <div className="p-4 sm:p-6 flex flex-col md:flex-row gap-5 items-stretch">
         
-        {/* ── CUERPO PRINCIPAL DEL ARTÍCULO (Lectura principal prioritaria) ── */}
-        <div className="flex-1 w-full flex flex-col justify-between order-1 md:order-2 min-w-0">
+        {/* ── BLOQUE DE AUTOR / BUILDER (Columna en Desktop, Cabecera en Móvil) ── */}
+        <div className="w-full md:w-60 shrink-0 pb-3 md:pb-0 border-b md:border-b-0 md:border-r border-border/80 md:pr-5 flex flex-col justify-between">
+          <div className="flex md:flex-col items-center md:items-center gap-3.5 md:gap-2.5 text-left md:text-center">
+            
+            {/* Avatar del creador con glow */}
+            <div className="relative shrink-0">
+              <img
+                src={article.authorAvatarUrl || '/images/mascot_opt.png'}
+                alt={article.authorName}
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = '/images/mascot_opt.png';
+                }}
+                className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-2xl object-cover bg-purple-500/10 p-0.5 border-2 border-purple-500/30 shadow-sm"
+                loading="lazy"
+              />
+              <span
+                className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-purple-500 ring-2 ring-surface"
+                title="Creador de la comunidad"
+              />
+            </div>
+
+            {/* Info del creador */}
+            <div className="flex-1 md:w-full min-w-0">
+              <span className="text-[10px] text-purple-400 font-bold uppercase tracking-wider block">
+                Builder
+              </span>
+              <h3 className="font-display font-bold text-base sm:text-lg text-ink truncate md:break-words leading-tight">
+                {article.authorName}
+              </h3>
+              {article.authorBio && (
+                <p
+                  className="text-xs text-muted mt-1 leading-snug line-clamp-2 md:line-clamp-3"
+                  title={article.authorBio}
+                >
+                  {article.authorBio}
+                </p>
+              )}
+            </div>
+
+          </div>
+
+          {/* Redes sociales del creador (Visibles en todas las vistas con iconos claros) */}
+          {hasSocials && (
+            <div className="mt-3 pt-2.5 border-t border-border/60 w-full flex items-center justify-start md:justify-center gap-2">
+              <span className="text-[10px] text-muted/70 font-semibold uppercase tracking-wider hidden md:block w-full text-center mb-1">
+                Redes
+              </span>
+              <div className="flex items-center gap-2 flex-wrap">
+                {article.authorBuilderUrl && (
+                  <a
+                    href={article.authorBuilderUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-8 h-8 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/25 flex items-center justify-center transition-transform hover:scale-110 shadow-sm"
+                    title="Perfil en AWS Builder Center"
+                  >
+                    <img src="/images/builder_center_icon.png" alt="Builder Center" className="w-4 h-4 object-contain" />
+                  </a>
+                )}
+
+                {article.authorLinkedinUrl && (
+                  <a
+                    href={article.authorLinkedinUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-8 h-8 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/25 flex items-center justify-center transition-transform hover:scale-110 shadow-sm"
+                    title="Perfil profesional en LinkedIn"
+                  >
+                    <LinkedinIcon className="w-4 h-4" />
+                  </a>
+                )}
+
+                {article.authorGithubUrl && (
+                  <a
+                    href={article.authorGithubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-8 h-8 rounded-xl bg-slate-500/10 hover:bg-slate-500/20 text-ink border border-border flex items-center justify-center transition-transform hover:scale-110 shadow-sm"
+                    title="Perfil de código en GitHub"
+                  >
+                    <GithubIcon className="w-4 h-4" />
+                  </a>
+                )}
+
+                {article.authorInstagramUrl && (
+                  <a
+                    href={article.authorInstagramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-8 h-8 rounded-xl bg-pink-500/10 hover:bg-pink-500/20 text-pink-400 border border-pink-500/25 flex items-center justify-center transition-transform hover:scale-110 shadow-sm"
+                    title="Perfil de Instagram"
+                  >
+                    <InstagramIcon className="w-4 h-4" />
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── CUERPO PRINCIPAL DEL ARTÍCULO ── */}
+        <div className="flex-1 w-full flex flex-col justify-between min-w-0">
           <div>
             {/* Meta superior: Categoría, Vigencia y Controles de edición */}
             <div className="flex items-center justify-between gap-2 mb-2.5">
@@ -102,7 +202,7 @@ export const ArticleCard: FC<ArticleCardProps> = ({
               </div>
             </div>
 
-            {/* Título del artículo: Grande, destacado y legible sin zoom */}
+            {/* Título del artículo: Grande, destacado y legible */}
             <h2 className="font-display font-bold text-lg sm:text-xl text-ink leading-snug group-hover:text-purple-400 transition-colors break-words">
               <a href={article.builderUrl} target="_blank" rel="noopener noreferrer">
                 {article.title}
@@ -118,7 +218,7 @@ export const ArticleCard: FC<ArticleCardProps> = ({
           </div>
 
           {/* ── SECCIÓN DE DIFUSIÓN & BOTÓN DE APOYO ── */}
-          <div className="mt-4 pt-3.5 border-t border-border flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="mt-5 pt-3.5 border-t border-border flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             {/* Botones de Difusión */}
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs text-muted font-medium flex items-center gap-1">
@@ -182,103 +282,6 @@ export const ArticleCard: FC<ArticleCardProps> = ({
                 {article.likesCount}
               </span>
             </button>
-          </div>
-        </div>
-
-        {/* ── BLOQUE DE AUTOR / BUILDER ── */}
-        {/* En móvil: fila superior compacta y clara con avatar + nombre legible + bio + redes */}
-        {/* En escritorio (md+): columna lateral dedicada */}
-        <div className="w-full md:w-56 shrink-0 order-2 md:order-1 pt-3 md:pt-0 border-t md:border-t-0 md:border-r border-border/80 md:pr-5 flex flex-col justify-center">
-          <div className="flex md:flex-col items-center md:items-center gap-3 md:gap-2 text-left md:text-center">
-            
-            {/* Avatar del creador */}
-            <div className="relative shrink-0">
-              <img
-                src={article.authorAvatarUrl || '/images/mascot_opt.png'}
-                alt={article.authorName}
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).src = '/images/mascot_opt.png';
-                }}
-                className="w-12 h-12 md:w-16 md:h-16 rounded-2xl object-cover bg-purple-500/10 p-0.5 border-2 border-purple-500/30 shadow-sm"
-                loading="lazy"
-              />
-              <span
-                className="absolute -bottom-1 -right-1 flex h-3.5 w-3.5 md:h-4 md:w-4 items-center justify-center rounded-full bg-purple-500 ring-2 ring-surface"
-                title="Creador de la comunidad"
-              />
-            </div>
-
-            {/* Info del creador */}
-            <div className="flex-1 md:w-full min-w-0">
-              <span className="text-[10px] text-purple-400 font-bold uppercase tracking-wider block md:hidden">
-                Autor &middot; Builder
-              </span>
-              <h3 className="font-display font-bold text-sm sm:text-base text-ink truncate md:break-words">
-                {article.authorName}
-              </h3>
-              {article.authorBio && (
-                <p
-                  className="text-xs text-muted mt-0.5 leading-snug line-clamp-2 md:line-clamp-3"
-                  title={article.authorBio}
-                >
-                  {article.authorBio}
-                </p>
-              )}
-            </div>
-
-            {/* Redes en móvil colocadas inline o abajo en escritorio */}
-            {hasSocials && (
-              <div className="flex items-center gap-1.5 shrink-0 md:mt-2.5 md:pt-2 md:border-t md:border-border/60 md:w-full md:justify-center">
-                {article.authorBuilderUrl && (
-                  <a
-                    href={article.authorBuilderUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/25 flex items-center justify-center transition-transform hover:scale-110 shadow-sm"
-                    title="Perfil en AWS Builder Center"
-                  >
-                    <img src="/images/builder_center_icon.png" alt="Builder Center" className="w-3.5 h-3.5 object-contain" />
-                  </a>
-                )}
-
-                {article.authorLinkedinUrl && (
-                  <a
-                    href={article.authorLinkedinUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/25 flex items-center justify-center transition-transform hover:scale-110 shadow-sm"
-                    title="Perfil profesional en LinkedIn"
-                  >
-                    <LinkedinIcon className="w-3.5 h-3.5" />
-                  </a>
-                )}
-
-                {article.authorGithubUrl && (
-                  <a
-                    href={article.authorGithubUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-slate-500/10 hover:bg-slate-500/20 text-ink border border-border flex items-center justify-center transition-transform hover:scale-110 shadow-sm"
-                    title="Perfil de código en GitHub"
-                  >
-                    <GithubIcon className="w-3.5 h-3.5" />
-                  </a>
-                )}
-
-                {article.authorInstagramUrl && (
-                  <a
-                    href={article.authorInstagramUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-pink-500/10 hover:bg-pink-500/20 text-pink-400 border border-pink-500/25 flex items-center justify-center transition-transform hover:scale-110 shadow-sm"
-                    title="Perfil de Instagram"
-                  >
-                    <InstagramIcon className="w-3.5 h-3.5" />
-                  </a>
-                )}
-              </div>
-            )}
-
           </div>
         </div>
 
