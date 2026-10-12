@@ -32,11 +32,11 @@ export const Navbar: FC<NavbarProps> = ({
             className="flex items-center gap-3 group shrink-0"
             title="Ir al portal principal de AWSUG Playa Vicente"
           >
-            <div className="relative w-11 h-11 sm:w-12 sm:h-12 shrink-0 flex items-center justify-center rounded-xl bg-purple-950/40 border border-purple-500/40 group-hover:border-purple-400 p-1 transition-all shadow-[0_0_12px_rgba(168,85,247,0.3)] group-hover:shadow-[0_0_18px_rgba(168,85,247,0.5)]">
+            <div className="relative w-10 h-10 sm:w-11 sm:h-11 shrink-0 flex items-center justify-center rounded-xl bg-purple-500/15 border border-purple-500/30 group-hover:border-purple-400 p-1 transition-all shadow-sm">
               <img
-                src="/images/logo-tight.svg"
-                alt="Logo AWSUG Playa Vicente"
-                className="w-full h-full object-contain filter drop-shadow-[0_0_4px_rgba(168,85,247,0.7)] group-hover:scale-105 transition-transform"
+                src="/images/mascot_opt.png"
+                alt="Mascota AWSUG Playa Vicente"
+                className="w-full h-full object-contain group-hover:scale-110 transition-transform drop-shadow-sm"
               />
             </div>
 
