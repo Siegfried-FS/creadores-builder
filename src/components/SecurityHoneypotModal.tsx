@@ -5,11 +5,13 @@ export const SecurityHoneypotModal: FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [triggeredPath, setTriggeredPath] = useState('');
 
+  const [vulnerabilityType, setVulnerabilityType] = useState<'admin' | 'sqli' | 'xss' | 'traversal'>('admin');
+
   useEffect(() => {
     const inspectPath = () => {
-      const path = window.location.pathname.toLowerCase();
-      const search = window.location.search.toLowerCase();
-      const hash = window.location.hash.toLowerCase();
+      const path = decodeURIComponent(window.location.pathname.toLowerCase());
+      const search = decodeURIComponent(window.location.search.toLowerCase());
+      const hash = decodeURIComponent(window.location.hash.toLowerCase());
       const full = path + search + hash;
 
       const adminPatterns = /(\/admin|\/wp-admin|\/administrator|\/backend|\/phpmyadmin|\/config|\/\.env|\/root|\/api\/admin|\/panel)/i;
@@ -17,7 +19,20 @@ export const SecurityHoneypotModal: FC = () => {
       const xssPatterns = /(<script|javascript:|onerror|onload|alert\(|eval\(|%3cscript)/i;
       const traversalPatterns = /(\.\.\/)|(\.\.\\)|(\.\.%2f)/i;
 
-      if (adminPatterns.test(full) || sqlPatterns.test(full) || xssPatterns.test(full) || traversalPatterns.test(full)) {
+      if (sqlPatterns.test(full)) {
+        setVulnerabilityType('sqli');
+        setTriggeredPath(window.location.pathname || full);
+        setIsOpen(true);
+      } else if (xssPatterns.test(full)) {
+        setVulnerabilityType('xss');
+        setTriggeredPath(window.location.pathname || full);
+        setIsOpen(true);
+      } else if (traversalPatterns.test(full)) {
+        setVulnerabilityType('traversal');
+        setTriggeredPath(window.location.pathname || full);
+        setIsOpen(true);
+      } else if (adminPatterns.test(full)) {
+        setVulnerabilityType('admin');
         setTriggeredPath(window.location.pathname || full);
         setIsOpen(true);
       }
@@ -40,6 +55,42 @@ export const SecurityHoneypotModal: FC = () => {
     setIsOpen(false);
   };
 
+  const getVulnerabilityContent = () => {
+    switch (vulnerabilityType) {
+      case 'sqli':
+        return {
+          tag: 'Vector Interceptado · Inyección SQL',
+          title: '¿Un intento de SQL Injection? 👀',
+          intro: '¡Wow! ¿Intentando inyectar sentencias SQL? Tranquilo, ¿te hicimos algo o solo andabas testeando el terreno? 😂',
+          callToAction: 'Si te apasiona el pentesting y encontrar vectores en bases de datos, ¿por qué no compartes tus hallazgos con la comunidad? Nos encantaría tener más temas de seguridad práctica y pruebas controladas. ¿Te animas a dar una charla o taller?'
+        };
+      case 'xss':
+        return {
+          tag: 'Vector Interceptado · Cross-Site Scripting (XSS)',
+          title: '¿Inyectando scripts en el cliente? ⚡',
+          intro: '¡Epa! Vimos esos scripts y tags raros en los parámetros... ¿Buscabas disparar un alert() o una cookie de sesión? 😉',
+          callToAction: 'Nos gusta la gente curiosa que prueba los límites del frontend. En lugar de hackear solos, ¡únete al grupo! Queremos organizar sesiones de desarrollo seguro y mitigación de XSS. ¿Te gustaría compartir una charla con nosotros?'
+        };
+      case 'traversal':
+        return {
+          tag: 'Vector Interceptado · Path Traversal',
+          title: '¿Escalando directorios hacia /etc/passwd? 📂',
+          intro: 'Vimos esos ../ en tu ruta... ¡Interesante intento de directory traversal para explorar el sistema de archivos! 🕵️‍♂️',
+          callToAction: 'Si te gusta la auditoría de rutas y la seguridad en infraestructura cloud, tenemos mucho de qué hablar. ¿Por qué no compartes tus experimentos con la comunidad? Te invitamos a dar una charla en el User Group.'
+        };
+      case 'admin':
+      default:
+        return {
+          tag: 'Auditoría de Ruta · Panel Administrativo',
+          title: '¿Buscando el panel de administración? 🛡️',
+          intro: 'Interesante que andes por esta ruta... ¿Qué andabas buscando por acá? ¿Un login oculto o credenciales de admin? 🧐',
+          callToAction: 'Si andas curioseando por acá y te gusta la ciberseguridad, nos encantaría que te unas a la comunidad para compartir. De hecho, queremos hablar de temas de seguridad práctica, cloud y auditoría. ¿Te animas a dar una charla o taller con nosotros?'
+        };
+    }
+  };
+
+  const content = getVulnerabilityContent();
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
       <div className="relative w-full max-w-lg rounded-3xl glass-card border border-border p-6 sm:p-8 shadow-2xl space-y-6 text-center">
@@ -56,30 +107,27 @@ export const SecurityHoneypotModal: FC = () => {
           </div>
         </div>
 
-        {/* Título Genérico Seguro (Sin revelar arquitectura interna) */}
+        {/* Título Personalizado por Vulnerabilidad */}
         <div>
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-bold badge-accent uppercase tracking-wider mb-2">
             <Terminal className="w-3.5 h-3.5" />
-            <span>Auditoría de Ruta · 404 No Encontrado</span>
+            <span>{content.tag}</span>
           </span>
           <h2 className="font-display font-extrabold text-2xl text-ink">
-            Página No Encontrada
+            {content.title}
           </h2>
           <p className="text-xs text-muted mt-1 font-mono break-all px-2">
-            Ruta solicitada: <span className="text-ink font-bold">{triggeredPath}</span>
+            Ruta interceptada: <span className="text-ink font-bold">{triggeredPath}</span>
           </p>
         </div>
 
-        {/* Mensaje Seguro y Comunitario de AWSUG Playa Vicente */}
+        {/* Mensaje Seguro y Comunitario Personalizado */}
         <div className="p-4 rounded-2xl bg-surface-hover/80 border border-border text-left space-y-3 text-xs">
           <p className="text-ink font-semibold leading-relaxed">
-            👀 Interesante que andes por esta ruta... ¿Qué andas buscando?
+            {content.intro}
           </p>
           <p className="text-muted leading-relaxed">
-            Si andas curioseando por acá y te gusta la ciberseguridad, nos encantaría que te unas a la comunidad para compartir. De hecho, queremos hablar de temas de seguridad práctica, cloud y auditoría.
-          </p>
-          <p className="text-purple-400 font-bold">
-            ¿Te animas a dar una charla o taller con nosotros?
+            {content.callToAction}
           </p>
 
           <div className="pt-2.5 border-t border-border flex flex-wrap gap-2 text-[11px]">
