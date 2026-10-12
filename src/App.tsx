@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Navbar } from './components/Navbar';
+import { Navbar, type AppTheme } from './components/Navbar';
 import { ArticleCard } from './components/ArticleCard';
 import { ArticleModal } from './components/ArticleModal';
 import { AuthModal } from './components/AuthModal';
 import { ProfileModal } from './components/ProfileModal';
+import { ParticlesBg } from './components/ParticlesBg';
 import type { Article, AWSCategory, CreatorProfile } from './types';
 import { INITIAL_ARTICLES } from './data/initialData';
 import { AWS_CATEGORIES } from './data/categories';
@@ -12,22 +13,36 @@ import { ConsoleSecurity, checkInputSecurity } from './components/ConsoleSecurit
 import { getArticles, createArticle, updateArticle, deleteArticle, toggleLike } from './services/api';
 
 export function App() {
-  // 🌙 Modo Espectral / ☀️ Modo Diurno
-  const [darkMode, setDarkMode] = useState<boolean>(() => {
-    return localStorage.getItem('awsug_theme') !== 'light';
+  // 🎨 Gestión de los 3 Temas Oficiales Independientes (Espectral 🌙, Tropical 🌴, Diurno ☀️)
+  const [theme, setTheme] = useState<AppTheme>(() => {
+    const saved = localStorage.getItem('awsug_theme');
+    if (saved === 'tropical' || saved === 'light' || saved === 'dark') {
+      return saved;
+    }
+    return 'dark';
   });
 
+  const applyThemeToDOM = (t: AppTheme) => {
+    const el = document.documentElement;
+    el.classList.remove('dark', 'tropical', 'light');
+    el.classList.add(t);
+    localStorage.setItem('awsug_theme', t);
+  };
+
   useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-      document.documentElement.classList.remove('light');
-      localStorage.setItem('awsug_theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      document.documentElement.classList.add('light');
-      localStorage.setItem('awsug_theme', 'light');
-    }
-  }, [darkMode]);
+    applyThemeToDOM(theme);
+  }, [theme]);
+
+  const handleCycleTheme = () => {
+    setTheme((prev) => {
+      let next: AppTheme = 'dark';
+      if (prev === 'dark') next = 'tropical';
+      else if (prev === 'tropical') next = 'light';
+      else next = 'dark';
+      applyThemeToDOM(next);
+      return next;
+    });
+  };
 
   // 👤 Sesión de Usuario (Inicia como visitante si no hay guardada)
   const [currentUser, setCurrentUser] = useState<CreatorProfile | null>(() => {
@@ -290,15 +305,16 @@ export function App() {
     alert('Tu cuenta, checklist y publicaciones han sido eliminados correctamente del Hub.');
   };
 
-  // Filtrado reactivo
+  // Filtrado reactivo (coincide por título, resumen, autor y también por categoría/etiquetas)
   const filteredArticles = useMemo(() => {
     return articles.filter((art) => {
       if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
+        const q = searchQuery.toLowerCase().trim();
         const matchesTitle = art.title.toLowerCase().includes(q);
-        const matchesSummary = art.summary?.toLowerCase().includes(q);
+        const matchesSummary = art.summary ? art.summary.toLowerCase().includes(q) : false;
         const matchesAuthor = art.authorName.toLowerCase().includes(q);
-        if (!matchesTitle && !matchesSummary && !matchesAuthor) return false;
+        const matchesCategory = art.category ? art.category.toLowerCase().includes(q) : false;
+        if (!matchesTitle && !matchesSummary && !matchesAuthor && !matchesCategory) return false;
       }
 
       if (selectedCategory !== 'all' && art.category !== selectedCategory) {
@@ -321,17 +337,17 @@ export function App() {
   }, [articles, myLikedIds]);
 
   return (
-    <div className="min-h-screen bg-background text-ink flex flex-col transition-colors duration-300">
+    <div className="min-h-screen bg-background text-ink flex flex-col transition-colors duration-300 relative overflow-x-hidden">
       {/* 🔒 Auditoría y Mensaje de Seguridad en Consola (AWS UG Playa Vicente) */}
       <ConsoleSecurity />
 
       {/* 🔮 Barra superior espectral del UG Playa Vicente */}
       <div className="spectrum-bar" />
 
-      {/* 🧭 Navbar Cápsula Flotante Oficial */}
+      {/* 🧭 Navbar Cápsula Flotante Oficial con Selector de 3 Temas */}
       <Navbar
-        darkMode={darkMode}
-        onToggleDarkMode={() => setDarkMode(!darkMode)}
+        theme={theme}
+        onCycleTheme={handleCycleTheme}
         currentUser={currentUser}
         onOpenAuth={() => setIsAuthModalOpen(true)}
         onOpenProfile={() => setIsProfileModalOpen(true)}
@@ -339,13 +355,16 @@ export function App() {
       />
 
       {/* 🌟 Contenido Principal */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 sm:space-y-8">
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 sm:space-y-8 relative z-10">
         
-        {/* ── HERO BANNER DEL HUB DE CREADORES ── */}
+        {/* ── HERO BANNER DEL HUB DE CREADORES CON PARTÍCULAS ANIMADAS ── */}
         <section className="relative rounded-3xl p-6 sm:p-10 border border-border glass-card overflow-hidden">
-          {/* Luz de fondo ambiental púrpura */}
-          <div className="absolute -top-24 -right-24 w-72 h-72 bg-purple-600/15 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
+          {/* Canvas de Partículas Interactivo sincronizado con el tema */}
+          <ParticlesBg />
+
+          {/* Orbes de luz ambientales con pulso suave estilo UG Playa Vicente */}
+          <div className="absolute -top-24 -right-24 w-72 h-72 bg-accent/20 rounded-full blur-3xl pointer-events-none animate-pulse" />
+          <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-accent/15 rounded-full blur-3xl pointer-events-none animate-pulse" />
 
           <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="max-w-2xl flex-1">

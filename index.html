@@ -13,8 +13,26 @@
     
     <!-- Google Identity Services (GSI) -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
+    <!-- Evitar FOUC / Flashazo Blanco: Aplica tema guardado inmediatamente -->
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('awsug_theme') || 'dark';
+          var valid = ['dark', 'light', 'tropical'].indexOf(saved) !== -1 ? saved : 'dark';
+          document.documentElement.className = valid;
+          if (valid === 'dark') {
+            document.documentElement.style.backgroundColor = '#080c16';
+          } else if (valid === 'tropical') {
+            document.documentElement.style.backgroundColor = '#0f172a';
+          } else {
+            document.documentElement.style.backgroundColor = '#1e293b';
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
-  <body>
+  <body class="bg-background text-ink">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

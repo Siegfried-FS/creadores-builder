@@ -86,7 +86,8 @@ export function checkInputSecurity(input: string) {
 
   const sqlPatterns = /(union\s+select|drop\s+table|or\s+1\s*=\s*1|'\s*or\s*'|--\s*$|;.*drop|select\s+.*from|insert\s+into)/i;
   const xssPatterns = /(<script|javascript:|onerror\s*=|onload\s*=|alert\(|<img|<svg|document\.cookie|eval\()/i;
-  const adminPatterns = /^(admin|root|administrator|wp-admin|config|payload|\.env|etc\/passwd)$/i;
+  const adminPatterns = /^(admin|root|administrator|wp-admin|config|payload|\.env|etc\/passwd|sudo|su)$/i;
+  const devPatterns = /^(dev|developer|developer tools|devtools|debug)$/i;
   const traversalPatterns = /(\.\.\/|\.\.\\)/i;
 
   if (sqlPatterns.test(input)) {
@@ -101,8 +102,13 @@ export function checkInputSecurity(input: string) {
     );
   } else if (adminPatterns.test(input)) {
     console.info(
-      `%c[Auditoría de Seguridad - Búsqueda de Privilegios]\nTérmino ingresado: "${input}"\n💡 No hay roles ni rutas /admin en el cliente web. La autorización se realiza por tokens OIDC firmados.`,
+      `%c[Auditoría de Seguridad - Búsqueda de Privilegios Root/Admin]\nTérmino ingresado: "${input}"\n💡 No hay paneles de administración central ni accesos directos /admin. Todo se gestiona mediante arquitecturas Serverless y tokens OIDC autenticados.`,
       'color: #a855f7; font-size: 12px; font-weight: bold;'
+    );
+  } else if (devPatterns.test(input.trim())) {
+    console.info(
+      `%c[Auditoría de Seguridad - Developer Tools & Debug Mode]\nTérmino ingresado: "${input}"\n🛠️ Modo desarrollador comunitario: Filtrando por Developer Tools, Serverless y Cloud Architecture en AWS. ¡Bienvenido/a builder!`,
+      'color: #38bdf8; font-size: 12px; font-weight: bold;'
     );
   } else if (traversalPatterns.test(input)) {
     console.warn(

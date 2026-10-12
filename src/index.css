@@ -2,30 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ☀️ 1. Tema Diurno (Light — Cálido & Azul Pizarra con Alto Contraste) */
-:root, html.light {
-  --background: #f1f4f9;
-  --surface: #ffffff;
-  --surface-glass: rgba(255, 255, 255, 0.95);
-  --surface-hover: #e8eef6;
-  --ink: #0f172a;
-  --muted: #334155;
-  --border-color: #cbd5e1;
-  --accent: #6d28d9;
-  --accent-dark: #581c87;
-  --accent-light: rgba(109, 40, 217, 0.1);
-  --gradient-btn: linear-gradient(135deg, #6d28d9, #8b5cf6);
-  --gradient-text: linear-gradient(135deg, #4c1d95, #6d28d9, #7c3aed);
-  --spectrum-bar: linear-gradient(90deg, #4c1d95, #6d28d9, #8b5cf6, #38bdf8);
-  --card-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
-  --card-shadow-hover: 0 12px 28px rgba(109, 40, 217, 0.16);
-}
-
-/* 🌙 2. Tema Espectral (Dark — Púrpura Cósmico Espacial como AWSUG Playa Vicente) */
-.dark, html.dark {
+/* 🌙 1. Tema Espectral (Dark — Púrpura Cósmico Espacial de AWSUG Playa Vicente) */
+html.dark, :root {
   --background: #080c16;
   --surface: #10172a;
-  --surface-glass: rgba(16, 23, 42, 0.9);
+  --surface-glass: rgba(16, 23, 42, 0.92);
   --surface-hover: #1b253b;
   --ink: #ffffff;
   --muted: #cbd5e1;
@@ -40,13 +21,51 @@
   --card-shadow-hover: 0 20px 45px rgba(168, 85, 247, 0.3);
 }
 
+/* 🌴 2. Tema Tropical (Playa Vicente — Menta Fresca, Esmeralda & Dorado Sol) */
+html.tropical {
+  --background: #0a1f18;
+  --surface: #0f2e24;
+  --surface-glass: rgba(15, 46, 36, 0.92);
+  --surface-hover: #164032;
+  --ink: #ecfdf5;
+  --muted: #a7f3d0;
+  --border-color: #1e4e3d;
+  --accent: #10b981;
+  --accent-dark: #059669;
+  --accent-light: rgba(16, 185, 129, 0.2);
+  --gradient-btn: linear-gradient(135deg, #10b981, #d97706);
+  --gradient-text: linear-gradient(135deg, #6ee7b7, #10b981, #f59e0b);
+  --spectrum-bar: linear-gradient(90deg, #047857, #10b981, #34d399, #f59e0b);
+  --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  --card-shadow-hover: 0 20px 45px rgba(16, 185, 129, 0.3);
+}
+
+/* ☀️ 3. Tema Diurno (Light — Suave Slate/Azul Cálido, Cero Blanco Cegador) */
+html.light {
+  --background: #e2e8f0;
+  --surface: #f8fafc;
+  --surface-glass: rgba(248, 250, 252, 0.95);
+  --surface-hover: #e2e8f0;
+  --ink: #0f172a;
+  --muted: #334155;
+  --border-color: #cbd5e1;
+  --accent: #6366f1;
+  --accent-dark: #4f46e5;
+  --accent-light: rgba(99, 102, 241, 0.12);
+  --gradient-btn: linear-gradient(135deg, #4f46e5, #6366f1);
+  --gradient-text: linear-gradient(135deg, #312e81, #4f46e5, #6366f1);
+  --spectrum-bar: linear-gradient(90deg, #312e81, #4f46e5, #6366f1, #38bdf8);
+  --card-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
+  --card-shadow-hover: 0 14px 30px rgba(79, 70, 229, 0.18);
+}
+
 body {
   margin: 0;
   background-color: var(--background);
   color: var(--ink);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   min-height: 100vh;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.25s ease, color 0.25s ease;
   overflow-x: hidden;
 }
 
@@ -72,7 +91,7 @@ h1, h2, h3, h4, .font-display {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-color);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
 }
 
 /* Tarjeta de superficie con micro-interacción */
@@ -112,7 +131,7 @@ h1, h2, h3, h4, .font-display {
 .badge-accent {
   background-color: var(--accent-light);
   color: var(--accent);
-  border: 1px solid rgba(168, 85, 247, 0.3);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
 .badge-muted {

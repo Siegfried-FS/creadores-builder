@@ -1,10 +1,12 @@
 import type { FC } from 'react';
-import { Moon, Sun, LogIn, LogOut, Sparkles, ExternalLink } from 'lucide-react';
+import { Moon, Sun, Palmtree, ExternalLink } from 'lucide-react';
 import type { CreatorProfile } from '../types';
 
+export type AppTheme = 'dark' | 'tropical' | 'light';
+
 interface NavbarProps {
-  darkMode: boolean;
-  onToggleDarkMode: () => void;
+  theme: AppTheme;
+  onCycleTheme: () => void;
   currentUser: CreatorProfile | null;
   onOpenAuth: () => void;
   onOpenProfile: () => void;
@@ -12,13 +14,26 @@ interface NavbarProps {
 }
 
 export const Navbar: FC<NavbarProps> = ({
-  darkMode,
-  onToggleDarkMode,
+  theme,
+  onCycleTheme,
   currentUser,
   onOpenAuth,
   onOpenProfile,
   onLogout,
 }) => {
+  const getThemeInfo = () => {
+    if (theme === 'tropical') {
+      return { label: 'Tropical 🌴', icon: Palmtree, color: 'text-emerald-400' };
+    }
+    if (theme === 'light') {
+      return { label: 'Diurno ☀️', icon: Sun, color: 'text-amber-500' };
+    }
+    return { label: 'Espectral 🌙', icon: Moon, color: 'text-purple-400' };
+  };
+
+  const themeInfo = getThemeInfo();
+  const ThemeIcon = themeInfo.icon;
+
   return (
     <header className="sticky top-0 z-40 w-full pt-2 pb-2 px-3 sm:px-6">
       <div className="max-w-6xl mx-auto rounded-2xl glass-pill px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-4">
@@ -68,17 +83,14 @@ export const Navbar: FC<NavbarProps> = ({
             <ExternalLink className="w-3 h-3 text-purple-400" />
           </a>
 
-          {/* Toggle de Modo Diurno / Espectral */}
+          {/* Selector de 3 Temas Oficiales Independientes */}
           <button
-            onClick={onToggleDarkMode}
-            className="p-2 rounded-xl border border-border bg-surface hover:bg-surface-hover text-muted hover:text-ink transition-colors"
-            title={darkMode ? 'Modo Diurno ☀️' : 'Modo Espectral 🌙'}
+            onClick={onCycleTheme}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-border bg-surface hover:bg-surface-hover text-muted hover:text-ink transition-colors text-xs font-medium"
+            title={`Tema actual: ${themeInfo.label}. Haz clic para cambiar.`}
           >
-            {darkMode ? (
-              <Sun className="w-4 h-4 text-purple-300" />
-            ) : (
-              <Moon className="w-4 h-4 text-purple-700" />
-            )}
+            <ThemeIcon className={`w-4 h-4 ${themeInfo.color}`} />
+            <span className="hidden md:inline font-mono text-[11px]">{themeInfo.label}</span>
           </button>
 
           {/* Estado de Autenticación */}
@@ -100,24 +112,23 @@ export const Navbar: FC<NavbarProps> = ({
                 <span className="max-w-[100px] sm:max-w-[130px] truncate">
                   {currentUser.name}
                 </span>
-                <Sparkles className="w-3 h-3 text-purple-400 group-hover:rotate-12 transition-transform" />
               </button>
 
               <button
                 onClick={onLogout}
-                className="p-2 rounded-xl border border-border bg-surface hover:bg-red-500/10 hover:border-red-500/30 text-muted hover:text-red-400 transition-colors"
+                className="p-1.5 rounded-xl border border-border bg-surface hover:bg-red-500/10 text-muted hover:text-red-400 transition-colors"
                 title="Cerrar sesión"
               >
-                <LogOut className="w-4 h-4" />
+                <span className="sr-only">Cerrar sesión</span>
+                <span className="text-xs px-1">Salir</span>
               </button>
             </div>
           ) : (
             <button
               onClick={onOpenAuth}
-              className="inline-flex items-center gap-2 btn-primary-gradient text-xs sm:text-sm px-3.5 sm:px-4 py-2 rounded-xl"
+              className="btn-primary-gradient px-4 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
             >
-              <LogIn className="w-3.5 h-3.5" />
-              <span>Iniciar Sesión</span>
+              <span>Ingresar</span>
             </button>
           )}
         </div>
