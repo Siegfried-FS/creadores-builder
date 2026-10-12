@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { Moon, Sun, LogIn, LogOut, Sparkles } from 'lucide-react';
+import { Moon, Sun, LogIn, LogOut, Sparkles, ExternalLink } from 'lucide-react';
 import type { CreatorProfile } from '../types';
 
 interface NavbarProps {
@@ -23,16 +23,14 @@ export const Navbar: FC<NavbarProps> = ({
     <header className="sticky top-0 z-40 w-full pt-2 pb-2 px-3 sm:px-6">
       <div className="max-w-6xl mx-auto rounded-2xl glass-pill px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-4">
         
-        {/* Identidad oficial: Logo de AWSUG Playa Vicente */}
+        {/* Identidad oficial: Mascota y Logo que llevan al inicio del Hub */}
         <div className="flex items-center gap-3 min-w-0">
-          <a
-            href="https://awsugplayavicente.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-3 group shrink-0"
-            title="Ir al portal principal de AWSUG Playa Vicente"
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="flex items-center gap-3 group shrink-0 text-left cursor-pointer focus:outline-none"
+            title="Volver al inicio del Hub"
           >
-            <div className="relative w-14 h-14 sm:w-16 sm:h-16 shrink-0 flex items-center justify-center rounded-2xl bg-gradient-to-tr from-purple-600/25 to-purple-400/10 border-2 border-purple-500/40 group-hover:border-purple-400 p-1 transition-all shadow-md group-hover:shadow-[0_0_18px_rgba(168,85,247,0.45)]">
+            <div className="relative w-12 h-12 sm:w-14 sm:h-14 shrink-0 flex items-center justify-center rounded-2xl bg-gradient-to-tr from-purple-600/25 to-purple-400/10 border-2 border-purple-500/40 group-hover:border-purple-400 p-1 transition-all shadow-md group-hover:shadow-[0_0_18px_rgba(168,85,247,0.45)]">
               <img
                 src="/images/mascot_opt.png"
                 alt="Mascota AWSUG Playa Vicente"
@@ -53,11 +51,23 @@ export const Navbar: FC<NavbarProps> = ({
                 Comunidad de Creadores AWS Builder Center
               </p>
             </div>
-          </a>
+          </button>
         </div>
 
         {/* Acciones de Navegación y Sesión */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {/* Enlace al sitio web oficial de la comunidad */}
+          <a
+            href="https://awsugplayavicente.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border bg-surface hover:bg-surface-hover text-muted hover:text-ink text-xs font-medium transition-colors"
+            title="Ir al portal principal de la comunidad AWSUG Playa Vicente"
+          >
+            <span>Comunidad</span>
+            <ExternalLink className="w-3 h-3 text-purple-400" />
+          </a>
+
           {/* Toggle de Modo Diurno / Espectral */}
           <button
             onClick={onToggleDarkMode}

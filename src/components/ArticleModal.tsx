@@ -54,8 +54,8 @@ export const ArticleModal: FC<ArticleModalProps> = ({
 
     // Enviar artículo heredando automáticamente los datos del perfil del autor
     onSubmit({
-      title: title.trim(),
-      summary: summary.trim(),
+      title: title.trim().slice(0, 120),
+      summary: summary.trim().slice(0, 220),
       category,
       builderUrl: builderUrl.trim(),
       linkedinPostUrl: linkedinPostUrl.trim() || undefined,
@@ -146,13 +146,19 @@ export const ArticleModal: FC<ArticleModalProps> = ({
           
           {/* Título del artículo */}
           <div>
-            <label className="block text-xs font-semibold text-ink mb-1 flex items-center gap-1">
-              <Bookmark className="w-3.5 h-3.5 text-purple-400" />
-              <span>Título del Artículo *</span>
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-semibold text-ink flex items-center gap-1">
+                <Bookmark className="w-3.5 h-3.5 text-purple-400" />
+                <span>Título del Artículo *</span>
+              </label>
+              <span className={`text-[10px] font-mono ${title.length > 100 ? 'text-amber-400' : 'text-muted'}`}>
+                {title.length}/120
+              </span>
+            </div>
             <input
               type="text"
               value={title}
+              maxLength={120}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Ej. ¿Ya tienes tu mes de Kiro Pro gratis? (Incluso un año...)"
               className="w-full bg-surface border border-border rounded-xl px-3.5 py-2.5 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-purple-500 transition-colors"
@@ -178,18 +184,27 @@ export const ArticleModal: FC<ArticleModalProps> = ({
             </select>
           </div>
 
-          {/* Resumen / Aprendizaje clave */}
+          {/* Resumen / Aprendizaje clave con límite de caracteres para no romper la retícula */}
           <div>
-            <label className="block text-xs font-semibold text-ink mb-1">
-              Resumen breve / ¿Qué aprenderá la comunidad?
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-semibold text-ink">
+                Resumen breve / ¿Qué aprenderá la comunidad?
+              </label>
+              <span className={`text-[10px] font-mono ${summary.length > 200 ? 'text-amber-400 font-bold' : 'text-muted'}`}>
+                {summary.length}/220 máx
+              </span>
+            </div>
             <textarea
               value={summary}
+              maxLength={220}
               onChange={(e) => setSummary(e.target.value)}
               rows={3}
-              placeholder="Explica en 2 líneas qué construiste, qué se rompió o qué aprendiste..."
+              placeholder="Explica en 2 líneas qué construiste, qué se rompió o qué aprendiste (máx. 220 caracteres)..."
               className="w-full bg-surface border border-border rounded-xl px-3.5 py-2 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-purple-500 transition-colors resize-none"
             />
+            <p className="text-[10px] text-muted mt-1">
+              Mantén el resumen conciso para que se adapte perfectamente a la cuadrícula de lectura.
+            </p>
           </div>
 
           {/* Enlace al Artículo en AWS Builder Center */}

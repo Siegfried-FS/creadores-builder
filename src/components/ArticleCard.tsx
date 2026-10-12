@@ -136,15 +136,15 @@ export const ArticleCard: FC<ArticleCardProps> = ({
             </div>
 
             {/* Título del artículo */}
-            <h2 className="font-display font-bold text-lg sm:text-xl text-ink leading-snug group-hover:text-purple-400 transition-colors">
+            <h2 className="font-display font-bold text-base sm:text-lg text-ink leading-snug group-hover:text-purple-400 transition-colors line-clamp-2 break-words">
               <a href={article.builderUrl} target="_blank" rel="noopener noreferrer">
                 {article.title}
               </a>
             </h2>
 
-            {/* Resumen */}
+            {/* Resumen acotado para preservar la retícula */}
             {article.summary && (
-              <p className="text-sm text-muted mt-2 leading-relaxed">
+              <p className="text-xs sm:text-sm text-muted mt-2 leading-relaxed line-clamp-3 break-words">
                 {article.summary}
               </p>
             )}
