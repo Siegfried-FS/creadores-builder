@@ -7,7 +7,7 @@ import { ProfileModal } from './components/ProfileModal';
 import type { Article, AWSCategory, CreatorProfile } from './types';
 import { INITIAL_ARTICLES } from './data/initialData';
 import { AWS_CATEGORIES } from './data/categories';
-import { Search, Sparkles, CheckCircle, UserPlus, BookOpen } from 'lucide-react';
+import { Search, Sparkles, CheckCircle, UserPlus, BookOpen, PlusCircle } from 'lucide-react';
 
 export function App() {
   // 🌙 Modo Espectral / ☀️ Modo Diurno
@@ -43,6 +43,8 @@ export function App() {
   const handleLoginSuccess = (user: CreatorProfile) => {
     setCurrentUser(user);
     localStorage.setItem('creadores_active_user', JSON.stringify(user));
+    // Menos fricción mero: abrir de inmediato el formulario para publicar su artículo
+    setIsArticleModalOpen(true);
   };
 
   const handleLogout = () => {
@@ -239,7 +241,7 @@ export function App() {
 
               {/* Aviso de acción según estado de sesión */}
               {currentUser ? (
-                <div className="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="p-3.5 sm:p-4 rounded-2xl bg-purple-500/10 border border-purple-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <img
                       src={currentUser.avatarUrl || '/images/mascot_opt.png'}
@@ -247,24 +249,34 @@ export function App() {
                       onError={(e) => {
                         (e.currentTarget as HTMLImageElement).src = '/images/mascot_opt.png';
                       }}
-                      className="w-10 h-10 rounded-xl object-cover border border-purple-500/30"
+                      className="w-12 h-12 rounded-xl object-cover border border-purple-500/30 shrink-0"
                     />
                     <div>
-                      <p className="text-xs font-bold text-ink">
-                        Hola, {currentUser.name}
+                      <p className="text-sm font-bold text-ink">
+                        ¡Bienvenido/a, {currentUser.name}! 👋
                       </p>
-                      <p className="text-[11px] text-muted">
-                        Gestiona tus redes o suma un nuevo artículo desde tu perfil.
+                      <p className="text-xs text-muted">
+                        Comparte tus posts de AWS Builder Center para recibir apoyo mutuo.
                       </p>
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => setIsProfileModalOpen(true)}
-                    className="btn-primary-gradient px-4 py-2 rounded-xl text-xs font-bold shrink-0 self-start sm:self-auto"
-                  >
-                    Mi Perfil y Publicaciones
-                  </button>
+                  <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+                    <button
+                      onClick={() => setIsArticleModalOpen(true)}
+                      className="btn-primary-gradient px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md"
+                    >
+                      <PlusCircle className="w-4 h-4" />
+                      <span>Publicar mi Artículo</span>
+                    </button>
+                    <button
+                      onClick={() => setIsProfileModalOpen(true)}
+                      className="px-3 py-2 rounded-xl border border-border bg-surface hover:bg-surface-hover text-muted hover:text-ink text-xs font-medium transition-colors"
+                      title="Configurar mis redes opcionales"
+                    >
+                      Mis Redes
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="p-3.5 rounded-2xl bg-surface border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
