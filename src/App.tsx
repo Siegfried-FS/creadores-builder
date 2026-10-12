@@ -221,74 +221,86 @@ export function App() {
           <div className="absolute -top-24 -right-24 w-72 h-72 bg-purple-600/15 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
 
-          <div className="relative z-10 max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full badge-accent text-xs font-bold mb-3 sm:mb-4">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Bootcamp Creadores de Contenido LATAM</span>
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="max-w-2xl flex-1">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full badge-accent text-xs font-bold mb-3 sm:mb-4">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Bootcamp Creadores de Contenido LATAM</span>
+              </div>
+
+              <h1 className="font-display font-extrabold text-2xl sm:text-4xl text-ink tracking-tight leading-tight mb-3">
+                Hub Comunitario de Creadores{' '}
+                <span className="spectrum-text">AWS Builder Center</span>
+              </h1>
+
+              <p className="text-xs sm:text-sm text-muted leading-relaxed mb-6">
+                Lee, apoya y amplifica los artículos técnicos de la comunidad. Marca en tu checklist los que ya apoyaste en AWS Builder Center y LinkedIn para no perder el hilo.
+              </p>
+
+              {/* Aviso de acción según estado de sesión */}
+              {currentUser ? (
+                <div className="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={currentUser.avatarUrl || '/images/mascot_opt.png'}
+                      alt={currentUser.name}
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = '/images/mascot_opt.png';
+                      }}
+                      className="w-10 h-10 rounded-xl object-cover border border-purple-500/30"
+                    />
+                    <div>
+                      <p className="text-xs font-bold text-ink">
+                        Hola, {currentUser.name}
+                      </p>
+                      <p className="text-[11px] text-muted">
+                        Gestiona tus redes o suma un nuevo artículo desde tu perfil.
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => setIsProfileModalOpen(true)}
+                    className="btn-primary-gradient px-4 py-2 rounded-xl text-xs font-bold shrink-0 self-start sm:self-auto"
+                  >
+                    Mi Perfil y Publicaciones
+                  </button>
+                </div>
+              ) : (
+                <div className="p-3.5 rounded-2xl bg-surface border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center shrink-0">
+                      <UserPlus className="w-5 h-5 text-purple-400" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-ink">
+                        ¿Participas en el Bootcamp de Creadores?
+                      </p>
+                      <p className="text-[11px] text-muted">
+                        Inicia sesión con tu perfil para registrar tus artículos de AWS Builder Center.
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => setIsAuthModalOpen(true)}
+                    className="btn-primary-gradient px-4 py-2 rounded-xl text-xs font-bold shrink-0 self-start sm:self-auto"
+                  >
+                    Iniciar Sesión
+                  </button>
+                </div>
+              )}
             </div>
 
-            <h1 className="font-display font-extrabold text-2xl sm:text-4xl text-ink tracking-tight leading-tight mb-3">
-              Hub Comunitario de Creadores{' '}
-              <span className="spectrum-text">AWS Builder Center</span>
-            </h1>
-
-            <p className="text-xs sm:text-sm text-muted leading-relaxed mb-6">
-              Lee, apoya y amplifica los artículos técnicos de la comunidad. Marca en tu checklist los que ya apoyaste en AWS Builder Center y LinkedIn para no perder el hilo.
-            </p>
-
-            {/* Aviso de acción según estado de sesión */}
-            {currentUser ? (
-              <div className="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <img
-                    src={currentUser.avatarUrl || '/images/mascot_opt.png'}
-                    alt={currentUser.name}
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).src = '/images/mascot_opt.png';
-                    }}
-                    className="w-10 h-10 rounded-xl object-cover border border-purple-500/30"
-                  />
-                  <div>
-                    <p className="text-xs font-bold text-ink">
-                      Hola, {currentUser.name}
-                    </p>
-                    <p className="text-[11px] text-muted">
-                      Gestiona tus redes o suma un nuevo artículo desde tu perfil.
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setIsProfileModalOpen(true)}
-                  className="btn-primary-gradient px-4 py-2 rounded-xl text-xs font-bold shrink-0 self-start sm:self-auto"
-                >
-                  Mi Perfil y Publicaciones
-                </button>
-              </div>
-            ) : (
-              <div className="p-3.5 rounded-2xl bg-surface border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center shrink-0">
-                    <UserPlus className="w-5 h-5 text-purple-400" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-ink">
-                      ¿Participas en el Bootcamp de Creadores?
-                    </p>
-                    <p className="text-[11px] text-muted">
-                      Inicia sesión con tu perfil para registrar tus artículos de AWS Builder Center.
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setIsAuthModalOpen(true)}
-                  className="btn-primary-gradient px-4 py-2 rounded-xl text-xs font-bold shrink-0 self-start sm:self-auto"
-                >
-                  Iniciar Sesión
-                </button>
-              </div>
-            )}
+            {/* Emblema Oficial AWSUG Playa Vicente con Aura Espectral */}
+            <div className="relative shrink-0 hidden md:flex items-center justify-center w-36 h-36 lg:w-44 lg:h-44">
+              <div className="absolute inset-0 bg-purple-500/25 rounded-full blur-2xl animate-pulse pointer-events-none" />
+              <img
+                src="/images/logo-tight.svg"
+                alt="AWS User Group Playa Vicente"
+                className="w-full h-full object-contain filter drop-shadow-[0_0_16px_rgba(168,85,247,0.55)] transition-transform hover:scale-105"
+              />
+            </div>
           </div>
         </section>
 
@@ -402,7 +414,11 @@ export function App() {
       <footer className="border-t border-border mt-12 py-8 bg-surface/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted">
           <div className="flex items-center gap-2.5">
-            <img src="/images/AWS_UG_Official_Authentic_Logo.png" alt="AWSUG" className="w-5 h-5 object-contain" />
+            <img
+              src="/images/logo-tight.svg"
+              alt="AWSUG"
+              className="w-6 h-6 object-contain filter drop-shadow-[0_0_4px_rgba(168,85,247,0.7)]"
+            />
             <span className="font-medium text-ink">AWS User Group Playa Vicente &middot; Creadores LATAM</span>
           </div>
           
