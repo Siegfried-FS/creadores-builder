@@ -70,15 +70,43 @@ export const SecurityHoneypotModal: FC = () => {
           </p>
         </div>
 
-        {/* Mensaje Seguro de Comunidad (Estilo oficial de AWSUG Playa Vicente sin datos internos) */}
-        <div className="p-4 rounded-2xl bg-surface-hover/80 border border-border text-left space-y-2.5 text-xs">
+        {/* Mensaje Seguro y Comunitario de AWSUG Playa Vicente */}
+        <div className="p-4 rounded-2xl bg-surface-hover/80 border border-border text-left space-y-3 text-xs">
+          <p className="text-ink font-semibold leading-relaxed">
+            👀 Interesante que andes por esta ruta... ¿Qué andas buscando?
+          </p>
           <p className="text-muted leading-relaxed">
-            Esta ruta no existe en la plataforma. Este sitio web opera como una aplicación estática desacoplada sin paneles administrativos, archivos de configuración ni endpoints expuestos.
+            Si andas curioseando por acá y te gusta la ciberseguridad, nos encantaría que te unas a la comunidad para compartir. De hecho, queremos hablar de temas de seguridad práctica, cloud y auditoría.
+          </p>
+          <p className="text-purple-400 font-bold">
+            ¿Te animas a dar una charla o taller con nosotros?
           </p>
 
-          <div className="pt-2 border-t border-border text-[11px] text-muted space-y-1">
-            <p className="font-bold text-ink">💡 ¿Te interesa la ciberseguridad cloud y el desarrollo en AWS?</p>
-            <p>En <strong>AWS User Group Playa Vicente</strong> organizamos talleres prácticos, laboratorios y charlas técnicas abiertas a la comunidad.</p>
+          <div className="pt-2.5 border-t border-border flex flex-wrap gap-2 text-[11px]">
+            <a
+              href="https://chat.whatsapp.com/KXQYW7V00q12cSoeijob4h"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/25 transition-colors font-medium"
+            >
+              <span>💬 WhatsApp</span>
+            </a>
+            <a
+              href="https://t.me/AUGPlayaVicente"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/25 transition-colors font-medium"
+            >
+              <span>✈️ Telegram</span>
+            </a>
+            <a
+              href="https://awsugplayavicente.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/25 transition-colors font-medium"
+            >
+              <span>🌐 Web Oficial</span>
+            </a>
           </div>
         </div>
 
