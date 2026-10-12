@@ -162,7 +162,7 @@ export const ArticleCard: FC<ArticleCardProps> = ({
                   title="Ver post en Instagram"
                 >
                   <InstagramIcon className="w-3.5 h-3.5 text-pink-400" />
-                  <span>IG Post</span>
+                  <span>Post</span>
                 </a>
               )}
             </div>

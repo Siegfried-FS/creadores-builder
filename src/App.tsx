@@ -83,27 +83,15 @@ export function App() {
     );
   };
 
-  // 📝 Artículos del Hub (Carga reactiva desde DynamoDB con caché local)
+  // 📝 Artículos del Hub (Carga reactiva desde DynamoDB Serverless)
   const [articles, setArticles] = useState<Article[]>(() => {
-    const saved = localStorage.getItem('creadores_articles');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        // Si la caché local es vieja (ej. no tiene githubUrl), forzamos INITIAL_ARTICLES
-        if (Array.isArray(parsed) && parsed.length > 0 && parsed[0]?.authorGithubUrl) {
-          return parsed;
-        }
-      } catch {
-        // ignore
-      }
-    }
     return INITIAL_ARTICLES;
   });
 
   // Carga inicial desde DynamoDB Serverless
   useEffect(() => {
     getArticles().then((data) => {
-      if (data && data.length > 0) {
+      if (Array.isArray(data)) {
         setArticles(data);
       }
     });
@@ -551,7 +539,31 @@ export function App() {
 
         {/* ── LISTA DE ARTÍCULOS ── */}
         <section className="space-y-4">
-          {filteredArticles.length === 0 ? (
+          {articles.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border p-12 text-center bg-surface/50">
+              <BookOpen className="w-10 h-10 text-purple-400 mx-auto mb-3" />
+              <p className="text-base font-bold text-ink">
+                ¡Aún no hay publicaciones registradas!
+              </p>
+              <p className="text-xs text-muted mt-1 max-w-md mx-auto">
+                Sé el primer builder de la comunidad en compartir tus artículos de AWS Builder Center, LinkedIn o Instagram para dar difusión mutua.
+              </p>
+              <button
+                onClick={() => {
+                  if (!currentUser) {
+                    setIsAuthModalOpen(true);
+                  } else {
+                    setEditingArticle(null);
+                    setIsArticleModalOpen(true);
+                  }
+                }}
+                className="btn-primary-gradient px-5 py-2.5 rounded-xl text-xs font-bold inline-flex items-center gap-2 mt-4 shadow-md"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span>Publicar mi primer artículo</span>
+              </button>
+            </div>
+          ) : filteredArticles.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-border p-12 text-center bg-surface/50">
               <BookOpen className="w-8 h-8 text-muted mx-auto mb-2 opacity-50" />
               <p className="text-sm font-semibold text-ink">
