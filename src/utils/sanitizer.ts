@@ -8,18 +8,28 @@ export function cleanUsername(input: string): string {
   return input.trim().replace(/^@+/, '').replace(/\s+/g, '');
 }
 
-// Genera la URL oficial de AWS Builder Center / Community
+// Genera la URL oficial de AWS Builder Center Community (https://builder.aws.com/community/@usuario)
 export function formatBuilderUrl(input: string): string {
   if (!input) return '';
   const trimmed = input.trim();
   
-  // Si ya es una URL completa
+  // Si ya es una URL completa oficial con /community/
+  if (trimmed.includes('builder.aws.com/community/@') || trimmed.includes('community.aws/@')) {
+    // Si viene del formato anterior community.aws/@, normalizar a builder.aws.com/community/@
+    return trimmed.replace('https://community.aws/@', 'https://builder.aws.com/community/@');
+  }
+
+  // Si le pasaron https://builder.aws.com/@usuario (sin /community/), corregirlo automáticamente
+  if (trimmed.includes('builder.aws.com/@')) {
+    return trimmed.replace('builder.aws.com/@', 'builder.aws.com/community/@');
+  }
+
   if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
     return trimmed;
   }
   
   const clean = cleanUsername(trimmed);
-  return `https://community.aws/@${clean}`;
+  return `https://builder.aws.com/community/@${clean}`;
 }
 
 // Genera la URL de LinkedIn (admite handle o URL completa)

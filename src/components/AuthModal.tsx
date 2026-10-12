@@ -105,9 +105,10 @@ export const AuthModal: FC<AuthModalProps> = ({ isOpen, onClose, onLoginSuccess 
       return;
     }
 
+    const normalizedId = `usr_${btoa(email.trim().toLowerCase()).replace(/=/g, '').slice(0, 16)}`;
     const cleanHandle = cleanUsername(name);
     const newUser: CreatorProfile = {
-      id: `usr_${Date.now()}`,
+      id: normalizedId,
       name: name.trim(),
       email: email.trim().toLowerCase(),
       bio: 'Creador en el Bootcamp AWS Builder Center',

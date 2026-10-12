@@ -73,11 +73,27 @@ export function createProfileFromGoogleCredential(credential: string): CreatorPr
   let linkedinUrl: string | undefined;
   let instagramUrl: string | undefined;
 
+  let existingId: string | undefined;
+
+  // Buscar en usuarios registrados previamente para vincular cuenta
+  try {
+    const registered = JSON.parse(localStorage.getItem('creadores_registered_users') || '[]');
+    const match = registered.find((u: any) => u.email?.toLowerCase() === email.toLowerCase());
+    if (match) {
+      existingId = match.id;
+      bio = match.bio || bio;
+      builderUrl = match.builderUrl || builderUrl;
+      linkedinUrl = match.linkedinUrl;
+      instagramUrl = match.instagramUrl;
+    }
+  } catch {}
+
   const savedUserJson = localStorage.getItem('creadores_active_user');
   if (savedUserJson) {
     try {
       const saved = JSON.parse(savedUserJson);
-      if (saved.email === email) {
+      if (saved.email?.toLowerCase() === email.toLowerCase()) {
+        existingId = existingId || saved.id;
         bio = saved.bio || bio;
         builderUrl = saved.builderUrl || builderUrl;
         linkedinUrl = saved.linkedinUrl;
@@ -88,8 +104,11 @@ export function createProfileFromGoogleCredential(credential: string): CreatorPr
     }
   }
 
+  // Generar ID consistente determinista basado en el correo para evitar fragmentación
+  const normalizedId = existingId || `usr_${btoa(email.toLowerCase()).replace(/=/g, '').slice(0, 16)}`;
+
   return {
-    id: payload.sub || `usr_g_${Date.now()}`,
+    id: normalizedId,
     name,
     email,
     bio,
