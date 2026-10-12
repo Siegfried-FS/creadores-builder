@@ -117,11 +117,11 @@ export const ArticleCard: FC<ArticleCardProps> = ({
             )}
           </div>
 
-          {/* ── SECCIÓN DE DIFUSIÓN & BOTÓN DE APOYO ── */}
+          {/* ── SECCIÓN DE DIFUSIÓN & BOTÓN DE APOYO (Compacto en 1 sola línea) ── */}
           <div className="mt-5 pt-3.5 border-t border-border flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            {/* Botones de Difusión */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs text-muted font-medium flex items-center gap-1">
+            {/* Botones de Difusión compactos */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-xs text-muted font-medium flex items-center gap-1 mr-1">
                 <Share2 className="w-3.5 h-3.5 text-purple-400" />
                 Difundido:
               </span>
@@ -131,11 +131,11 @@ export const ArticleCard: FC<ArticleCardProps> = ({
                   href={article.builderUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg btn-primary-gradient shadow-sm"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg btn-primary-gradient shadow-sm whitespace-nowrap"
                   title="Abrir artículo completo en AWS Builder Center"
                 >
                   <img src="/images/builder_center_icon.png" alt="Builder" className="w-3.5 h-3.5 object-contain" />
-                  <span>Leer en Builder</span>
+                  <span>Leer</span>
                   <ExternalLink className="w-3 h-3" />
                 </a>
               )}
@@ -145,11 +145,11 @@ export const ArticleCard: FC<ArticleCardProps> = ({
                   href={article.linkedinPostUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-border bg-surface-hover hover:border-blue-500/50 text-ink transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg border border-border bg-surface-hover hover:border-blue-500/50 text-ink transition-colors whitespace-nowrap"
                   title="Ver post en LinkedIn para dar Like y Repost"
                 >
                   <LinkedinIcon className="w-3.5 h-3.5 text-blue-400" />
-                  <span>Post LinkedIn</span>
+                  <span>Post</span>
                 </a>
               )}
 
@@ -158,11 +158,11 @@ export const ArticleCard: FC<ArticleCardProps> = ({
                   href={article.instagramPostUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-border bg-surface-hover hover:border-pink-500/50 text-ink transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg border border-border bg-surface-hover hover:border-pink-500/50 text-ink transition-colors whitespace-nowrap"
                   title="Ver post en Instagram"
                 >
                   <InstagramIcon className="w-3.5 h-3.5 text-pink-400" />
-                  <span>Post IG</span>
+                  <span>IG Post</span>
                 </a>
               )}
             </div>
@@ -170,7 +170,7 @@ export const ArticleCard: FC<ArticleCardProps> = ({
             {/* Botón de apoyo comunitario */}
             <button
               onClick={() => onToggleLike(article.id)}
-              className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
                 isLikedByMe
                   ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40 shadow-sm'
                   : 'bg-surface border border-border text-muted hover:text-purple-400 hover:border-purple-500/30 hover:bg-surface-hover'
@@ -283,141 +283,6 @@ export const ArticleCard: FC<ArticleCardProps> = ({
               </div>
             </div>
           )}
-        </div>
-
-        {/* ── CUERPO PRINCIPAL DEL ARTÍCULO ── */}
-        <div className="flex-1 w-full flex flex-col justify-between min-w-0">
-          <div>
-            {/* Meta superior: Categoría, Vigencia y Controles de edición */}
-            <div className="flex items-center justify-between gap-2 mb-2.5">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-md badge-accent">
-                  {article.category}
-                </span>
-
-                {/* Vigencia de 30 días (DynamoDB TTL) */}
-                {(() => {
-                  const createdTime = new Date(article.createdAt).getTime();
-                  const now = Date.now();
-                  const daysElapsed = Math.floor((now - createdTime) / (1000 * 60 * 60 * 24));
-                  const daysRemaining = Math.max(1, 30 - daysElapsed);
-                  return (
-                    <span
-                      className="inline-flex items-center gap-1 text-[11px] text-muted font-medium px-2 py-0.5 rounded-full bg-surface border border-border"
-                      title="Publicación activa por 30 días continuos con TTL automático en Amazon DynamoDB"
-                    >
-                      <Clock className="w-3 h-3 text-purple-400" />
-                      <span>{daysRemaining > 0 ? `${daysRemaining}d activo` : 'Por renovar'}</span>
-                    </span>
-                  );
-                })()}
-              </div>
-              
-              {/* Acciones del autor */}
-              <div className="flex items-center gap-1">
-                {canEdit && onEdit && (
-                  <button
-                    onClick={() => onEdit(article)}
-                    className="text-muted hover:text-purple-400 p-2 rounded-lg hover:bg-purple-500/10 transition-colors"
-                    title="Editar mi artículo"
-                  >
-                    <Pencil className="w-4 h-4" />
-                  </button>
-                )}
-
-                {canDelete && onDelete && (
-                  <button
-                    onClick={() => onDelete(article.id)}
-                    className="text-muted hover:text-red-400 p-2 rounded-lg hover:bg-red-500/10 transition-colors"
-                    title="Retirar mi artículo"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Título del artículo: Grande, destacado y legible */}
-            <h2 className="font-display font-bold text-lg sm:text-xl text-ink leading-snug group-hover:text-purple-400 transition-colors break-words">
-              <a href={article.builderUrl} target="_blank" rel="noopener noreferrer">
-                {article.title}
-              </a>
-            </h2>
-
-            {/* Resumen / Aprendizaje */}
-            {article.summary && (
-              <p className="text-xs sm:text-sm text-muted mt-2.5 leading-relaxed line-clamp-3 break-words">
-                {article.summary}
-              </p>
-            )}
-          </div>
-
-          {/* ── SECCIÓN DE DIFUSIÓN & BOTÓN DE APOYO ── */}
-          <div className="mt-5 pt-3.5 border-t border-border flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            {/* Botones de Difusión */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs text-muted font-medium flex items-center gap-1">
-                <Share2 className="w-3.5 h-3.5 text-purple-400" />
-                Difundido:
-              </span>
-
-              {article.builderUrl && (
-                <a
-                  href={article.builderUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg btn-primary-gradient shadow-sm"
-                  title="Abrir artículo completo en AWS Builder Center"
-                >
-                  <img src="/images/builder_center_icon.png" alt="Builder" className="w-3.5 h-3.5 object-contain" />
-                  <span>Leer en Builder</span>
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-              )}
-
-              {article.linkedinPostUrl && (
-                <a
-                  href={article.linkedinPostUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-border bg-surface-hover hover:border-blue-500/50 text-ink transition-colors"
-                  title="Ver post en LinkedIn para dar Like y Repost"
-                >
-                  <LinkedinIcon className="w-3.5 h-3.5 text-blue-400" />
-                  <span>Post LinkedIn</span>
-                </a>
-              )}
-
-              {article.instagramPostUrl && (
-                <a
-                  href={article.instagramPostUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-border bg-surface-hover hover:border-pink-500/50 text-ink transition-colors"
-                  title="Ver post en Instagram"
-                >
-                  <InstagramIcon className="w-3.5 h-3.5 text-pink-400" />
-                  <span>Post IG</span>
-                </a>
-              )}
-            </div>
-
-            {/* Botón de apoyo comunitario */}
-            <button
-              onClick={() => onToggleLike(article.id)}
-              className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                isLikedByMe
-                  ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40 shadow-sm'
-                  : 'bg-surface border border-border text-muted hover:text-purple-400 hover:border-purple-500/30 hover:bg-surface-hover'
-              }`}
-            >
-              <Heart className={`w-4 h-4 ${isLikedByMe ? 'fill-purple-400 text-purple-400' : ''}`} />
-              <span>{isLikedByMe ? '¡Ya apoyé!' : 'Dar apoyo'}</span>
-              <span className="ml-0.5 px-2 py-0.5 rounded-md bg-surface text-[11px] font-mono border border-border">
-                {article.likesCount}
-              </span>
-            </button>
-          </div>
         </div>
 
       </div>
