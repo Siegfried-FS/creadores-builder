@@ -9,6 +9,7 @@ import { INITIAL_ARTICLES } from './data/initialData';
 import { AWS_CATEGORIES } from './data/categories';
 import { Search, Sparkles, CheckCircle, UserPlus, BookOpen, PlusCircle } from 'lucide-react';
 import { ConsoleSecurity, checkInputSecurity } from './components/ConsoleSecurity';
+import { getArticles, createArticle, updateArticle, deleteArticle, toggleLike } from './services/api';
 
 export function App() {
   // 🌙 Modo Espectral / ☀️ Modo Diurno
@@ -72,7 +73,7 @@ export function App() {
     );
   };
 
-  // 📝 Artículos del Hub
+  // 📝 Artículos del Hub (Carga reactiva desde DynamoDB con caché local)
   const [articles, setArticles] = useState<Article[]>(() => {
     const saved = localStorage.getItem('creadores_articles');
     if (saved) {
@@ -85,6 +86,15 @@ export function App() {
     }
     return INITIAL_ARTICLES;
   });
+
+  // Carga inicial desde DynamoDB Serverless
+  useEffect(() => {
+    getArticles().then((data) => {
+      if (data && data.length > 0) {
+        setArticles(data);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('creadores_articles', JSON.stringify(articles));
@@ -147,6 +157,8 @@ export function App() {
     }
 
     const isLiked = myLikedIds.includes(articleId);
+    const delta = isLiked ? -1 : 1;
+    
     if (isLiked) {
       setMyLikedIds((prev) => prev.filter((id) => id !== articleId));
       setArticles((prev) =>
@@ -162,17 +174,21 @@ export function App() {
         )
       );
     }
+
+    // Sincronización en segundo plano con Amazon DynamoDB
+    toggleLike(articleId, delta).catch(() => {});
   };
 
-  // Crear o Actualizar artículo (con vigencia de 30 días deslizantes)
-  const handleSaveArticle = (articleData: Partial<Article>) => {
+  // Crear o Actualizar artículo (con vigencia de 30 días deslizantes y persistencia DynamoDB)
+  const handleSaveArticle = async (articleData: Partial<Article>) => {
     if (!currentUser) return;
 
     if (articleData.id) {
       // ✏️ Actualización de artículo existente por su autor
+      const articleId = articleData.id;
       setArticles((prev) =>
         prev.map((art) =>
-          art.id === articleData.id
+          art.id === articleId
             ? {
                 ...art,
                 title: articleData.title || art.title,
@@ -186,10 +202,16 @@ export function App() {
         )
       );
       setEditingArticle(null);
+
+      // Persistir en DynamoDB
+      updateArticle(articleId, {
+        ...articleData,
+        authorId: currentUser.id,
+      }).catch((err) => console.warn('Error actualizando en DynamoDB:', err));
     } else {
       // 🚀 Publicación de nuevo artículo con TTL de 30 días deslizantes
       const now = Date.now();
-      const newArticle: Article = {
+      const localNewArticle: Article = {
         id: `art_${now}`,
         title: articleData.title || '',
         summary: articleData.summary || '',
@@ -210,13 +232,37 @@ export function App() {
         likesCount: 0,
       };
 
-      setArticles((prev) => [newArticle, ...prev]);
+      // Optimistic update
+      setArticles((prev) => [localNewArticle, ...prev]);
+
+      // Guardar en DynamoDB
+      try {
+        const savedDynamo = await createArticle({
+          ...articleData,
+          authorId: currentUser.id,
+          authorName: currentUser.name,
+          authorBio: currentUser.bio,
+          authorAvatarUrl: currentUser.avatarUrl || '/images/mascot_opt.png',
+          authorBuilderUrl: currentUser.builderUrl,
+          authorLinkedinUrl: currentUser.linkedinUrl,
+          authorInstagramUrl: currentUser.instagramUrl,
+        });
+        if (savedDynamo && savedDynamo.id) {
+          setArticles((prev) => prev.map((a) => (a.id === localNewArticle.id ? savedDynamo : a)));
+        }
+      } catch (err) {
+        console.warn('Error guardando en DynamoDB:', err);
+      }
     }
   };
 
   const handleDeleteArticle = (articleId: string) => {
+    if (!currentUser) return;
     if (confirm('¿Deseas retirar esta publicación del Hub?')) {
       setArticles((prev) => prev.filter((a) => a.id !== articleId));
+      deleteArticle(articleId, currentUser.id).catch((err) =>
+        console.warn('Error eliminando en DynamoDB:', err)
+      );
     }
   };
 

@@ -67,8 +67,8 @@ export const ProfileModal: FC<ProfileModalProps> = ({
     const cleanHandle = cleanUsername(builderHandle || name);
     const updated: CreatorProfile = {
       ...currentUser,
-      name: name.trim(),
-      bio: bio.trim(),
+      name: name.trim().slice(0, 50),
+      bio: bio.trim().slice(0, 100),
       avatarUrl: avatarUrl || '/images/mascot_opt.png',
       builderHandle: cleanHandle,
       builderUrl: formatBuilderUrl(builderHandle || cleanHandle),
@@ -228,12 +228,18 @@ export const ProfileModal: FC<ProfileModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-muted mb-1">
-                  Nombre Completo
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[11px] font-medium text-muted">
+                    Nombre Completo
+                  </label>
+                  <span className={`text-[10px] font-mono ${name.length > 40 ? 'text-amber-400 font-bold' : 'text-muted'}`}>
+                    {name.length}/50
+                  </span>
+                </div>
                 <input
                   type="text"
                   value={name}
+                  maxLength={50}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full bg-surface border border-border rounded-xl px-3 py-2 text-xs text-ink focus:outline-none focus:border-purple-500"
                   required
@@ -241,16 +247,25 @@ export const ProfileModal: FC<ProfileModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-muted mb-1">
-                  Biografía / Rol Comunitario
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[11px] font-medium text-muted">
+                    Biografía / Rol Comunitario
+                  </label>
+                  <span className={`text-[10px] font-mono ${bio.length > 85 ? 'text-amber-400 font-bold' : 'text-muted'}`}>
+                    {bio.length}/100 máx
+                  </span>
+                </div>
                 <textarea
                   value={bio}
+                  maxLength={100}
                   onChange={(e) => setBio(e.target.value)}
                   rows={2}
                   className="w-full bg-surface border border-border rounded-xl px-3 py-2 text-xs text-ink focus:outline-none focus:border-purple-500 resize-none"
                   placeholder="Ej. Carpintero & Líder de AWS UG Playa Vicente..."
                 />
+                <p className="text-[10px] text-muted mt-1">
+                  Máximo 100 caracteres para lucir perfecto en la columna de autor.
+                </p>
               </div>
 
               <div>
