@@ -18,16 +18,10 @@
     <script>
       (function() {
         try {
-          var saved = localStorage.getItem('awsug_theme') || 'dark';
-          var valid = ['dark', 'light', 'tropical'].indexOf(saved) !== -1 ? saved : 'dark';
+          var saved = localStorage.getItem('awsug_theme');
+          var valid = saved === 'light' ? 'light' : 'dark';
           document.documentElement.className = valid;
-          if (valid === 'dark') {
-            document.documentElement.style.backgroundColor = '#080c16';
-          } else if (valid === 'tropical') {
-            document.documentElement.style.backgroundColor = '#0f172a';
-          } else {
-            document.documentElement.style.backgroundColor = '#1e293b';
-          }
+          document.documentElement.style.backgroundColor = valid === 'light' ? '#1e293b' : '#080c16';
         } catch (e) {}
       })();
     </script>

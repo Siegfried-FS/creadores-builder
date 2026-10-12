@@ -10,9 +10,8 @@ interface Particle {
 }
 
 const THEME_PALETTES: Record<string, string[]> = {
-  light: ['#3b82f6', '#6366f1', '#0ea5e9', '#8b5cf6', '#cbd5e1'],
+  light: ['#6366f1', '#818cf8', '#38bdf8', '#a855f7', '#94a3b8'],
   dark: ['#a855f7', '#7c3aed', '#c084fc', '#38bdf8', '#818cf8'],
-  tropical: ['#10b981', '#059669', '#d97706', '#34d399', '#f59e0b'],
 };
 
 export function ParticlesBg() {
@@ -29,7 +28,6 @@ export function ParticlesBg() {
 
     const getTheme = () => {
       const cls = document.documentElement.className;
-      if (cls.includes('tropical')) return 'tropical';
       if (cls.includes('light')) return 'light';
       return 'dark';
     };
@@ -53,9 +51,8 @@ export function ParticlesBg() {
     });
 
     const resize = () => {
-      const parent = canvas.parentElement;
-      const w = parent ? parent.offsetWidth : window.innerWidth;
-      const h = parent ? parent.offsetHeight : window.innerHeight;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
 
       canvas.width = w * window.devicePixelRatio;
       canvas.height = h * window.devicePixelRatio;
@@ -64,13 +61,13 @@ export function ParticlesBg() {
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
-      const count = Math.min(48, Math.max(18, Math.floor((w * h) / 22000)));
-      if (particles.current.length === 0 || Math.abs(particles.current.length - count) > 12) {
+      const count = Math.min(55, Math.max(25, Math.floor((w * h) / 24000)));
+      if (particles.current.length === 0 || Math.abs(particles.current.length - count) > 15) {
         particles.current = Array.from({ length: count }, () => ({
           x: Math.random() * w,
           y: Math.random() * h,
-          vx: (Math.random() - 0.5) * 0.4,
-          vy: (Math.random() - 0.5) * 0.4,
+          vx: (Math.random() - 0.5) * 0.45,
+          vy: (Math.random() - 0.5) * 0.45,
           size: Math.random() * 2.2 + 1,
           color: currentPalette[Math.floor(Math.random() * currentPalette.length)],
         }));
@@ -81,14 +78,12 @@ export function ParticlesBg() {
     window.addEventListener('resize', resize);
 
     const handleMouseMove = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      mouse.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      mouse.current = { x: e.clientX, y: e.clientY };
     };
 
     const handleTouchMove = (e: TouchEvent) => {
       if (e.touches.length > 0) {
-        const rect = canvas.getBoundingClientRect();
-        mouse.current = { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+        mouse.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
       }
     };
 
@@ -102,9 +97,8 @@ export function ParticlesBg() {
     window.addEventListener('touchend', handleLeave);
 
     const draw = () => {
-      const parent = canvas.parentElement;
-      const w = parent ? parent.offsetWidth : window.innerWidth;
-      const h = parent ? parent.offsetHeight : window.innerHeight;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
 
       ctx.clearRect(0, 0, w, h);
 
@@ -131,12 +125,12 @@ export function ParticlesBg() {
           const dy = pts[i].y - pts[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
 
-          if (dist < 120) {
+          if (dist < 125) {
             ctx.beginPath();
             ctx.moveTo(pts[i].x, pts[i].y);
             ctx.lineTo(pts[j].x, pts[j].y);
             ctx.strokeStyle = pts[i].color;
-            ctx.globalAlpha = 0.14 * (1 - dist / 120);
+            ctx.globalAlpha = 0.15 * (1 - dist / 125);
             ctx.lineWidth = 0.75;
             ctx.stroke();
           }
@@ -149,12 +143,12 @@ export function ParticlesBg() {
         const dym = p.y - my;
         const distm = Math.sqrt(dxm * dxm + dym * dym);
 
-        if (distm < 130) {
+        if (distm < 140) {
           ctx.beginPath();
           ctx.moveTo(p.x, p.y);
           ctx.lineTo(mx, my);
           ctx.strokeStyle = p.color;
-          ctx.globalAlpha = 0.35 * (1 - distm / 130);
+          ctx.globalAlpha = 0.35 * (1 - distm / 140);
           ctx.lineWidth = 1;
           ctx.stroke();
         }
@@ -179,7 +173,7 @@ export function ParticlesBg() {
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 w-full h-full pointer-events-none opacity-80 z-0"
+      className="fixed inset-0 w-screen h-screen pointer-events-none opacity-80 z-0"
       aria-hidden="true"
     />
   );

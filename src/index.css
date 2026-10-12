@@ -6,7 +6,7 @@
 html.dark, :root {
   --background: #080c16;
   --surface: #10172a;
-  --surface-glass: rgba(16, 23, 42, 0.92);
+  --surface-glass: rgba(16, 23, 42, 0.88);
   --surface-hover: #1b253b;
   --ink: #ffffff;
   --muted: #cbd5e1;
@@ -21,42 +21,23 @@ html.dark, :root {
   --card-shadow-hover: 0 20px 45px rgba(168, 85, 247, 0.3);
 }
 
-/* 🌴 2. Tema Tropical (Playa Vicente — Menta Fresca, Esmeralda & Dorado Sol) */
-html.tropical {
-  --background: #0a1f18;
-  --surface: #0f2e24;
-  --surface-glass: rgba(15, 46, 36, 0.92);
-  --surface-hover: #164032;
-  --ink: #ecfdf5;
-  --muted: #a7f3d0;
-  --border-color: #1e4e3d;
-  --accent: #10b981;
-  --accent-dark: #059669;
-  --accent-light: rgba(16, 185, 129, 0.2);
-  --gradient-btn: linear-gradient(135deg, #10b981, #d97706);
-  --gradient-text: linear-gradient(135deg, #6ee7b7, #10b981, #f59e0b);
-  --spectrum-bar: linear-gradient(90deg, #047857, #10b981, #34d399, #f59e0b);
-  --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-  --card-shadow-hover: 0 20px 45px rgba(16, 185, 129, 0.3);
-}
-
-/* ☀️ 3. Tema Diurno (Light — Suave Slate/Azul Cálido, Cero Blanco Cegador) */
+/* ☀️ 2. Tema Claro Confortable (Warm Slate & Deep Indigo — CERO blanco cegador, CERO fatiga visual) */
 html.light {
-  --background: #e2e8f0;
-  --surface: #f8fafc;
-  --surface-glass: rgba(248, 250, 252, 0.95);
-  --surface-hover: #e2e8f0;
-  --ink: #0f172a;
-  --muted: #334155;
-  --border-color: #cbd5e1;
-  --accent: #6366f1;
-  --accent-dark: #4f46e5;
-  --accent-light: rgba(99, 102, 241, 0.12);
-  --gradient-btn: linear-gradient(135deg, #4f46e5, #6366f1);
-  --gradient-text: linear-gradient(135deg, #312e81, #4f46e5, #6366f1);
-  --spectrum-bar: linear-gradient(90deg, #312e81, #4f46e5, #6366f1, #38bdf8);
-  --card-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
-  --card-shadow-hover: 0 14px 30px rgba(79, 70, 229, 0.18);
+  --background: #1e293b;        /* Fondo pizarra profundo y descansado */
+  --surface: #0f172a;           /* Tarjetas en slate nocturno oscuro */
+  --surface-glass: rgba(15, 23, 42, 0.9);
+  --surface-hover: #1e293b;
+  --ink: #f8fafc;               /* Tipografía blanco marfil con alto contraste */
+  --muted: #94a3b8;             /* Texto secundario slate suave */
+  --border-color: #334155;      /* Bordes nítidos y elegantes */
+  --accent: #818cf8;            /* Acento índigo suave */
+  --accent-dark: #6366f1;
+  --accent-light: rgba(129, 140, 248, 0.15);
+  --gradient-btn: linear-gradient(135deg, #6366f1, #818cf8);
+  --gradient-text: linear-gradient(135deg, #e0e7ff, #a5b4fc, #818cf8);
+  --spectrum-bar: linear-gradient(90deg, #4338ca, #6366f1, #818cf8, #38bdf8);
+  --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --card-shadow-hover: 0 16px 36px rgba(99, 102, 241, 0.25);
 }
 
 body {
@@ -91,7 +72,7 @@ h1, h2, h3, h4, .font-display {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-color);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
 /* Tarjeta de superficie con micro-interacción */
@@ -113,18 +94,18 @@ h1, h2, h3, h4, .font-display {
   -webkit-text-fill-color: transparent;
 }
 
-/* Botón primario de gradiente púrpura */
+/* Botón primario de gradiente púrpura/índigo */
 .btn-primary-gradient {
   background: var(--gradient-btn);
   color: #ffffff;
   font-weight: 700;
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.25);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
   transition: all 0.2s ease;
 }
 .btn-primary-gradient:hover {
   filter: brightness(1.1);
   transform: translateY(-1px);
-  box-shadow: 0 10px 28px rgba(168, 85, 247, 0.35);
+  box-shadow: 0 10px 28px var(--card-shadow-hover);
 }
 
 /* Badges temáticos */

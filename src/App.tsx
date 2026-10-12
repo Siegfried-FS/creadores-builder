@@ -13,13 +13,9 @@ import { ConsoleSecurity, checkInputSecurity } from './components/ConsoleSecurit
 import { getArticles, createArticle, updateArticle, deleteArticle, toggleLike } from './services/api';
 
 export function App() {
-  // 🎨 Gestión de los 3 Temas Oficiales Independientes (Espectral 🌙, Tropical 🌴, Diurno ☀️)
+  // 🎨 Gestión de los 2 Temas Oficiales: Espectral 🌙 y Confortable Slate ☀️
   const [theme, setTheme] = useState<AppTheme>(() => {
-    const saved = localStorage.getItem('awsug_theme');
-    if (saved === 'tropical' || saved === 'light' || saved === 'dark') {
-      return saved;
-    }
-    return 'dark';
+    return localStorage.getItem('awsug_theme') === 'light' ? 'light' : 'dark';
   });
 
   const applyThemeToDOM = (t: AppTheme) => {
@@ -33,12 +29,9 @@ export function App() {
     applyThemeToDOM(theme);
   }, [theme]);
 
-  const handleCycleTheme = () => {
+  const handleToggleTheme = () => {
     setTheme((prev) => {
-      let next: AppTheme = 'dark';
-      if (prev === 'dark') next = 'tropical';
-      else if (prev === 'tropical') next = 'light';
-      else next = 'dark';
+      const next: AppTheme = prev === 'dark' ? 'light' : 'dark';
       applyThemeToDOM(next);
       return next;
     });
@@ -341,13 +334,16 @@ export function App() {
       {/* 🔒 Auditoría y Mensaje de Seguridad en Consola (AWS UG Playa Vicente) */}
       <ConsoleSecurity />
 
+      {/* 🔮 Canvas de Partículas Global: Animación interactiva en TODO el sitio web */}
+      <ParticlesBg />
+
       {/* 🔮 Barra superior espectral del UG Playa Vicente */}
       <div className="spectrum-bar" />
 
-      {/* 🧭 Navbar Cápsula Flotante Oficial con Selector de 3 Temas */}
+      {/* 🧭 Navbar Cápsula Flotante Oficial con Selector de Temas */}
       <Navbar
         theme={theme}
-        onCycleTheme={handleCycleTheme}
+        onToggleTheme={handleToggleTheme}
         currentUser={currentUser}
         onOpenAuth={() => setIsAuthModalOpen(true)}
         onOpenProfile={() => setIsProfileModalOpen(true)}
@@ -357,11 +353,8 @@ export function App() {
       {/* 🌟 Contenido Principal */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 sm:space-y-8 relative z-10">
         
-        {/* ── HERO BANNER DEL HUB DE CREADORES CON PARTÍCULAS ANIMADAS ── */}
+        {/* ── HERO BANNER DEL HUB DE CREADORES ── */}
         <section className="relative rounded-3xl p-6 sm:p-10 border border-border glass-card overflow-hidden">
-          {/* Canvas de Partículas Interactivo sincronizado con el tema */}
-          <ParticlesBg />
-
           {/* Orbes de luz ambientales con pulso suave estilo UG Playa Vicente */}
           <div className="absolute -top-24 -right-24 w-72 h-72 bg-accent/20 rounded-full blur-3xl pointer-events-none animate-pulse" />
           <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-accent/15 rounded-full blur-3xl pointer-events-none animate-pulse" />

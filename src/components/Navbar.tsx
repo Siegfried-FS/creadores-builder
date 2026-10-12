@@ -1,12 +1,12 @@
 import type { FC } from 'react';
-import { Moon, Sun, Palmtree, ExternalLink } from 'lucide-react';
+import { Moon, Sun, ExternalLink } from 'lucide-react';
 import type { CreatorProfile } from '../types';
 
-export type AppTheme = 'dark' | 'tropical' | 'light';
+export type AppTheme = 'dark' | 'light';
 
 interface NavbarProps {
   theme: AppTheme;
-  onCycleTheme: () => void;
+  onToggleTheme: () => void;
   currentUser: CreatorProfile | null;
   onOpenAuth: () => void;
   onOpenProfile: () => void;
@@ -15,24 +15,13 @@ interface NavbarProps {
 
 export const Navbar: FC<NavbarProps> = ({
   theme,
-  onCycleTheme,
+  onToggleTheme,
   currentUser,
   onOpenAuth,
   onOpenProfile,
   onLogout,
 }) => {
-  const getThemeInfo = () => {
-    if (theme === 'tropical') {
-      return { label: 'Tropical 🌴', icon: Palmtree, color: 'text-emerald-400' };
-    }
-    if (theme === 'light') {
-      return { label: 'Diurno ☀️', icon: Sun, color: 'text-amber-500' };
-    }
-    return { label: 'Espectral 🌙', icon: Moon, color: 'text-purple-400' };
-  };
-
-  const themeInfo = getThemeInfo();
-  const ThemeIcon = themeInfo.icon;
+  const isLight = theme === 'light';
 
   return (
     <header className="sticky top-0 z-40 w-full pt-2 pb-2 px-3 sm:px-6">
@@ -83,14 +72,23 @@ export const Navbar: FC<NavbarProps> = ({
             <ExternalLink className="w-3 h-3 text-purple-400" />
           </a>
 
-          {/* Selector de 3 Temas Oficiales Independientes */}
+          {/* Toggle de Modo Espectral 🌙 / Modo Confortable ☀️ */}
           <button
-            onClick={onCycleTheme}
+            onClick={onToggleTheme}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-border bg-surface hover:bg-surface-hover text-muted hover:text-ink transition-colors text-xs font-medium"
-            title={`Tema actual: ${themeInfo.label}. Haz clic para cambiar.`}
+            title={isLight ? 'Modo Espectral Cósmico 🌙' : 'Modo Confortable Slate ☀️'}
           >
-            <ThemeIcon className={`w-4 h-4 ${themeInfo.color}`} />
-            <span className="hidden md:inline font-mono text-[11px]">{themeInfo.label}</span>
+            {isLight ? (
+              <>
+                <Sun className="w-4 h-4 text-indigo-400" />
+                <span className="hidden md:inline font-mono text-[11px]">Confortable</span>
+              </>
+            ) : (
+              <>
+                <Moon className="w-4 h-4 text-purple-400" />
+                <span className="hidden md:inline font-mono text-[11px]">Espectral</span>
+              </>
+            )}
           </button>
 
           {/* Estado de Autenticación */}
