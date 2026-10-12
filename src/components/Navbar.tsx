@@ -32,24 +32,24 @@ export const Navbar: FC<NavbarProps> = ({
             className="flex items-center gap-3 group shrink-0"
             title="Ir al portal principal de AWSUG Playa Vicente"
           >
-            <div className="relative w-10 h-10 sm:w-11 sm:h-11 shrink-0 flex items-center justify-center rounded-xl bg-purple-500/15 border border-purple-500/30 group-hover:border-purple-400 p-1 transition-all shadow-sm">
+            <div className="relative w-14 h-14 sm:w-16 sm:h-16 shrink-0 flex items-center justify-center rounded-2xl bg-gradient-to-tr from-purple-600/25 to-purple-400/10 border-2 border-purple-500/40 group-hover:border-purple-400 p-1 transition-all shadow-md group-hover:shadow-[0_0_18px_rgba(168,85,247,0.45)]">
               <img
                 src="/images/mascot_opt.png"
                 alt="Mascota AWSUG Playa Vicente"
-                className="w-full h-full object-contain group-hover:scale-110 transition-transform drop-shadow-sm"
+                className="w-full h-full object-contain group-hover:scale-110 transition-transform drop-shadow-md"
               />
             </div>
 
             <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="font-display font-black text-xs sm:text-sm spectrum-text whitespace-nowrap">
+              <div className="flex items-center gap-2">
+                <span className="font-display font-black text-sm sm:text-base spectrum-text whitespace-nowrap">
                   AWSUG Playa Vicente
                 </span>
-                <span className="inline-flex items-center text-[9px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded-full badge-accent">
+                <span className="inline-flex items-center text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full badge-accent">
                   Hub
                 </span>
               </div>
-              <p className="text-[10px] text-muted truncate hidden sm:block">
+              <p className="text-xs text-muted truncate hidden sm:block">
                 Comunidad de Creadores AWS Builder Center
               </p>
             </div>
