@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { ExternalLink, Heart, Globe, Share2, Trash2 } from 'lucide-react';
+import { ExternalLink, Heart, Share2, Trash2 } from 'lucide-react';
 import type { Article } from '../types';
 
 interface ArticleCardProps {
@@ -36,9 +36,9 @@ export const ArticleCard: FC<ArticleCardProps> = ({
 
       <div className="p-5 sm:p-6 flex flex-col md:flex-row gap-6 items-start">
         
-        {/* ── COLUMNA 1: EL CREADOR (En móvil arriba, en desktop lateral) ── */}
-        <div className="w-full md:w-64 shrink-0 flex md:flex-col items-center md:items-start gap-4 pb-4 md:pb-0 border-b md:border-b-0 md:border-r border-border/80 md:pr-6">
-          <div className="relative shrink-0">
+        {/* ── COLUMNA 1: EL CREADOR (Completamente centrado) ── */}
+        <div className="w-full md:w-56 shrink-0 flex flex-col items-center justify-center text-center gap-2.5 pb-4 md:pb-0 border-b md:border-b-0 md:border-r border-border/80 md:pr-6">
+          <div className="relative shrink-0 mx-auto">
             <img
               src={article.authorAvatarUrl || '/images/mascot_opt.png'}
               alt={article.authorName}
@@ -54,7 +54,7 @@ export const ArticleCard: FC<ArticleCardProps> = ({
             />
           </div>
 
-          <div className="flex-1 min-w-0">
+          <div className="w-full">
             <h3 className="font-display font-bold text-base sm:text-lg text-ink truncate">
               {article.authorName}
             </h3>
@@ -64,17 +64,17 @@ export const ArticleCard: FC<ArticleCardProps> = ({
               </p>
             )}
 
-            {/* Redes sociales del creador */}
-            <div className="flex items-center gap-2 mt-3 flex-wrap">
+            {/* Redes sociales del creador centradas */}
+            <div className="flex items-center justify-center gap-1.5 mt-3 flex-wrap">
               {article.authorBuilderUrl && (
                 <a
                   href={article.authorBuilderUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 font-medium transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 font-medium transition-colors border border-purple-500/20"
                   title="Perfil en AWS Builder Center"
                 >
-                  <Globe className="w-3.5 h-3.5" />
+                  <img src="/images/builder_center_icon.png" alt="Builder" className="w-3.5 h-3.5 object-contain" />
                   <span>Builder</span>
                 </a>
               )}
@@ -159,8 +159,9 @@ export const ArticleCard: FC<ArticleCardProps> = ({
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg btn-primary-gradient shadow-sm"
                 >
+                  <img src="/images/builder_center_icon.png" alt="Builder" className="w-3.5 h-3.5 object-contain" />
                   <span>Leer en Builder</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
+                  <ExternalLink className="w-3 h-3" />
                 </a>
               )}
 
