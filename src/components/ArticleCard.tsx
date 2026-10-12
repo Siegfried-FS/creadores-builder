@@ -48,111 +48,19 @@ export const ArticleCard: FC<ArticleCardProps> = ({
       {/* Barra superior espectral del UG */}
       <div className="h-1 w-full bg-gradient-to-r from-purple-700 via-purple-500 to-indigo-500" />
 
-      <div className="p-5 sm:p-6 flex flex-col md:flex-row gap-6 items-center md:items-stretch">
+      <div className="p-4 sm:p-6 flex flex-col md:flex-row gap-5 items-stretch">
         
-        {/* ── COLUMNA 1: EL CREADOR (100% Centrado, Amplio y Legible) ── */}
-        <div className="w-full md:w-64 shrink-0 flex flex-col items-center justify-center text-center pb-5 md:pb-0 border-b md:border-b-0 md:border-r border-border/80 md:pr-6">
-          <div className="relative shrink-0 mx-auto mb-2.5">
-            <img
-              src={article.authorAvatarUrl || '/images/mascot_opt.png'}
-              alt={article.authorName}
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src = '/images/mascot_opt.png';
-              }}
-              className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover bg-purple-500/10 p-0.5 border-2 border-purple-500/30 shadow-sm"
-              loading="lazy"
-            />
-            <span
-              className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-purple-500 ring-2 ring-surface"
-              title="Creador verificado del Hub"
-            />
-          </div>
-
-          <div className="w-full flex flex-col items-center px-1">
-            <h3 className="font-display font-bold text-base sm:text-lg text-ink break-words max-w-full">
-              {article.authorName}
-            </h3>
-            {article.authorBio && (
-              <p
-                className="text-xs text-muted mt-1 leading-relaxed break-words text-center line-clamp-3 w-full"
-                title={article.authorBio}
-              >
-                {article.authorBio}
-              </p>
-            )}
-
-            {/* Redes sociales con leyenda sutil y solo iconos oficiales */}
-            {hasSocials && (
-              <div className="mt-3.5 pt-3 border-t border-border/60 w-full flex flex-col items-center">
-                <span className="text-[10px] text-muted/80 font-bold uppercase tracking-wider mb-2 select-none">
-                  Redes del Creador
-                </span>
-                
-                <div className="flex items-center justify-center gap-2">
-                  {article.authorBuilderUrl && (
-                    <a
-                      href={article.authorBuilderUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-8 h-8 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/25 flex items-center justify-center transition-transform hover:scale-110 shadow-sm"
-                      title="Perfil en AWS Builder Center"
-                    >
-                      <img src="/images/builder_center_icon.png" alt="Builder Center" className="w-4 h-4 object-contain" />
-                    </a>
-                  )}
-
-                  {article.authorLinkedinUrl && (
-                    <a
-                      href={article.authorLinkedinUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-8 h-8 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/25 flex items-center justify-center transition-transform hover:scale-110 shadow-sm"
-                      title="Perfil profesional en LinkedIn"
-                    >
-                      <LinkedinIcon className="w-4 h-4" />
-                    </a>
-                  )}
-
-                  {article.authorGithubUrl && (
-                    <a
-                      href={article.authorGithubUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-8 h-8 rounded-xl bg-slate-500/10 hover:bg-slate-500/20 text-ink border border-border flex items-center justify-center transition-transform hover:scale-110 shadow-sm"
-                      title="Perfil de código en GitHub"
-                    >
-                      <GithubIcon className="w-4 h-4" />
-                    </a>
-                  )}
-
-                  {article.authorInstagramUrl && (
-                    <a
-                      href={article.authorInstagramUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-8 h-8 rounded-xl bg-pink-500/10 hover:bg-pink-500/20 text-pink-400 border border-pink-500/25 flex items-center justify-center transition-transform hover:scale-110 shadow-sm"
-                      title="Perfil de Instagram"
-                    >
-                      <InstagramIcon className="w-4 h-4" />
-                    </a>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* ── COLUMNA 2: SU ARTÍCULO Y ENLACES DE DIFUSIÓN ── */}
-        <div className="flex-1 w-full flex flex-col justify-between h-full min-w-0">
+        {/* ── CUERPO PRINCIPAL DEL ARTÍCULO (Lectura principal prioritaria) ── */}
+        <div className="flex-1 w-full flex flex-col justify-between order-1 md:order-2 min-w-0">
           <div>
-            {/* Categoría, Vigencia de 30 días y Acciones del Autor */}
+            {/* Meta superior: Categoría, Vigencia y Controles de edición */}
             <div className="flex items-center justify-between gap-2 mb-2.5">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-md badge-accent">
                   {article.category}
                 </span>
 
-                {/* Vigencia de 30 días (DynamoDB TTL rolling window) */}
+                {/* Vigencia de 30 días (DynamoDB TTL) */}
                 {(() => {
                   const createdTime = new Date(article.createdAt).getTime();
                   const now = Date.now();
@@ -160,7 +68,7 @@ export const ArticleCard: FC<ArticleCardProps> = ({
                   const daysRemaining = Math.max(1, 30 - daysElapsed);
                   return (
                     <span
-                      className="inline-flex items-center gap-1 text-[10px] text-muted font-medium px-2 py-0.5 rounded-full bg-surface border border-border"
+                      className="inline-flex items-center gap-1 text-[11px] text-muted font-medium px-2 py-0.5 rounded-full bg-surface border border-border"
                       title="Publicación activa por 30 días continuos con TTL automático en Amazon DynamoDB"
                     >
                       <Clock className="w-3 h-3 text-purple-400" />
@@ -170,48 +78,48 @@ export const ArticleCard: FC<ArticleCardProps> = ({
                 })()}
               </div>
               
-              {/* Controles exclusivos del autor: Editar y Eliminar */}
+              {/* Acciones del autor */}
               <div className="flex items-center gap-1">
                 {canEdit && onEdit && (
                   <button
                     onClick={() => onEdit(article)}
-                    className="text-muted hover:text-purple-400 p-1.5 rounded-lg hover:bg-purple-500/10 transition-colors"
+                    className="text-muted hover:text-purple-400 p-2 rounded-lg hover:bg-purple-500/10 transition-colors"
                     title="Editar mi artículo"
                   >
-                    <Pencil className="w-3.5 h-3.5" />
+                    <Pencil className="w-4 h-4" />
                   </button>
                 )}
 
                 {canDelete && onDelete && (
                   <button
                     onClick={() => onDelete(article.id)}
-                    className="text-muted hover:text-red-400 p-1.5 rounded-lg hover:bg-red-500/10 transition-colors"
+                    className="text-muted hover:text-red-400 p-2 rounded-lg hover:bg-red-500/10 transition-colors"
                     title="Retirar mi artículo"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 )}
               </div>
             </div>
 
-            {/* Título del artículo */}
-            <h2 className="font-display font-bold text-base sm:text-lg text-ink leading-snug group-hover:text-purple-400 transition-colors line-clamp-2 break-words">
+            {/* Título del artículo: Grande, destacado y legible sin zoom */}
+            <h2 className="font-display font-bold text-lg sm:text-xl text-ink leading-snug group-hover:text-purple-400 transition-colors break-words">
               <a href={article.builderUrl} target="_blank" rel="noopener noreferrer">
                 {article.title}
               </a>
             </h2>
 
-            {/* Resumen acotado para preservar la retícula */}
+            {/* Resumen / Aprendizaje */}
             {article.summary && (
-              <p className="text-xs sm:text-sm text-muted mt-2 leading-relaxed line-clamp-3 break-words">
+              <p className="text-xs sm:text-sm text-muted mt-2.5 leading-relaxed line-clamp-3 break-words">
                 {article.summary}
               </p>
             )}
           </div>
 
-          {/* Dónde se difundió + Botón de apoyo comunitario */}
-          <div className="mt-5 pt-4 border-t border-border flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            {/* Enlaces de difusión */}
+          {/* ── SECCIÓN DE DIFUSIÓN & BOTÓN DE APOYO ── */}
+          <div className="mt-4 pt-3.5 border-t border-border flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            {/* Botones de Difusión */}
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs text-muted font-medium flex items-center gap-1">
                 <Share2 className="w-3.5 h-3.5 text-purple-400" />
@@ -259,10 +167,10 @@ export const ArticleCard: FC<ArticleCardProps> = ({
               )}
             </div>
 
-            {/* Botón de apoyo mutuo To-Do */}
+            {/* Botón de apoyo comunitario */}
             <button
               onClick={() => onToggleLike(article.id)}
-              className={`inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                 isLikedByMe
                   ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40 shadow-sm'
                   : 'bg-surface border border-border text-muted hover:text-purple-400 hover:border-purple-500/30 hover:bg-surface-hover'
@@ -270,10 +178,107 @@ export const ArticleCard: FC<ArticleCardProps> = ({
             >
               <Heart className={`w-4 h-4 ${isLikedByMe ? 'fill-purple-400 text-purple-400' : ''}`} />
               <span>{isLikedByMe ? '¡Ya apoyé!' : 'Dar apoyo'}</span>
-              <span className="ml-0.5 px-1.5 py-0.5 rounded-md bg-surface text-[11px] font-mono border border-border">
+              <span className="ml-0.5 px-2 py-0.5 rounded-md bg-surface text-[11px] font-mono border border-border">
                 {article.likesCount}
               </span>
             </button>
+          </div>
+        </div>
+
+        {/* ── BLOQUE DE AUTOR / BUILDER ── */}
+        {/* En móvil: fila superior compacta y clara con avatar + nombre legible + bio + redes */}
+        {/* En escritorio (md+): columna lateral dedicada */}
+        <div className="w-full md:w-56 shrink-0 order-2 md:order-1 pt-3 md:pt-0 border-t md:border-t-0 md:border-r border-border/80 md:pr-5 flex flex-col justify-center">
+          <div className="flex md:flex-col items-center md:items-center gap-3 md:gap-2 text-left md:text-center">
+            
+            {/* Avatar del creador */}
+            <div className="relative shrink-0">
+              <img
+                src={article.authorAvatarUrl || '/images/mascot_opt.png'}
+                alt={article.authorName}
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = '/images/mascot_opt.png';
+                }}
+                className="w-12 h-12 md:w-16 md:h-16 rounded-2xl object-cover bg-purple-500/10 p-0.5 border-2 border-purple-500/30 shadow-sm"
+                loading="lazy"
+              />
+              <span
+                className="absolute -bottom-1 -right-1 flex h-3.5 w-3.5 md:h-4 md:w-4 items-center justify-center rounded-full bg-purple-500 ring-2 ring-surface"
+                title="Creador de la comunidad"
+              />
+            </div>
+
+            {/* Info del creador */}
+            <div className="flex-1 md:w-full min-w-0">
+              <span className="text-[10px] text-purple-400 font-bold uppercase tracking-wider block md:hidden">
+                Autor &middot; Builder
+              </span>
+              <h3 className="font-display font-bold text-sm sm:text-base text-ink truncate md:break-words">
+                {article.authorName}
+              </h3>
+              {article.authorBio && (
+                <p
+                  className="text-xs text-muted mt-0.5 leading-snug line-clamp-2 md:line-clamp-3"
+                  title={article.authorBio}
+                >
+                  {article.authorBio}
+                </p>
+              )}
+            </div>
+
+            {/* Redes en móvil colocadas inline o abajo en escritorio */}
+            {hasSocials && (
+              <div className="flex items-center gap-1.5 shrink-0 md:mt-2.5 md:pt-2 md:border-t md:border-border/60 md:w-full md:justify-center">
+                {article.authorBuilderUrl && (
+                  <a
+                    href={article.authorBuilderUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/25 flex items-center justify-center transition-transform hover:scale-110 shadow-sm"
+                    title="Perfil en AWS Builder Center"
+                  >
+                    <img src="/images/builder_center_icon.png" alt="Builder Center" className="w-3.5 h-3.5 object-contain" />
+                  </a>
+                )}
+
+                {article.authorLinkedinUrl && (
+                  <a
+                    href={article.authorLinkedinUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/25 flex items-center justify-center transition-transform hover:scale-110 shadow-sm"
+                    title="Perfil profesional en LinkedIn"
+                  >
+                    <LinkedinIcon className="w-3.5 h-3.5" />
+                  </a>
+                )}
+
+                {article.authorGithubUrl && (
+                  <a
+                    href={article.authorGithubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-slate-500/10 hover:bg-slate-500/20 text-ink border border-border flex items-center justify-center transition-transform hover:scale-110 shadow-sm"
+                    title="Perfil de código en GitHub"
+                  >
+                    <GithubIcon className="w-3.5 h-3.5" />
+                  </a>
+                )}
+
+                {article.authorInstagramUrl && (
+                  <a
+                    href={article.authorInstagramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-pink-500/10 hover:bg-pink-500/20 text-pink-400 border border-pink-500/25 flex items-center justify-center transition-transform hover:scale-110 shadow-sm"
+                    title="Perfil de Instagram"
+                  >
+                    <InstagramIcon className="w-3.5 h-3.5" />
+                  </a>
+                )}
+              </div>
+            )}
+
           </div>
         </div>
 
