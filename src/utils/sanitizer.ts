@@ -81,14 +81,15 @@ export function isValidAWSArticleUrl(url: string): { isValid: boolean; error?: s
   }
 }
 
-// Valida si un enlace de post de LinkedIn es válido
+// Valida si un enlace de post de LinkedIn es válido (acepta linkedin.com y el acortador oficial lnkd.in)
 export function isValidLinkedInPostUrl(url: string): { isValid: boolean; error?: string } {
   if (!url) return { isValid: true }; // Opcional
   
   try {
     const parsed = new URL(url);
-    if (!parsed.hostname.includes('linkedin.com')) {
-      return { isValid: false, error: 'Debe ser un enlace que comience con https://www.linkedin.com/...' };
+    const isLinkedIn = parsed.hostname.includes('linkedin.com') || parsed.hostname.includes('lnkd.in');
+    if (!isLinkedIn) {
+      return { isValid: false, error: 'Debe ser un enlace de LinkedIn (linkedin.com o lnkd.in)' };
     }
     return { isValid: true };
   } catch {
