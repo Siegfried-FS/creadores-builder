@@ -328,6 +328,28 @@ export function App() {
             <img src="/images/mascot_opt.png" alt="AWS UG Playa Vicente" className="h-6 w-6 object-contain" />
             <span>&copy; {new Date().getFullYear()} AWS User Group Playa Vicente &bull; Creadores Bootcamp</span>
           </div>
+
+          {/* Enlaces de Comunidad: Telegram & WhatsApp */}
+          <div className="flex items-center space-x-3">
+            <span className="text-muted text-[11px] font-semibold">Comunidad activa:</span>
+            <a
+              href="https://t.me/AUGPlayaVicente"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-[#229ED9]/10 hover:bg-[#229ED9]/20 text-[#229ED9] text-[11px] font-semibold transition-colors"
+            >
+              <span>Telegram</span>
+            </a>
+            <a
+              href="https://chat.whatsapp.com/KXQYW7V00q12cSoeijob4h"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-[#25D366]/10 hover:bg-[#25D366]/20 text-emerald-600 dark:text-emerald-400 text-[11px] font-semibold transition-colors"
+            >
+              <span>WhatsApp</span>
+            </a>
+          </div>
+
           <div className="font-mono text-[11px]">
             Dominio oficial: <span className="text-ink font-semibold">creadores.awsugplayavicente.com</span>
           </div>

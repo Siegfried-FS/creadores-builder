@@ -43,22 +43,22 @@ export const SecurityShield: FC<SecurityShieldProps> = ({ children }) => {
       // Mensajes en consola para curiosos y pentesters
       if (detected === 'xss') {
         console.warn(
-          `%c🛡️ [ESCUDO ACTIVO - XSS INTERCEPTADO]\nBuen intento. Este sitio renderiza datos sanitizados bajo React y CSP estricto.\nSi quieres aprender XSS defensivo: https://portswigger.net/web-security/cross-site-scripting\nO súmate a la comunidad: https://www.meetup.com/aws-user-group-playa-vicente`,
+          `%c🛡️ [ESCUDO ACTIVO - XSS INTERCEPTADO]\nBuen intento. Este sitio renderiza datos sanitizados bajo React y CSP estricto.\nSi quieres aprender XSS defensivo: https://portswigger.net/web-security/cross-site-scripting\nO súmate a la comunidad en Telegram: https://t.me/AUGPlayaVicente`,
           'color: #ef4444; font-size: 13px; font-weight: bold;'
         );
       } else if (detected === 'sqli') {
         console.warn(
-          `%c🛡️ [ESCUDO ACTIVO - SQLi INTERCEPTADO]\nNo hay bases de datos relacionales ni motores SQL expuestos aquí. La persistencia es Serverless NoSQL (DynamoDB con IAM de privilegio mínimo).\nAprende más en: https://portswigger.net/web-security/sql-injection`,
+          `%c🛡️ [ESCUDO ACTIVO - SQLi INTERCEPTADO]\nNo hay bases de datos relacionales ni motores SQL expuestos aquí. La persistencia es Serverless NoSQL (DynamoDB con IAM de privilegio mínimo).\nAprende más en: https://portswigger.net/web-security/sql-injection\nComunidad: https://t.me/AUGPlayaVicente`,
           'color: #ef4444; font-size: 13px; font-weight: bold;'
         );
       } else if (detected === 'admin') {
         console.info(
-          `%c🦎 [HONEYPOT - PANEL ADMIN NO EXISTENTE]\nNo hay paneles de /admin ni backdoors en este servidor. La administración y control de autoría se gestiona 100% mediante tokens JWT con AWS Cognito.\n¿Te apasiona la ciberseguridad? Participa en nuestros talleres en Playa Vicente: https://www.meetup.com/aws-user-group-playa-vicente`,
+          `%c🦎 [HONEYPOT - PANEL ADMIN NO EXISTENTE]\nNo hay paneles de /admin ni backdoors en este servidor. La administración y control de autoría se gestiona 100% mediante tokens JWT con AWS Cognito.\n¿Te apasiona la ciberseguridad? Súmate a la comunidad en WhatsApp: https://chat.whatsapp.com/KXQYW7V00q12cSoeijob4h`,
           'color: #f97316; font-size: 13px; font-weight: bold;'
         );
       } else if (detected === 'env_probe' || detected === 'traversal') {
         console.warn(
-          `%c🛡️ [ESCUDO ACTIVO - SONDEO DE ARCHIVOS SENSIBLES]\nNo hay archivos .env ni filesystem servido directamente en el cliente. Los secretos se custodian en AWS Secrets Manager y Parameter Store.\nSúmate a la comunidad: https://www.meetup.com/aws-user-group-playa-vicente`,
+          `%c🛡️ [ESCUDO ACTIVO - SONDEO DE ARCHIVOS SENSIBLES]\nNo hay archivos .env ni filesystem servido directamente en el cliente. Los secretos se custodian en AWS Secrets Manager y Parameter Store.\nSúmate en Telegram: https://t.me/AUGPlayaVicente`,
           'color: #ef4444; font-size: 13px; font-weight: bold;'
         );
       }
@@ -118,24 +118,34 @@ export const SecurityShield: FC<SecurityShieldProps> = ({ children }) => {
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 pt-2">
             <button
               onClick={() => {
                 window.location.href = '/';
               }}
-              className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-5 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold transition-colors"
+              className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Volver a la App</span>
             </button>
 
             <a
-              href="https://www.meetup.com/aws-user-group-playa-vicente"
+              href="https://t.me/AUGPlayaVicente"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full sm:w-auto inline-flex items-center justify-center space-x-1.5 px-5 py-2.5 rounded-xl bg-aws-orange hover:bg-amber-600 text-white text-xs font-semibold shadow-md transition-all"
+              className="w-full sm:w-auto inline-flex items-center justify-center space-x-1.5 px-4 py-2.5 rounded-xl bg-[#229ED9] hover:bg-[#1b85b8] text-white text-xs font-semibold shadow-md transition-all"
             >
-              <span>Comunidad en Meetup</span>
+              <span>Grupo Telegram</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+
+            <a
+              href="https://chat.whatsapp.com/KXQYW7V00q12cSoeijob4h"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full sm:w-auto inline-flex items-center justify-center space-x-1.5 px-4 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#1faa4f] text-white text-xs font-semibold shadow-md transition-all"
+            >
+              <span>Grupo WhatsApp</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </a>
           </div>

@@ -24,8 +24,9 @@ export const ConsoleSecurityBanner: FC = () => {
   Construimos aplicaciones serverless seguras y enseñamos
   seguridad cloud en comunidad.
   
-  Súmate a nuestros meetups y talleres:
-  https://www.meetup.com/aws-user-group-playa-vicente
+  Súmate a la comunidad en Telegram y WhatsApp:
+  Telegram: https://t.me/AUGPlayaVicente
+  WhatsApp: https://chat.whatsapp.com/KXQYW7V00q12cSoeijob4h
   ─────────────────────────────────────────────────────────────`,
       'color: #f97316; font-family: monospace; font-size: 11px; font-weight: bold; line-height: 1.4;'
     );
