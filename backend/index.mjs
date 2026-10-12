@@ -79,6 +79,7 @@ export const handler = async (event) => {
         authorAvatarUrl: body.authorAvatarUrl || '/images/mascot_opt.png',
         authorBuilderUrl: body.authorBuilderUrl || '',
         authorLinkedinUrl: body.authorLinkedinUrl || '',
+        authorGithubUrl: body.authorGithubUrl || '',
         authorInstagramUrl: body.authorInstagramUrl || '',
         createdAt: new Date(now).toISOString(),
         expiresAt: new Date(now + 30 * 24 * 60 * 60 * 1000).toISOString(),
@@ -121,7 +122,7 @@ export const handler = async (event) => {
         TableName: TABLE_NAME,
         Key: { id: articleId },
         UpdateExpression:
-          'SET title = :title, summary = :summary, category = :cat, builderUrl = :bUrl, linkedinPostUrl = :liUrl, instagramPostUrl = :igUrl',
+          'SET title = :title, summary = :summary, category = :cat, builderUrl = :bUrl, linkedinPostUrl = :liUrl, instagramPostUrl = :igUrl, authorBuilderUrl = :abUrl, authorLinkedinUrl = :alUrl, authorGithubUrl = :agUrl, authorInstagramUrl = :aiUrl',
         ExpressionAttributeValues: {
           ':title': String(body.title || existing.Item.title).trim().slice(0, 120),
           ':summary': String(body.summary || '').trim().slice(0, 220),
@@ -129,6 +130,10 @@ export const handler = async (event) => {
           ':bUrl': String(body.builderUrl || existing.Item.builderUrl).trim(),
           ':liUrl': body.linkedinPostUrl ? String(body.linkedinPostUrl).trim() : null,
           ':igUrl': body.instagramPostUrl ? String(body.instagramPostUrl).trim() : null,
+          ':abUrl': body.authorBuilderUrl !== undefined ? body.authorBuilderUrl : (existing.Item.authorBuilderUrl || ''),
+          ':alUrl': body.authorLinkedinUrl !== undefined ? body.authorLinkedinUrl : (existing.Item.authorLinkedinUrl || ''),
+          ':agUrl': body.authorGithubUrl !== undefined ? body.authorGithubUrl : (existing.Item.authorGithubUrl || ''),
+          ':aiUrl': body.authorInstagramUrl !== undefined ? body.authorInstagramUrl : (existing.Item.authorInstagramUrl || ''),
         },
         ReturnValues: 'ALL_NEW',
       });

@@ -326,6 +326,18 @@ export function App() {
     });
   }, [articles, searchQuery, selectedCategory, statusFilter, myLikedIds]);
 
+  // Paginación inteligente: Solo muestra los primeros 20 artículos inicialmente para no saturar
+  const [visibleCount, setVisibleCount] = useState<number>(20);
+
+  // Reiniciar a 20 artículos si cambia la búsqueda o categoría
+  useEffect(() => {
+    setVisibleCount(20);
+  }, [searchQuery, selectedCategory, statusFilter]);
+
+  const displayedArticles = useMemo(() => {
+    return filteredArticles.slice(0, visibleCount);
+  }, [filteredArticles, visibleCount]);
+
   const stats = useMemo(() => {
     const total = articles.length;
     const supported = myLikedIds.filter((id) => articles.some((a) => a.id === id)).length;
@@ -550,21 +562,35 @@ export function App() {
               </p>
             </div>
           ) : (
-            filteredArticles.map((article) => (
-              <ArticleCard
-                key={article.id}
-                article={article}
-                isLikedByMe={myLikedIds.includes(article.id)}
-                onToggleLike={handleToggleLike}
-                onEdit={(art: Article) => {
-                  setEditingArticle(art);
-                  setIsArticleModalOpen(true);
-                }}
-                canEdit={currentUser ? currentUser.id === article.authorId : false}
-                onDelete={handleDeleteArticle}
-                canDelete={currentUser ? currentUser.id === article.authorId : false}
-              />
-            ))
+            <>
+              {displayedArticles.map((article) => (
+                <ArticleCard
+                  key={article.id}
+                  article={article}
+                  isLikedByMe={myLikedIds.includes(article.id)}
+                  onToggleLike={handleToggleLike}
+                  onEdit={(art: Article) => {
+                    setEditingArticle(art);
+                    setIsArticleModalOpen(true);
+                  }}
+                  canEdit={currentUser ? currentUser.id === article.authorId : false}
+                  onDelete={handleDeleteArticle}
+                  canDelete={currentUser ? currentUser.id === article.authorId : false}
+                />
+              ))}
+
+              {/* Botón de paginación / Ver más cuando hay más de 20 artículos */}
+              {visibleCount < filteredArticles.length && (
+                <div className="pt-4 pb-2 text-center">
+                  <button
+                    onClick={() => setVisibleCount((prev) => prev + 20)}
+                    className="px-6 py-2.5 rounded-xl border border-border bg-surface hover:bg-surface-hover text-ink text-xs font-bold transition-all shadow-sm hover:border-purple-500/50"
+                  >
+                    <span>Cargar más publicaciones ({filteredArticles.length - visibleCount} restantes)</span>
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </section>
 
