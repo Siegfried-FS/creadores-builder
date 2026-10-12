@@ -137,6 +137,7 @@ export function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isArticleModalOpen, setIsArticleModalOpen] = useState(false);
+  const [editingArticle, setEditingArticle] = useState<Article | null>(null);
 
   // Toggle de Apoyo (Solo para usuarios registrados para llevar control real y evitar spam)
   const handleToggleLike = (articleId: string) => {
@@ -163,30 +164,54 @@ export function App() {
     }
   };
 
-  // Agregar artículo (desde el perfil)
-  const handleAddArticle = (articleData: Partial<Article>) => {
+  // Crear o Actualizar artículo (con vigencia de 30 días deslizantes)
+  const handleSaveArticle = (articleData: Partial<Article>) => {
     if (!currentUser) return;
 
-    const newArticle: Article = {
-      id: `art_${Date.now()}`,
-      title: articleData.title || '',
-      summary: articleData.summary || '',
-      category: (articleData.category || 'Developer Tools') as AWSCategory,
-      builderUrl: articleData.builderUrl || '',
-      linkedinPostUrl: articleData.linkedinPostUrl,
-      instagramPostUrl: articleData.instagramPostUrl,
-      authorId: currentUser.id,
-      authorName: currentUser.name,
-      authorBio: currentUser.bio,
-      authorAvatarUrl: currentUser.avatarUrl || '/images/mascot_opt.png',
-      authorBuilderUrl: currentUser.builderUrl,
-      authorLinkedinUrl: currentUser.linkedinUrl,
-      authorInstagramUrl: currentUser.instagramUrl,
-      createdAt: new Date().toISOString(),
-      likesCount: 0,
-    };
+    if (articleData.id) {
+      // ✏️ Actualización de artículo existente por su autor
+      setArticles((prev) =>
+        prev.map((art) =>
+          art.id === articleData.id
+            ? {
+                ...art,
+                title: articleData.title || art.title,
+                summary: articleData.summary || art.summary,
+                category: (articleData.category || art.category) as AWSCategory,
+                builderUrl: articleData.builderUrl || art.builderUrl,
+                linkedinPostUrl: articleData.linkedinPostUrl,
+                instagramPostUrl: articleData.instagramPostUrl,
+              }
+            : art
+        )
+      );
+      setEditingArticle(null);
+    } else {
+      // 🚀 Publicación de nuevo artículo con TTL de 30 días deslizantes
+      const now = Date.now();
+      const newArticle: Article = {
+        id: `art_${now}`,
+        title: articleData.title || '',
+        summary: articleData.summary || '',
+        category: (articleData.category || 'Developer Tools') as AWSCategory,
+        builderUrl: articleData.builderUrl || '',
+        linkedinPostUrl: articleData.linkedinPostUrl,
+        instagramPostUrl: articleData.instagramPostUrl,
+        authorId: currentUser.id,
+        authorName: currentUser.name,
+        authorBio: currentUser.bio,
+        authorAvatarUrl: currentUser.avatarUrl || '/images/mascot_opt.png',
+        authorBuilderUrl: currentUser.builderUrl,
+        authorLinkedinUrl: currentUser.linkedinUrl,
+        authorInstagramUrl: currentUser.instagramUrl,
+        createdAt: new Date().toISOString(),
+        expiresAt: new Date(now + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        ttl: Math.floor(now / 1000) + 30 * 24 * 60 * 60,
+        likesCount: 0,
+      };
 
-    setArticles((prev) => [newArticle, ...prev]);
+      setArticles((prev) => [newArticle, ...prev]);
+    }
   };
 
   const handleDeleteArticle = (articleId: string) => {
@@ -292,7 +317,10 @@ export function App() {
 
                   <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
                     <button
-                      onClick={() => setIsArticleModalOpen(true)}
+                      onClick={() => {
+                        setEditingArticle(null);
+                        setIsArticleModalOpen(true);
+                      }}
                       className="btn-primary-gradient px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md"
                     >
                       <PlusCircle className="w-4 h-4" />
@@ -445,6 +473,11 @@ export function App() {
                 article={article}
                 isLikedByMe={myLikedIds.includes(article.id)}
                 onToggleLike={handleToggleLike}
+                onEdit={(art: Article) => {
+                  setEditingArticle(art);
+                  setIsArticleModalOpen(true);
+                }}
+                canEdit={currentUser ? currentUser.id === article.authorId : false}
                 onDelete={handleDeleteArticle}
                 canDelete={currentUser ? currentUser.id === article.authorId : false}
               />
@@ -509,14 +542,21 @@ export function App() {
             onClose={() => setIsProfileModalOpen(false)}
             currentUser={currentUser}
             onUpdateUser={handleUpdateUser}
-            onOpenPublishArticle={() => setIsArticleModalOpen(true)}
+            onOpenPublishArticle={() => {
+              setEditingArticle(null);
+              setIsArticleModalOpen(true);
+            }}
           />
 
           <ArticleModal
             isOpen={isArticleModalOpen}
-            onClose={() => setIsArticleModalOpen(false)}
+            onClose={() => {
+              setIsArticleModalOpen(false);
+              setEditingArticle(null);
+            }}
             author={currentUser}
-            onSubmit={handleAddArticle}
+            initialArticle={editingArticle}
+            onSubmit={handleSaveArticle}
           />
         </>
       )}

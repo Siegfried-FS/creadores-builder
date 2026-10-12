@@ -1,5 +1,5 @@
-import { useState, type FC, type FormEvent } from 'react';
-import { X, Sparkles, AlertCircle, Bookmark, Link as LinkIcon, Share2 } from 'lucide-react';
+import { useState, useEffect, type FC, type FormEvent } from 'react';
+import { X, Sparkles, AlertCircle, Bookmark, Link as LinkIcon, Share2, Clock, Check } from 'lucide-react';
 import type { Article, AWSCategory, CreatorProfile } from '../types';
 import { AWS_CATEGORIES } from '../data/categories';
 import { isValidAWSArticleUrl, isValidLinkedInPostUrl } from '../utils/sanitizer';
@@ -8,6 +8,7 @@ interface ArticleModalProps {
   isOpen: boolean;
   onClose: () => void;
   author: CreatorProfile;
+  initialArticle?: Article | null;
   onSubmit: (articleData: Partial<Article>) => void;
 }
 
@@ -15,6 +16,7 @@ export const ArticleModal: FC<ArticleModalProps> = ({
   isOpen,
   onClose,
   author,
+  initialArticle,
   onSubmit,
 }) => {
   const [title, setTitle] = useState('');
@@ -24,6 +26,27 @@ export const ArticleModal: FC<ArticleModalProps> = ({
   const [linkedinPostUrl, setLinkedinPostUrl] = useState('');
   const [instagramPostUrl, setInstagramPostUrl] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      if (initialArticle) {
+        setTitle(initialArticle.title || '');
+        setSummary(initialArticle.summary || '');
+        setCategory(initialArticle.category || 'Developer Tools');
+        setBuilderUrl(initialArticle.builderUrl || '');
+        setLinkedinPostUrl(initialArticle.linkedinPostUrl || '');
+        setInstagramPostUrl(initialArticle.instagramPostUrl || '');
+      } else {
+        setTitle('');
+        setSummary('');
+        setCategory('Developer Tools');
+        setBuilderUrl('');
+        setLinkedinPostUrl('');
+        setInstagramPostUrl('');
+      }
+      setValidationError(null);
+    }
+  }, [isOpen, initialArticle]);
 
   if (!isOpen) return null;
 
@@ -54,6 +77,7 @@ export const ArticleModal: FC<ArticleModalProps> = ({
 
     // Enviar artículo heredando automáticamente los datos del perfil del autor
     onSubmit({
+      id: initialArticle?.id,
       title: title.trim().slice(0, 120),
       summary: summary.trim().slice(0, 220),
       category,
@@ -69,15 +93,10 @@ export const ArticleModal: FC<ArticleModalProps> = ({
       authorInstagramUrl: author.instagramUrl,
     });
 
-    // Resetear formulario
-    setTitle('');
-    setSummary('');
-    setCategory('Developer Tools');
-    setBuilderUrl('');
-    setLinkedinPostUrl('');
-    setInstagramPostUrl('');
     onClose();
   };
+
+  const isEditing = Boolean(initialArticle);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fadeIn">
@@ -99,11 +118,22 @@ export const ArticleModal: FC<ArticleModalProps> = ({
           </div>
           <div>
             <h2 className="font-display font-bold text-lg text-ink">
-              Publicar Artículo en el Hub
+              {isEditing ? 'Editar Artículo en el Hub' : 'Publicar Artículo en el Hub'}
             </h2>
             <p className="text-xs text-muted">
-              Comparte tu contenido técnico para recibir apoyo de la comunidad
+              {isEditing
+                ? 'Actualiza los enlaces o la información de tu publicación'
+                : 'Comparte tu contenido técnico para recibir apoyo de la comunidad'}
             </p>
+          </div>
+        </div>
+
+        {/* ⏱️ Aviso claro sobre los 30 días de vigencia (TTL deslizante) */}
+        <div className="mb-4 p-3 rounded-xl bg-purple-500/10 border border-purple-500/25 flex items-start gap-2.5">
+          <Clock className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+          <div className="text-xs text-muted leading-relaxed">
+            <span className="font-bold text-ink">Vigencia de 30 días deslizantes: </span>
+            Tu publicación estará activa en el Hub durante 30 días exactos para mantener el contenido siempre fresco y dinámico. Al cumplirse el plazo, se depura automáticamente mediante TTL en Amazon DynamoDB.
           </div>
         </div>
 
@@ -119,7 +149,7 @@ export const ArticleModal: FC<ArticleModalProps> = ({
           />
           <div className="min-w-0 flex-1">
             <div className="text-[10px] text-muted uppercase font-bold tracking-wider">
-              Publicando como
+              {isEditing ? 'Editando como' : 'Publicando como'}
             </div>
             <div className="text-xs font-bold text-ink truncate">
               {author.name}
@@ -151,7 +181,7 @@ export const ArticleModal: FC<ArticleModalProps> = ({
                 <Bookmark className="w-3.5 h-3.5 text-purple-400" />
                 <span>Título del Artículo *</span>
               </label>
-              <span className={`text-[10px] font-mono ${title.length > 100 ? 'text-amber-400' : 'text-muted'}`}>
+              <span className={`text-[10px] font-mono ${title.length > 100 ? 'text-amber-400 font-semibold' : 'text-muted'}`}>
                 {title.length}/120
               </span>
             </div>
@@ -217,7 +247,7 @@ export const ArticleModal: FC<ArticleModalProps> = ({
               type="url"
               value={builderUrl}
               onChange={(e) => setBuilderUrl(e.target.value)}
-              placeholder="https://community.aws/@usuario/mi-articulo"
+              placeholder="https://builder.aws.com/content/... o https://community.aws/@..."
               className="w-full bg-surface border border-border rounded-xl px-3.5 py-2.5 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-purple-500 font-mono transition-colors"
               required
             />
@@ -242,7 +272,7 @@ export const ArticleModal: FC<ArticleModalProps> = ({
                   type="url"
                   value={linkedinPostUrl}
                   onChange={(e) => setLinkedinPostUrl(e.target.value)}
-                  placeholder="https://www.linkedin.com/posts/tu-usuario_..."
+                  placeholder="https://www.linkedin.com/posts/... o https://lnkd.in/..."
                   className="w-full bg-surface border border-border rounded-xl px-3 py-2 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-purple-500 font-mono transition-colors"
                 />
               </div>
@@ -273,9 +303,16 @@ export const ArticleModal: FC<ArticleModalProps> = ({
             </button>
             <button
               type="submit"
-              className="btn-primary-gradient px-5 py-2.5 rounded-xl text-xs font-bold"
+              className="btn-primary-gradient px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5"
             >
-              Publicar Artículo
+              {isEditing ? (
+                <>
+                  <Check className="w-3.5 h-3.5" />
+                  <span>Guardar Cambios</span>
+                </>
+              ) : (
+                <span>Publicar Artículo</span>
+              )}
             </button>
           </div>
 

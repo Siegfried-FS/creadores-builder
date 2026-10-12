@@ -1,11 +1,13 @@
 import type { FC } from 'react';
-import { ExternalLink, Heart, Share2, Trash2 } from 'lucide-react';
+import { ExternalLink, Heart, Share2, Trash2, Pencil, Clock } from 'lucide-react';
 import type { Article } from '../types';
 
 interface ArticleCardProps {
   article: Article;
   isLikedByMe: boolean;
   onToggleLike: (articleId: string) => void;
+  onEdit?: (article: Article) => void;
+  canEdit?: boolean;
   onDelete?: (articleId: string) => void;
   canDelete?: boolean;
 }
@@ -26,6 +28,8 @@ export const ArticleCard: FC<ArticleCardProps> = ({
   article,
   isLikedByMe,
   onToggleLike,
+  onEdit,
+  canEdit = false,
   onDelete,
   canDelete = false,
 }) => {
@@ -118,21 +122,53 @@ export const ArticleCard: FC<ArticleCardProps> = ({
         {/* ── COLUMNA 2: SU ARTÍCULO Y ENLACES DE DIFUSIÓN ── */}
         <div className="flex-1 w-full flex flex-col justify-between h-full min-w-0">
           <div>
-            {/* Categoría y botón borrar opcional */}
+            {/* Categoría, Vigencia de 30 días y Acciones del Autor */}
             <div className="flex items-center justify-between gap-2 mb-2.5">
-              <span className="inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-md badge-accent">
-                {article.category}
-              </span>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-md badge-accent">
+                  {article.category}
+                </span>
+
+                {/* Vigencia de 30 días (DynamoDB TTL rolling window) */}
+                {(() => {
+                  const createdTime = new Date(article.createdAt).getTime();
+                  const now = Date.now();
+                  const daysElapsed = Math.floor((now - createdTime) / (1000 * 60 * 60 * 24));
+                  const daysRemaining = Math.max(1, 30 - daysElapsed);
+                  return (
+                    <span
+                      className="inline-flex items-center gap-1 text-[10px] text-muted font-medium px-2 py-0.5 rounded-full bg-surface border border-border"
+                      title="Publicación activa por 30 días continuos con TTL automático en Amazon DynamoDB"
+                    >
+                      <Clock className="w-3 h-3 text-purple-400" />
+                      <span>{daysRemaining > 0 ? `${daysRemaining}d activo` : 'Por renovar'}</span>
+                    </span>
+                  );
+                })()}
+              </div>
               
-              {canDelete && onDelete && (
-                <button
-                  onClick={() => onDelete(article.id)}
-                  className="text-muted hover:text-red-400 p-1 rounded transition-colors"
-                  title="Retirar artículo"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              )}
+              {/* Controles exclusivos del autor: Editar y Eliminar */}
+              <div className="flex items-center gap-1">
+                {canEdit && onEdit && (
+                  <button
+                    onClick={() => onEdit(article)}
+                    className="text-muted hover:text-purple-400 p-1.5 rounded-lg hover:bg-purple-500/10 transition-colors"
+                    title="Editar mi artículo"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                  </button>
+                )}
+
+                {canDelete && onDelete && (
+                  <button
+                    onClick={() => onDelete(article.id)}
+                    className="text-muted hover:text-red-400 p-1.5 rounded-lg hover:bg-red-500/10 transition-colors"
+                    title="Retirar mi artículo"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Título del artículo */}

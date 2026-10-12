@@ -45,5 +45,7 @@ export interface Article {
   authorXUrl?: string;
 
   createdAt: string;
+  expiresAt?: string;             // ISO date para cálculo de vigencia de 30 días
+  ttl?: number;                   // Timestamp Unix epoch (segundos) para TTL de DynamoDB
   likesCount: number;
 }
