@@ -1,5 +1,5 @@
 import { useState, type FC, type FormEvent } from 'react';
-import { X, Sparkles, User, Mail, ArrowRight } from 'lucide-react';
+import { X, User, Mail, Lock, LogIn, UserPlus, AlertCircle } from 'lucide-react';
 import type { CreatorProfile } from '../types';
 import { cleanUsername, formatBuilderUrl } from '../utils/sanitizer';
 
@@ -9,7 +9,7 @@ interface AuthModalProps {
   onLoginSuccess: (user: CreatorProfile) => void;
 }
 
-const GoogleIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
+const GoogleIcon = ({ className = 'w-4 h-4' }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24">
     <path
       fill="#4285F4"
@@ -31,15 +31,110 @@ const GoogleIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
 );
 
 export const AuthModal: FC<AuthModalProps> = ({ isOpen, onClose, onLoginSuccess }) => {
-  const [showManualForm, setShowManualForm] = useState(false);
+  const [mode, setMode] = useState<'login' | 'register'>('register');
+  
+  // Campos del formulario
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
-  // Acceso 1-clic con Google (Menos fricción mero)
-  const handleGoogleLogin = () => {
-    // Si ya hay una sesión guardada con Google, la recuperamos
+  // Registro de nuevo creador
+  const handleRegister = (e: FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (!name.trim()) {
+      setError('Por favor escribe tu nombre o alias.');
+      return;
+    }
+    if (!email.trim() || !email.includes('@')) {
+      setError('Por favor ingresa un correo electrónico válido.');
+      return;
+    }
+    if (password.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres.');
+      return;
+    }
+
+    const cleanHandle = cleanUsername(name);
+    const newUser: CreatorProfile = {
+      id: `usr_${Date.now()}`,
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      bio: 'Creador en el Bootcamp AWS Builder Center',
+      builderHandle: cleanHandle,
+      builderUrl: formatBuilderUrl(cleanHandle),
+      avatarUrl: '/images/mascot_opt.png',
+    };
+
+    // Guardar en la lista de usuarios registrados en el navegador
+    try {
+      const existingUsers = JSON.parse(localStorage.getItem('creadores_registered_users') || '[]');
+      const updated = existingUsers.filter((u: any) => u.email !== newUser.email);
+      updated.push({ ...newUser, password });
+      localStorage.setItem('creadores_registered_users', JSON.stringify(updated));
+    } catch {
+      // ignore
+    }
+
+    onLoginSuccess(newUser);
+    onClose();
+  };
+
+  // Inicio de sesión de creador existente
+  const handleLogin = (e: FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (!email.trim()) {
+      setError('Por favor ingresa tu correo electrónico.');
+      return;
+    }
+    if (!password) {
+      setError('Por favor ingresa tu contraseña.');
+      return;
+    }
+
+    try {
+      const existingUsers = JSON.parse(localStorage.getItem('creadores_registered_users') || '[]');
+      const found = existingUsers.find((u: any) => u.email === email.trim().toLowerCase());
+
+      if (found) {
+        if (found.password && found.password !== password) {
+          setError('Contraseña incorrecta.');
+          return;
+        }
+        const { password: _, ...userProfile } = found;
+        onLoginSuccess(userProfile);
+        onClose();
+        return;
+      }
+    } catch {
+      // ignore
+    }
+
+    // Si es un inicio de sesión nuevo
+    const cleanHandle = cleanUsername(email.split('@')[0]);
+    const user: CreatorProfile = {
+      id: `usr_${Date.now()}`,
+      name: email.split('@')[0],
+      email: email.trim().toLowerCase(),
+      bio: 'Creador en el Bootcamp AWS Builder Center',
+      builderHandle: cleanHandle,
+      builderUrl: formatBuilderUrl(cleanHandle),
+      avatarUrl: '/images/mascot_opt.png',
+    };
+
+    onLoginSuccess(user);
+    onClose();
+  };
+
+  // Acceso con Google
+  const handleGoogleAuth = () => {
+    // Si ya existe sesión previa
     const savedUserJson = localStorage.getItem('creadores_active_user');
     if (savedUserJson) {
       try {
@@ -54,15 +149,13 @@ export const AuthModal: FC<AuthModalProps> = ({ isOpen, onClose, onLoginSuccess 
       }
     }
 
-    // Perfil inmediato de Google para el creador
-    const promptName = prompt('¿Cuál es tu nombre para tu perfil de creador?', 'Creador AWS');
-    if (!promptName) return;
-
-    const cleanHandle = cleanUsername(promptName);
+    // Crear perfil rápido con Google
+    const defaultName = mode === 'register' && name.trim() ? name.trim() : 'Creador de la Comunidad';
+    const cleanHandle = cleanUsername(defaultName);
     const googleUser: CreatorProfile = {
       id: `usr_g_${Date.now()}`,
-      name: promptName.trim(),
-      email: `${cleanHandle.toLowerCase()}@gmail.com`,
+      name: defaultName,
+      email: email.trim() || `${cleanHandle.toLowerCase()}@gmail.com`,
       bio: 'Creador en el Bootcamp AWS Builder Center',
       builderHandle: cleanHandle,
       builderUrl: formatBuilderUrl(cleanHandle),
@@ -70,43 +163,6 @@ export const AuthModal: FC<AuthModalProps> = ({ isOpen, onClose, onLoginSuccess 
     };
 
     onLoginSuccess(googleUser);
-    onClose();
-  };
-
-  // Acceso directo con Nombre y Correo (sin contraseñas)
-  const handleManualSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) return;
-
-    const cleanHandle = cleanUsername(name);
-    const newUser: CreatorProfile = {
-      id: `usr_${Date.now()}`,
-      name: name.trim(),
-      email: email.trim() || `${cleanHandle.toLowerCase()}@comunidad.aws`,
-      bio: 'Creador en el Bootcamp AWS Builder Center',
-      builderHandle: cleanHandle,
-      builderUrl: formatBuilderUrl(cleanHandle),
-      avatarUrl: '/images/mascot_opt.png',
-    };
-
-    onLoginSuccess(newUser);
-    onClose();
-  };
-
-  // Acceso directo para Roberto
-  const handleRobertoLogin = () => {
-    const robertoUser: CreatorProfile = {
-      id: 'usr_roberto',
-      name: 'Roberto Flores',
-      email: 'roberto.ciberseguridad@gmail.com',
-      bio: 'Carpintero & Líder del AWS User Group Playa Vicente. Lead Auditor ISO 27001 y AWS Certified Cloud Practitioner.',
-      builderHandle: 'siegfried_fs',
-      builderUrl: 'https://community.aws/@siegfried_fs',
-      linkedinUrl: 'https://www.linkedin.com/in/roberto-flores-carpintero',
-      instagramUrl: 'https://www.instagram.com/siegfried_fs',
-      avatarUrl: '/images/mascot_opt.png',
-    };
-    onLoginSuccess(robertoUser);
     onClose();
   };
 
@@ -124,106 +180,161 @@ export const AuthModal: FC<AuthModalProps> = ({ isOpen, onClose, onLoginSuccess 
         </button>
 
         {/* Encabezado con Mascota */}
-        <div className="text-center mb-6">
-          <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center p-1.5 shadow-md">
+        <div className="text-center mb-5">
+          <div className="w-14 h-14 mx-auto mb-2.5 rounded-2xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center p-1 shadow-md">
             <img src="/images/mascot_opt.png" alt="AWSUG" className="w-full h-full object-contain" />
           </div>
           <h2 className="font-display font-bold text-xl text-ink">
-            Bienvenido al Hub de Creadores
+            {mode === 'register' ? 'Crea tu Cuenta de Creador' : 'Inicia Sesión en el Hub'}
           </h2>
-          <p className="text-xs text-muted mt-1 max-w-xs mx-auto">
-            Entra con un clic para publicar tus artículos de <strong className="text-purple-400">AWS Builder Center</strong> y recibir apoyo de la comunidad.
+          <p className="text-xs text-muted mt-0.5">
+            AWS User Group Playa Vicente &middot; Creadores Builder Center
           </p>
         </div>
 
-        <div className="space-y-3">
-          {/* 🌟 BOTÓN PRINCIPAL: CONTINUAR CON GOOGLE */}
+        {/* Selector de Pestaña: Registro / Login */}
+        <div className="flex rounded-xl bg-surface-hover p-1 mb-5 border border-border">
           <button
-            onClick={handleGoogleLogin}
-            className="w-full py-3 px-4 rounded-2xl border border-border bg-surface hover:bg-surface-hover text-ink font-bold text-sm flex items-center justify-center gap-3 transition-all hover:scale-[1.01] shadow-md hover:border-purple-400 group"
+            type="button"
+            onClick={() => { setMode('register'); setError(null); }}
+            className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+              mode === 'register'
+                ? 'bg-surface text-ink shadow-sm border border-border'
+                : 'text-muted hover:text-ink'
+            }`}
           >
-            <GoogleIcon className="w-5 h-5 shrink-0" />
-            <span>Continuar con Google</span>
+            <UserPlus className="w-3.5 h-3.5" />
+            <span>Registrarme</span>
           </button>
 
-          {/* Acceso Rápido Líder UG */}
           <button
-            onClick={handleRobertoLogin}
-            className="w-full py-2.5 px-4 rounded-2xl border border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 font-semibold text-xs flex items-center justify-center gap-2 transition-all"
+            type="button"
+            onClick={() => { setMode('login'); setError(null); }}
+            className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+              mode === 'login'
+                ? 'bg-surface text-ink shadow-sm border border-border'
+                : 'text-muted hover:text-ink'
+            }`}
           >
-            <Sparkles className="w-4 h-4 text-purple-400" />
-            <span>Entrar como Roberto Flores (Líder UG)</span>
+            <LogIn className="w-3.5 h-3.5" />
+            <span>Iniciar Sesión</span>
           </button>
         </div>
 
-        {/* Alternativa sin contraseñas */}
-        <div className="mt-5 pt-4 border-t border-border">
-          {!showManualForm ? (
-            <button
-              onClick={() => setShowManualForm(true)}
-              className="w-full text-center text-xs text-muted hover:text-purple-400 transition-colors py-1 font-medium"
-            >
-              ¿Prefieres entrar solo con tu Nombre? Haz clic aquí &rarr;
-            </button>
-          ) : (
-            <form onSubmit={handleManualSubmit} className="space-y-3 animate-fadeIn">
-              <p className="text-xs font-semibold text-ink mb-1">
-                Entrada rápida (Cero contraseñas)
-              </p>
-              
-              <div>
-                <label className="block text-[11px] text-muted mb-1">Tu Nombre o Alias *</label>
-                <div className="relative">
-                  <User className="absolute left-3 top-2.5 w-3.5 h-3.5 text-muted" />
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Ej. Roberto Flores"
-                    className="w-full bg-surface border border-border rounded-xl pl-9 pr-3 py-2 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-purple-500"
-                    required
-                    autoFocus
-                  />
-                </div>
-              </div>
+        {error && (
+          <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
 
-              <div>
-                <label className="block text-[11px] text-muted mb-1">Correo Electrónico (Opcional)</label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-2.5 w-3.5 h-3.5 text-muted" />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="tu@correo.com"
-                    className="w-full bg-surface border border-border rounded-xl pl-9 pr-3 py-2 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-purple-500"
-                  />
-                </div>
+        {/* Formulario */}
+        <form onSubmit={mode === 'register' ? handleRegister : handleLogin} className="space-y-3.5">
+          {mode === 'register' && (
+            <div>
+              <label className="block text-xs font-medium text-muted mb-1">
+                Tu Nombre Completo *
+              </label>
+              <div className="relative">
+                <User className="absolute left-3 top-2.5 w-4 h-4 text-muted" />
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Ej. Roberto Flores"
+                  className="w-full bg-surface border border-border rounded-xl pl-9 pr-3 py-2 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-purple-500 transition-colors"
+                  required
+                />
               </div>
-
-              <div className="flex items-center gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={() => setShowManualForm(false)}
-                  className="px-3 py-2 rounded-xl border border-border text-xs text-muted hover:text-ink"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 btn-primary-gradient py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5"
-                >
-                  <span>Entrar al Hub</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </form>
+            </div>
           )}
+
+          <div>
+            <label className="block text-xs font-medium text-muted mb-1">
+              Correo Electrónico *
+            </label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-2.5 w-4 h-4 text-muted" />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="tu@correo.com"
+                className="w-full bg-surface border border-border rounded-xl pl-9 pr-3 py-2 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-purple-500 transition-colors"
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-muted mb-1">
+              Contraseña *
+            </label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-2.5 w-4 h-4 text-muted" />
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full bg-surface border border-border rounded-xl pl-9 pr-3 py-2 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-purple-500 transition-colors"
+                required
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="w-full btn-primary-gradient py-2.5 rounded-xl text-xs font-bold mt-2 shadow-md"
+          >
+            {mode === 'register' ? 'Crear mi Cuenta de Creador' : 'Entrar al Hub'}
+          </button>
+        </form>
+
+        {/* Separador */}
+        <div className="relative my-4">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-border" />
+          </div>
+          <div className="relative flex justify-center text-[10px] uppercase font-bold">
+            <span className="bg-surface px-2 text-muted">o continúa con</span>
+          </div>
         </div>
 
-        {/* Nota de cero fricción */}
-        <p className="text-[11px] text-muted/70 text-center mt-5">
-          Tus redes sociales son 100% opcionales y podrás añadirlas desde tu perfil cuando quieras.
+        {/* Botón de Google */}
+        <button
+          type="button"
+          onClick={handleGoogleAuth}
+          className="w-full py-2.5 px-4 rounded-xl border border-border bg-surface hover:bg-surface-hover text-ink font-semibold text-xs flex items-center justify-center gap-2 transition-all hover:border-purple-400"
+        >
+          <GoogleIcon className="w-4 h-4" />
+          <span>Continuar con Google</span>
+        </button>
+
+        <p className="text-[11px] text-muted text-center mt-4">
+          {mode === 'register' ? (
+            <>
+              ¿Ya tienes cuenta?{' '}
+              <button
+                type="button"
+                onClick={() => { setMode('login'); setError(null); }}
+                className="text-purple-400 hover:text-purple-300 font-bold"
+              >
+                Inicia sesión aquí
+              </button>
+            </>
+          ) : (
+            <>
+              ¿Primera vez aquí?{' '}
+              <button
+                type="button"
+                onClick={() => { setMode('register'); setError(null); }}
+                className="text-purple-400 hover:text-purple-300 font-bold"
+              >
+                Crea tu cuenta aquí
+              </button>
+            </>
+          )}
         </p>
 
       </div>

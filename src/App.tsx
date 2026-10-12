@@ -43,8 +43,6 @@ export function App() {
   const handleLoginSuccess = (user: CreatorProfile) => {
     setCurrentUser(user);
     localStorage.setItem('creadores_active_user', JSON.stringify(user));
-    // Menos fricción mero: abrir de inmediato el formulario para publicar su artículo
-    setIsArticleModalOpen(true);
   };
 
   const handleLogout = () => {
