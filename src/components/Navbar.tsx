@@ -1,12 +1,8 @@
 import type { FC } from 'react';
-import { Moon, Sun, ExternalLink } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import type { CreatorProfile } from '../types';
 
-export type AppTheme = 'dark' | 'light';
-
 interface NavbarProps {
-  theme: AppTheme;
-  onToggleTheme: () => void;
   currentUser: CreatorProfile | null;
   onOpenAuth: () => void;
   onOpenProfile: () => void;
@@ -14,15 +10,11 @@ interface NavbarProps {
 }
 
 export const Navbar: FC<NavbarProps> = ({
-  theme,
-  onToggleTheme,
   currentUser,
   onOpenAuth,
   onOpenProfile,
   onLogout,
 }) => {
-  const isLight = theme === 'light';
-
   return (
     <header className="sticky top-0 z-40 w-full pt-2 pb-2 px-3 sm:px-6">
       <div className="max-w-6xl mx-auto rounded-2xl glass-pill px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-4">
@@ -34,11 +26,11 @@ export const Navbar: FC<NavbarProps> = ({
             className="flex items-center gap-3 group shrink-0 text-left cursor-pointer focus:outline-none"
             title="Volver al inicio del Hub"
           >
-            <div className="relative w-12 h-12 sm:w-14 sm:h-14 shrink-0 flex items-center justify-center rounded-2xl bg-gradient-to-tr from-purple-600/25 to-purple-400/10 border-2 border-purple-500/40 group-hover:border-purple-400 p-1 transition-all shadow-md group-hover:shadow-[0_0_18px_rgba(168,85,247,0.45)]">
+            <div className="relative w-12 h-12 sm:w-14 sm:h-14 shrink-0 flex items-center justify-center rounded-2xl bg-gradient-to-tr from-purple-600/20 to-purple-400/10 border-2 border-purple-500/30 group-hover:border-purple-400 p-1 transition-all shadow-md group-hover:shadow-[0_0_16px_rgba(109,40,217,0.3)]">
               <img
                 src="/images/mascot_opt.png"
                 alt="Mascota AWSUG Playa Vicente"
-                className="w-full h-full object-contain group-hover:scale-110 transition-transform drop-shadow-md"
+                className="w-full h-full object-contain group-hover:scale-110 transition-transform drop-shadow-sm"
               />
             </div>
 
@@ -69,27 +61,8 @@ export const Navbar: FC<NavbarProps> = ({
             title="Ir al portal principal de la comunidad AWSUG Playa Vicente"
           >
             <span>Comunidad</span>
-            <ExternalLink className="w-3 h-3 text-purple-400" />
+            <ExternalLink className="w-3 h-3 text-purple-600" />
           </a>
-
-          {/* Toggle de Modo Espectral 🌙 / Modo Confortable ☀️ */}
-          <button
-            onClick={onToggleTheme}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-border bg-surface hover:bg-surface-hover text-muted hover:text-ink transition-colors text-xs font-medium"
-            title={isLight ? 'Modo Espectral Cósmico 🌙' : 'Modo Confortable Slate ☀️'}
-          >
-            {isLight ? (
-              <>
-                <Sun className="w-4 h-4 text-indigo-400" />
-                <span className="hidden md:inline font-mono text-[11px]">Confortable</span>
-              </>
-            ) : (
-              <>
-                <Moon className="w-4 h-4 text-purple-400" />
-                <span className="hidden md:inline font-mono text-[11px]">Espectral</span>
-              </>
-            )}
-          </button>
 
           {/* Estado de Autenticación */}
           {currentUser ? (
@@ -114,7 +87,7 @@ export const Navbar: FC<NavbarProps> = ({
 
               <button
                 onClick={onLogout}
-                className="p-1.5 rounded-xl border border-border bg-surface hover:bg-red-500/10 text-muted hover:text-red-400 transition-colors"
+                className="p-1.5 rounded-xl border border-border bg-surface hover:bg-red-500/10 text-muted hover:text-red-500 transition-colors"
                 title="Cerrar sesión"
               >
                 <span className="sr-only">Cerrar sesión</span>

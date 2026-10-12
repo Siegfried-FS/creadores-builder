@@ -76,6 +76,10 @@ export const ProfileModal: FC<ProfileModalProps> = ({
 
   const handleSaveProfile = (e: FormEvent) => {
     e.preventDefault();
+    if (!builderHandle.trim()) {
+      alert('Tu usuario o enlace de AWS Builder Center es obligatorio para formar parte de la comunidad de creadores.');
+      return;
+    }
     const cleanHandle = cleanUsername(builderHandle || name);
     const updated: CreatorProfile = {
       ...currentUser,
@@ -283,7 +287,7 @@ export const ProfileModal: FC<ProfileModalProps> = ({
 
               <div>
                 <label className="block text-[11px] font-medium text-muted mb-1">
-                  Usuario o Enlace de AWS Builder Center (Opcional)
+                  Usuario o Enlace de AWS Builder Center <span className="text-purple-400 font-bold">*</span> (Obligatorio)
                 </label>
                 <div className="relative">
                   <AtSign className="absolute left-3 top-2.5 w-3.5 h-3.5 text-muted" />
@@ -291,10 +295,14 @@ export const ProfileModal: FC<ProfileModalProps> = ({
                     type="text"
                     value={builderHandle}
                     onChange={(e) => setBuilderHandle(e.target.value)}
-                    placeholder="@siegfried_fs o URL de builder.aws.com"
+                    placeholder="@siegfried_fs o URL de builder.aws.com / community.aws"
                     className="w-full bg-surface border border-border rounded-xl pl-9 pr-3 py-2 text-xs text-ink focus:outline-none focus:border-purple-500"
+                    required
                   />
                 </div>
+                <p className="text-[10px] text-muted mt-1">
+                  Es la red principal de nuestra comunidad técnica.
+                </p>
               </div>
 
               <div>

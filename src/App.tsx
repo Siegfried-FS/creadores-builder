@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Navbar, type AppTheme } from './components/Navbar';
+import { Navbar } from './components/Navbar';
 import { ArticleCard } from './components/ArticleCard';
 import { ArticleModal } from './components/ArticleModal';
 import { AuthModal } from './components/AuthModal';
@@ -14,29 +14,6 @@ import { SecurityHoneypotModal } from './components/SecurityHoneypotModal';
 import { getArticles, createArticle, updateArticle, deleteArticle, toggleLike } from './services/api';
 
 export function App() {
-  // 🎨 Gestión de los 2 Temas Oficiales: Espectral 🌙 y Confortable Slate ☀️
-  const [theme, setTheme] = useState<AppTheme>(() => {
-    return localStorage.getItem('awsug_theme') === 'light' ? 'light' : 'dark';
-  });
-
-  const applyThemeToDOM = (t: AppTheme) => {
-    const el = document.documentElement;
-    el.classList.remove('dark', 'tropical', 'light');
-    el.classList.add(t);
-    localStorage.setItem('awsug_theme', t);
-  };
-
-  useEffect(() => {
-    applyThemeToDOM(theme);
-  }, [theme]);
-
-  const handleToggleTheme = () => {
-    setTheme((prev) => {
-      const next: AppTheme = prev === 'dark' ? 'light' : 'dark';
-      applyThemeToDOM(next);
-      return next;
-    });
-  };
 
   // 👤 Sesión de Usuario (Inicia como visitante si no hay guardada)
   const [currentUser, setCurrentUser] = useState<CreatorProfile | null>(() => {
@@ -341,10 +318,8 @@ export function App() {
       {/* 🔮 Barra superior espectral del UG Playa Vicente */}
       <div className="spectrum-bar" />
 
-      {/* 🧭 Navbar Cápsula Flotante Oficial con Selector de Temas */}
+      {/* 🧭 Navbar Cápsula Flotante Oficial */}
       <Navbar
-        theme={theme}
-        onToggleTheme={handleToggleTheme}
         currentUser={currentUser}
         onOpenAuth={() => setIsAuthModalOpen(true)}
         onOpenProfile={() => setIsProfileModalOpen(true)}

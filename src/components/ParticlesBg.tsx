@@ -9,10 +9,7 @@ interface Particle {
   color: string;
 }
 
-const THEME_PALETTES: Record<string, string[]> = {
-  light: ['#6366f1', '#818cf8', '#38bdf8', '#a855f7', '#94a3b8'],
-  dark: ['#a855f7', '#7c3aed', '#c084fc', '#38bdf8', '#818cf8'],
-};
+const PALETTE = ['#6d28d9', '#8b5cf6', '#a855f7', '#64748b', '#94a3b8'];
 
 export function ParticlesBg() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -26,30 +23,6 @@ export function ParticlesBg() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const getTheme = () => {
-      const cls = document.documentElement.className;
-      if (cls.includes('light')) return 'light';
-      return 'dark';
-    };
-
-    let currentPalette = THEME_PALETTES[getTheme()] || THEME_PALETTES.dark;
-
-    const updatePalette = () => {
-      currentPalette = THEME_PALETTES[getTheme()] || THEME_PALETTES.dark;
-      particles.current.forEach((p) => {
-        p.color = currentPalette[Math.floor(Math.random() * currentPalette.length)];
-      });
-    };
-
-    // Observar cambios de clase en <html>
-    const observer = new MutationObserver(() => {
-      updatePalette();
-    });
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class'],
-    });
-
     const resize = () => {
       const w = window.innerWidth;
       const h = window.innerHeight;
@@ -61,15 +34,15 @@ export function ParticlesBg() {
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
-      const count = Math.min(55, Math.max(25, Math.floor((w * h) / 24000)));
+      const count = Math.min(50, Math.max(22, Math.floor((w * h) / 25000)));
       if (particles.current.length === 0 || Math.abs(particles.current.length - count) > 15) {
         particles.current = Array.from({ length: count }, () => ({
           x: Math.random() * w,
           y: Math.random() * h,
           vx: (Math.random() - 0.5) * 0.45,
           vy: (Math.random() - 0.5) * 0.45,
-          size: Math.random() * 2.2 + 1,
-          color: currentPalette[Math.floor(Math.random() * currentPalette.length)],
+          size: Math.random() * 2 + 1,
+          color: PALETTE[Math.floor(Math.random() * PALETTE.length)],
         }));
       }
     };
@@ -116,7 +89,7 @@ export function ParticlesBg() {
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
-        ctx.globalAlpha = 0.55;
+        ctx.globalAlpha = 0.5;
         ctx.fill();
 
         // Líneas entre partículas
@@ -161,7 +134,6 @@ export function ParticlesBg() {
 
     return () => {
       cancelAnimationFrame(animRef.current);
-      observer.disconnect();
       window.removeEventListener('resize', resize);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('touchmove', handleTouchMove);
@@ -173,7 +145,7 @@ export function ParticlesBg() {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 w-screen h-screen pointer-events-none opacity-80 z-0"
+      className="fixed inset-0 w-screen h-screen pointer-events-none opacity-75 z-0"
       aria-hidden="true"
     />
   );
