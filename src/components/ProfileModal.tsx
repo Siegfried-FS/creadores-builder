@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, type FC, type FormEvent } from 'react';
-import { X, User, Edit3, PlusCircle, AtSign, Check, ExternalLink, Camera, Image as ImageIcon, Trash2, AlertTriangle } from 'lucide-react';
-import type { CreatorProfile } from '../types';
+import { X, User, Edit3, PlusCircle, AtSign, Check, ExternalLink, Camera, Image as ImageIcon, Trash2, AlertTriangle, BookOpen, Heart, Pencil } from 'lucide-react';
+import type { CreatorProfile, Article } from '../types';
 import { formatBuilderUrl, formatLinkedInUrl, formatInstagramUrl, formatGitHubUrl, cleanUsername } from '../utils/sanitizer';
 
 interface ProfileModalProps {
@@ -10,6 +10,9 @@ interface ProfileModalProps {
   onUpdateUser: (updatedUser: CreatorProfile) => void;
   onOpenPublishArticle: () => void;
   onDeleteAccount?: (userId: string) => void;
+  userArticles?: Article[];
+  onEditArticle?: (article: Article) => void;
+  onDeleteArticle?: (articleId: string) => void;
 }
 
 export const ProfileModal: FC<ProfileModalProps> = ({
@@ -19,6 +22,9 @@ export const ProfileModal: FC<ProfileModalProps> = ({
   onUpdateUser,
   onOpenPublishArticle,
   onDeleteAccount,
+  userArticles = [],
+  onEditArticle,
+  onDeleteArticle,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(currentUser.name);
@@ -435,6 +441,108 @@ export const ProfileModal: FC<ProfileModalProps> = ({
                   </a>
                 </div>
               )}
+            </div>
+          )}
+        </div>
+
+        {/* 📚 Mis Artículos Publicados en el Hub */}
+        <div className="mt-6 pt-5 border-t border-border">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-display font-bold text-sm text-ink flex items-center gap-1.5">
+              <BookOpen className="w-4 h-4 text-purple-400" />
+              <span>Mis Artículos Publicados</span>
+              <span className="text-xs px-2 py-0.5 rounded-full badge-accent font-mono ml-1">
+                {userArticles.length}
+              </span>
+            </h3>
+
+            <button
+              onClick={() => {
+                onClose();
+                onOpenPublishArticle();
+              }}
+              className="text-xs text-purple-400 hover:text-purple-300 font-semibold flex items-center gap-1"
+            >
+              <PlusCircle className="w-3.5 h-3.5" />
+              <span>Nuevo Post</span>
+            </button>
+          </div>
+
+          {userArticles.length === 0 ? (
+            <div className="p-4 rounded-2xl bg-surface-hover/60 border border-border text-center text-xs text-muted">
+              <p>Aún no has registrado ningún artículo con esta cuenta.</p>
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenPublishArticle();
+                }}
+                className="mt-2 text-purple-400 hover:underline font-semibold"
+              >
+                + Registra tu primer post de Builder Center
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1">
+              {userArticles.map((art) => (
+                <div
+                  key={art.id}
+                  className="p-3 rounded-2xl bg-surface border border-border hover:border-purple-500/40 transition-colors flex items-center justify-between gap-3 shadow-sm"
+                >
+                  <div className="min-w-0 flex-1">
+                    <span className="text-[10px] font-bold text-purple-400 uppercase tracking-wider block truncate">
+                      {art.category}
+                    </span>
+                    <h4 className="text-xs font-bold text-ink truncate mt-0.5" title={art.title}>
+                      {art.title}
+                    </h4>
+                    <div className="flex items-center gap-3 mt-1 text-[11px] text-muted">
+                      <span className="flex items-center gap-1">
+                        <Heart className="w-3 h-3 text-purple-400 fill-purple-400/20" />
+                        <span>{art.likesCount || 0} apoyos</span>
+                      </span>
+                      <span>·</span>
+                      <a
+                        href={art.builderUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-purple-300 flex items-center gap-1 text-purple-400 font-medium"
+                      >
+                        <span>Ver en Builder</span>
+                        <ExternalLink className="w-2.5 h-2.5" />
+                      </a>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1 shrink-0">
+                    {onEditArticle && (
+                      <button
+                        onClick={() => {
+                          onClose();
+                          onEditArticle(art);
+                        }}
+                        className="p-1.5 rounded-lg border border-border hover:bg-purple-500/10 text-muted hover:text-purple-400 transition-colors"
+                        title="Editar publicación"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+
+                    {onDeleteArticle && (
+                      <button
+                        onClick={() => {
+                          if (confirm(`¿Deseas retirar "${art.title}" del Hub?`)) {
+                            onDeleteArticle(art.id);
+                          }
+                        }}
+                        className="p-1.5 rounded-lg border border-border hover:bg-red-500/10 text-muted hover:text-red-400 transition-colors"
+                        title="Retirar publicación"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>

@@ -81,8 +81,27 @@ export const AuthModal: FC<AuthModalProps> = ({ isOpen, onClose, onLoginSuccess 
       setError('Por favor ingresa un correo electrónico válido.');
       return;
     }
-    if (password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres.');
+    // Validación estricta de contraseña segura (8+ caracteres, mayúscula, minúscula, número y símbolo)
+    const hasMinLength = password.length >= 8;
+    const hasUpper = /[A-Z]/.test(password);
+    const hasLower = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecial = /[^A-Za-z0-9]/.test(password);
+
+    if (!hasMinLength) {
+      setError('La contraseña debe tener al menos 8 caracteres.');
+      return;
+    }
+    if (!hasUpper || !hasLower) {
+      setError('La contraseña debe contener letras mayúsculas y minúsculas.');
+      return;
+    }
+    if (!hasNumber) {
+      setError('La contraseña debe incluir al menos un número.');
+      return;
+    }
+    if (!hasSpecial) {
+      setError('La contraseña debe incluir al menos un símbolo especial (!@#$%^&*...).');
       return;
     }
 
@@ -285,11 +304,34 @@ export const AuthModal: FC<AuthModalProps> = ({ isOpen, onClose, onLoginSuccess 
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder="Mínimo 8 caracteres, números y símbolos"
                 className="w-full bg-surface border border-border rounded-xl pl-9 pr-3 py-2 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-purple-500 transition-colors"
                 required
               />
             </div>
+
+            {/* Checklist interactivo de Contraseña Segura en Registro */}
+            {mode === 'register' && password.length > 0 && (
+              <div className="mt-2 p-2.5 rounded-xl bg-surface-hover/80 border border-border text-[11px] space-y-1">
+                <p className="font-bold text-muted text-[10px] uppercase tracking-wider">
+                  Requisitos de Seguridad:
+                </p>
+                <div className="grid grid-cols-2 gap-1 text-[10px]">
+                  <span className={password.length >= 8 ? 'text-emerald-400 font-medium' : 'text-muted'}>
+                    {password.length >= 8 ? '✓' : '○'} Mínimo 8 caracteres
+                  </span>
+                  <span className={/[A-Z]/.test(password) && /[a-z]/.test(password) ? 'text-emerald-400 font-medium' : 'text-muted'}>
+                    {/[A-Z]/.test(password) && /[a-z]/.test(password) ? '✓' : '○'} Mayúscula y minúscula
+                  </span>
+                  <span className={/[0-9]/.test(password) ? 'text-emerald-400 font-medium' : 'text-muted'}>
+                    {/[0-9]/.test(password) ? '✓' : '○'} Al menos un número
+                  </span>
+                  <span className={/[^A-Za-z0-9]/.test(password) ? 'text-emerald-400 font-medium' : 'text-muted'}>
+                    {/[^A-Za-z0-9]/.test(password) ? '✓' : '○'} Símbolo (!@#$...)
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
           <button

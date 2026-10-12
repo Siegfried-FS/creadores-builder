@@ -10,6 +10,7 @@ import { INITIAL_ARTICLES } from './data/initialData';
 import { AWS_CATEGORIES } from './data/categories';
 import { Search, Sparkles, CheckCircle, UserPlus, BookOpen, PlusCircle } from 'lucide-react';
 import { ConsoleSecurity, checkInputSecurity } from './components/ConsoleSecurity';
+import { SecurityHoneypotModal } from './components/SecurityHoneypotModal';
 import { getArticles, createArticle, updateArticle, deleteArticle, toggleLike } from './services/api';
 
 export function App() {
@@ -610,6 +611,9 @@ export function App() {
         </div>
       </footer>
 
+      {/* 🛡️ Honeypot Visual de Seguridad DevSecOps (Captura /admin/, /wp-admin/, SQLi, XSS) */}
+      <SecurityHoneypotModal />
+
       {/* ── MODALES ── */}
       <AuthModal
         isOpen={isAuthModalOpen}
@@ -629,6 +633,12 @@ export function App() {
               setIsArticleModalOpen(true);
             }}
             onDeleteAccount={handleDeleteAccount}
+            userArticles={articles.filter((a) => a.authorId === currentUser.id)}
+            onEditArticle={(art) => {
+              setEditingArticle(art);
+              setIsArticleModalOpen(true);
+            }}
+            onDeleteArticle={handleDeleteArticle}
           />
 
           <ArticleModal
