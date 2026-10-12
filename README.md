@@ -62,25 +62,17 @@ Inspirado en la cultura de ciberseguridad y auditoría del grupo de usuarios:
 
 ## 📋 Checklist de Producción: ¿Se puede publicar ya?
 
-### ✅ Lo que ya está 100% probado y funcionando:
-* [x] **Base de datos DynamoDB activa y conectada** con la API Serverless en AWS.
+### ✅ Lo que ya está 100% probado y funcionando en producción:
+* [x] **Dominio y SSL en vivo**: Disponible en [`https://creadores.awsugplayavicente.com`](https://creadores.awsugplayavicente.com) con certificado AWS ACM y Route 53.
+* [x] **Despliegue continuo en rama `bankai`**: Integrado con AWS Amplify Hosting.
+* [x] **Base de datos DynamoDB activa y conectada** con la API Serverless en AWS (`https://6qxtspu588.execute-api.us-east-1.amazonaws.com`).
 * [x] **Endpoints funcionales** de creación (`POST`), consulta (`GET`), edición (`PUT`), eliminación (`DELETE`) y likes atómicos (`POST /like`).
 * [x] **Resiliencia offline / fallback**: si la red falla, la aplicación respalda y lee automáticamente desde `localStorage` sin romperse.
-* [x] **Autenticación oficial con Google** y configuración de avatar personalizado (subida de imagen o iguana oficial).
-* [x] **Checklist individual de apoyos** persistido por usuario.
-* [x] **Navegación fluida**: el clic en la mascota arriba devuelve suavemente al inicio del Hub, con botón independiente hacia el portal de la comunidad.
-* [x] **Build de TypeScript y Vite limpio** (tiempo de compilación < 1 segundo, 0 errores).
-
-### 🚀 Pasos finales únicamente para desplegar a la nube pública:
-1. **Subir commits a la nube:**
-   ```bash
-   git push origin zanpakuto
-   ```
-2. **Configurar variables en AWS Amplify Hosting:**
-   * `VITE_API_URL` = `https://6qxtspu588.execute-api.us-east-1.amazonaws.com`
-   * `VITE_GOOGLE_CLIENT_ID` = `580534439118-64h777puf0v0hadj0bim58vhh52jq1n3.apps.googleusercontent.com`
-3. **Vincular subdominio en Route 53 (opcional):**
-   * Apuntar `creadores.awsugplayavicente.com` a la aplicación de Amplify en la zona DNS existente `Z08742531Y1VDAVQC9IHG`.
+* [x] **Autenticación con Google e identidad determinista**: vinculación transparente de cuentas por correo electrónico con opción de eliminar cuenta (`GDPR / Privacidad`).
+* [x] **Checklist individual de apoyos** persistido por usuario con barra de progreso.
+* [x] **Formato canónico de perfiles de Builder Center**: auto-resolución estricta a `https://builder.aws.com/community/@usuario`.
+* [x] **Temas visuales independientes**: Diurno ☀️ (gris perla suave anti-reflejo) y Espectral 🌙 con fondo animado de partículas interactivo.
+* [x] **Build de TypeScript y Vite limpio** (0 errores, tiempos de carga < 1s).
 
 ---
 
