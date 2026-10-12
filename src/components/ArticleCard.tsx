@@ -91,11 +91,11 @@ export const ArticleCard: FC<ArticleCardProps> = ({
 
           </div>
 
-          {/* Redes sociales del creador (Visibles en todas las vistas con iconos claros) */}
+          {/* Redes sociales del creador (Visibles en todas las vistas con titulo 'Redes Sociales' y todos los iconos abajo) */}
           {hasSocials && (
-            <div className="mt-3 pt-2.5 border-t border-border/60 w-full flex items-center justify-start md:justify-center gap-2">
-              <span className="text-[10px] text-muted/70 font-semibold uppercase tracking-wider hidden md:block w-full text-center mb-1">
-                Redes
+            <div className="mt-3.5 pt-3 border-t border-border/70 w-full flex flex-col items-start md:items-center">
+              <span className="text-[11px] font-bold text-muted/90 uppercase tracking-wider mb-2 select-none">
+                Redes Sociales
               </span>
               <div className="flex items-center gap-2 flex-wrap">
                 {article.authorBuilderUrl && (
@@ -104,9 +104,9 @@ export const ArticleCard: FC<ArticleCardProps> = ({
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-8 h-8 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/25 flex items-center justify-center transition-transform hover:scale-110 shadow-sm"
-                    title="Perfil en AWS Builder Center"
+                    title="Perfil oficial en AWS Builder Center"
                   >
-                    <img src="/images/builder_center_icon.png" alt="Builder Center" className="w-4 h-4 object-contain" />
+                    <img src="/images/builder_center_icon.png" alt="AWS Builder Center" className="w-4 h-4 object-contain" />
                   </a>
                 )}
 
@@ -140,7 +140,7 @@ export const ArticleCard: FC<ArticleCardProps> = ({
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-8 h-8 rounded-xl bg-pink-500/10 hover:bg-pink-500/20 text-pink-400 border border-pink-500/25 flex items-center justify-center transition-transform hover:scale-110 shadow-sm"
-                    title="Perfil de Instagram"
+                    title="Perfil personal en Instagram"
                   >
                     <InstagramIcon className="w-4 h-4" />
                   </a>

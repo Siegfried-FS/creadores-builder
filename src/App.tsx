@@ -89,7 +89,10 @@ export function App() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        // Si la caché local es vieja (ej. no tiene githubUrl), forzamos INITIAL_ARTICLES
+        if (Array.isArray(parsed) && parsed.length > 0 && parsed[0]?.authorGithubUrl) {
+          return parsed;
+        }
       } catch {
         // ignore
       }
