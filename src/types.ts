@@ -13,34 +13,37 @@ export type AWSCategory =
 export interface CreatorProfile {
   id: string;
   name: string;
-  email: string;
+  bio?: string;
+  email?: string;
   builderHandle: string;
   builderUrl: string;
-  linkedinHandle?: string;
   linkedinUrl?: string;
-  instagramHandle?: string;
   instagramUrl?: string;
+  xUrl?: string;
   avatarUrl?: string;
 }
 
 export interface Article {
   id: string;
   title: string;
+  summary?: string;
   category: AWSCategory;
-  builderUrl: string;
-  linkedinPostUrl?: string;
+  // Enlaces del artículo y difusión
+  builderUrl: string;              // Enlace al artículo en AWS Builder Center
+  linkedinPostUrl?: string;        // Dónde lo posteó en LinkedIn
+  instagramPostUrl?: string;       // Dónde lo posteó en Instagram
+  xPostUrl?: string;               // Dónde lo posteó en X / Twitter
+  
+  // Datos del creador
   authorId: string;
   authorName: string;
-  authorBuilderHandle: string;
+  authorBio?: string;
   authorAvatarUrl?: string;
-  createdAt: string;
-  updatedAt?: string;
-  expiresAt?: string;
-  likesCount: number;
-}
+  authorBuilderUrl: string;
+  authorLinkedinUrl?: string;
+  authorInstagramUrl?: string;
+  authorXUrl?: string;
 
-export interface UserLike {
-  userId: string;
-  articleId: string;
-  likedAt: string;
+  createdAt: string;
+  likesCount: number;
 }
