@@ -66,6 +66,9 @@ export const ProfileModal: FC<ProfileModalProps> = ({
             <img
               src={currentUser.avatarUrl || '/images/mascot_opt.png'}
               alt={currentUser.name}
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = '/images/mascot_opt.png';
+              }}
               className="w-full h-full object-cover"
             />
           </div>

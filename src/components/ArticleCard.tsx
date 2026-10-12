@@ -42,6 +42,9 @@ export const ArticleCard: FC<ArticleCardProps> = ({
             <img
               src={article.authorAvatarUrl || '/images/mascot_opt.png'}
               alt={article.authorName}
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = '/images/mascot_opt.png';
+              }}
               className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover bg-purple-500/10 p-1 border-2 border-purple-500/30 shadow-sm"
               loading="lazy"
             />

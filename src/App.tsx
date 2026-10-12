@@ -243,6 +243,9 @@ export function App() {
                   <img
                     src={currentUser.avatarUrl || '/images/mascot_opt.png'}
                     alt={currentUser.name}
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = '/images/mascot_opt.png';
+                    }}
                     className="w-10 h-10 rounded-xl object-cover border border-purple-500/30"
                   />
                   <div>
@@ -398,9 +401,9 @@ export function App() {
       {/* ── PIE DE PÁGINA COMUNITARIO ── */}
       <footer className="border-t border-border mt-12 py-8 bg-surface/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted">
-          <div className="flex items-center gap-2">
-            <img src="/images/logo.svg" alt="AWSUG" className="w-4 h-4 object-contain" />
-            <span>AWS User Group Playa Vicente &middot; Creadores LATAM</span>
+          <div className="flex items-center gap-2.5">
+            <img src="/images/AWS_UG_Official_Authentic_Logo.png" alt="AWSUG" className="w-5 h-5 object-contain" />
+            <span className="font-medium text-ink">AWS User Group Playa Vicente &middot; Creadores LATAM</span>
           </div>
           
           <div className="flex items-center gap-4">

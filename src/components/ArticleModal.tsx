@@ -112,6 +112,9 @@ export const ArticleModal: FC<ArticleModalProps> = ({
           <img
             src={author.avatarUrl || '/images/mascot_opt.png'}
             alt={author.name}
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = '/images/mascot_opt.png';
+            }}
             className="w-9 h-9 rounded-full object-cover border border-purple-500/30"
           />
           <div className="min-w-0 flex-1">

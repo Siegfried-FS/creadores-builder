@@ -23,20 +23,20 @@ export const Navbar: FC<NavbarProps> = ({
     <header className="sticky top-0 z-40 w-full pt-2 pb-2 px-3 sm:px-6">
       <div className="max-w-6xl mx-auto rounded-2xl glass-pill px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-4">
         
-        {/* Identidad oficial: Logo SVG de AWSUG Playa Vicente */}
+        {/* Identidad oficial: Logo de AWSUG Playa Vicente */}
         <div className="flex items-center gap-3 min-w-0">
           <a
             href="https://awsugplayavicente.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2.5 group shrink-0"
+            className="flex items-center gap-3 group shrink-0"
             title="Ir al portal principal de AWSUG Playa Vicente"
           >
-            <div className="w-8 h-8 sm:w-9 sm:h-9 shrink-0 flex items-center justify-center rounded-xl bg-purple-500/10 border border-purple-500/20 group-hover:border-purple-500/50 transition-colors">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 shrink-0 flex items-center justify-center rounded-xl bg-purple-500/15 border border-purple-500/30 group-hover:border-purple-400 p-1 transition-all shadow-sm">
               <img
-                src="/images/logo.svg"
+                src="/images/AWS_UG_Official_Authentic_Logo.png"
                 alt="Logo AWSUG Playa Vicente"
-                className="w-5 h-5 sm:w-6 sm:h-6 object-contain group-hover:scale-110 transition-transform"
+                className="w-full h-full object-contain group-hover:scale-105 transition-transform"
               />
             </div>
 
@@ -82,7 +82,10 @@ export const Navbar: FC<NavbarProps> = ({
                 <img
                   src={currentUser.avatarUrl || '/images/mascot_opt.png'}
                   alt={currentUser.name}
-                  className="w-5 h-5 rounded-full object-cover border border-purple-500/40"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = '/images/mascot_opt.png';
+                  }}
+                  className="w-6 h-6 rounded-full object-cover border border-purple-500/40"
                 />
                 <span className="max-w-[100px] sm:max-w-[130px] truncate">
                   {currentUser.name}
