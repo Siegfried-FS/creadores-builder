@@ -266,6 +266,27 @@ export function App() {
     }
   };
 
+  // 🛡️ Derecho al olvido: Eliminar cuenta, sesión y todas las publicaciones del usuario
+  const handleDeleteAccount = async (userId: string) => {
+    // 1. Eliminar publicaciones del autor en DynamoDB
+    const userArticles = articles.filter((a) => a.authorId === userId);
+    for (const art of userArticles) {
+      deleteArticle(art.id, userId).catch(() => {});
+    }
+
+    // 2. Limpiar del estado y almacenamiento local
+    setArticles((prev) => prev.filter((a) => a.authorId !== userId));
+    localStorage.removeItem('creadores_active_user');
+    localStorage.removeItem(`creadores_likes_${userId}`);
+
+    // 3. Resetear sesión y cerrar modales
+    setMyLikedIds([]);
+    setCurrentUser(null);
+    setIsProfileModalOpen(false);
+
+    alert('Tu cuenta, checklist y publicaciones han sido eliminados correctamente del Hub.');
+  };
+
   // Filtrado reactivo
   const filteredArticles = useMemo(() => {
     return articles.filter((art) => {
@@ -592,6 +613,7 @@ export function App() {
               setEditingArticle(null);
               setIsArticleModalOpen(true);
             }}
+            onDeleteAccount={handleDeleteAccount}
           />
 
           <ArticleModal

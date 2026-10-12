@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, type FC, type FormEvent } from 'react';
-import { X, User, Edit3, PlusCircle, AtSign, Check, ExternalLink, Camera, Image as ImageIcon } from 'lucide-react';
+import { X, User, Edit3, PlusCircle, AtSign, Check, ExternalLink, Camera, Image as ImageIcon, Trash2, AlertTriangle } from 'lucide-react';
 import type { CreatorProfile } from '../types';
 import { formatBuilderUrl, formatLinkedInUrl, formatInstagramUrl, cleanUsername } from '../utils/sanitizer';
 
@@ -9,6 +9,7 @@ interface ProfileModalProps {
   currentUser: CreatorProfile;
   onUpdateUser: (updatedUser: CreatorProfile) => void;
   onOpenPublishArticle: () => void;
+  onDeleteAccount?: (userId: string) => void;
 }
 
 export const ProfileModal: FC<ProfileModalProps> = ({
@@ -17,6 +18,7 @@ export const ProfileModal: FC<ProfileModalProps> = ({
   currentUser,
   onUpdateUser,
   onOpenPublishArticle,
+  onDeleteAccount,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(currentUser.name);
@@ -26,6 +28,7 @@ export const ProfileModal: FC<ProfileModalProps> = ({
   const [linkedinUrl, setLinkedinUrl] = useState(currentUser.linkedinUrl || '');
   const [instagramUrl, setInstagramUrl] = useState(currentUser.instagramUrl || '');
   const [savedNotice, setSavedNotice] = useState(false);
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -38,6 +41,7 @@ export const ProfileModal: FC<ProfileModalProps> = ({
       setBuilderHandle(currentUser.builderHandle || '');
       setLinkedinUrl(currentUser.linkedinUrl || '');
       setInstagramUrl(currentUser.instagramUrl || '');
+      setIsConfirmingDelete(false);
     }
   }, [isOpen, currentUser]);
 
@@ -396,6 +400,63 @@ export const ProfileModal: FC<ProfileModalProps> = ({
             </div>
           )}
         </div>
+
+        {/* 🛡️ Privacidad & Derecho al Olvido (Eliminación de Cuenta) */}
+        {onDeleteAccount && (
+          <div className="mt-6 pt-5 border-t border-border">
+            {isConfirmingDelete ? (
+              <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/30 space-y-3 animate-fadeIn">
+                <div className="flex items-start gap-2.5">
+                  <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="text-xs font-bold text-red-400">
+                      ¿Confirmas la eliminación permanente de tu cuenta?
+                    </h4>
+                    <p className="text-[11px] text-muted leading-relaxed mt-1">
+                      Esta acción es irreversible: se borrarán tus datos de perfil, tu checklist de apoyos comunitarios y se retirarán todas tus publicaciones registradas en el Hub.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setIsConfirmingDelete(false)}
+                    className="px-3 py-1.5 rounded-xl border border-border text-xs text-muted hover:text-ink hover:bg-surface transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onDeleteAccount(currentUser.id)}
+                    className="px-3.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold flex items-center gap-1.5 transition-colors shadow-sm"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Sí, eliminar mi cuenta</span>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <h4 className="text-xs font-bold text-ink">Privacidad y Gestión de Datos</h4>
+                  <p className="text-[11px] text-muted">
+                    Derecho al olvido: elimina tu perfil y retira tus publicaciones.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsConfirmingDelete(true)}
+                  className="px-3 py-1.5 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 text-xs font-medium flex items-center gap-1.5 transition-colors shrink-0"
+                  title="Eliminar mi cuenta definitivamente"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Eliminar Cuenta</span>
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
       </div>
     </div>
