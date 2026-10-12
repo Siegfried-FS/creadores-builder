@@ -90,9 +90,10 @@ export function App() {
     localStorage.setItem('creadores_articles', JSON.stringify(articles));
   }, [articles]);
 
-  // ❤️ Artículos que el usuario actual ya apoyó (Checklist personal)
+  // ❤️ Artículos que el usuario actual ya apoyó (Checklist personal por cada creador)
   const [myLikedIds, setMyLikedIds] = useState<string[]>(() => {
-    const saved = localStorage.getItem('creadores_likes');
+    if (!currentUser) return [];
+    const saved = localStorage.getItem(`creadores_likes_${currentUser.id}`);
     if (saved) {
       try {
         return JSON.parse(saved);
@@ -103,9 +104,29 @@ export function App() {
     return [];
   });
 
+  // Cargar checklist individual cuando cambia el usuario logueado
   useEffect(() => {
-    localStorage.setItem('creadores_likes', JSON.stringify(myLikedIds));
-  }, [myLikedIds]);
+    if (currentUser) {
+      const saved = localStorage.getItem(`creadores_likes_${currentUser.id}`);
+      if (saved) {
+        try {
+          setMyLikedIds(JSON.parse(saved));
+          return;
+        } catch {
+          // ignore
+        }
+      }
+      setMyLikedIds([]);
+    } else {
+      setMyLikedIds([]);
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (currentUser) {
+      localStorage.setItem(`creadores_likes_${currentUser.id}`, JSON.stringify(myLikedIds));
+    }
+  }, [myLikedIds, currentUser]);
 
   // Filtros
   const [searchQuery, setSearchQuery] = useState('');
@@ -117,8 +138,13 @@ export function App() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isArticleModalOpen, setIsArticleModalOpen] = useState(false);
 
-  // Toggle de Apoyo
+  // Toggle de Apoyo (Solo para usuarios registrados para llevar control real y evitar spam)
   const handleToggleLike = (articleId: string) => {
+    if (!currentUser) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+
     const isLiked = myLikedIds.includes(articleId);
     if (isLiked) {
       setMyLikedIds((prev) => prev.filter((id) => id !== articleId));
