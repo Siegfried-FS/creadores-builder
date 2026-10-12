@@ -2,29 +2,75 @@ import { useState, useEffect, useMemo } from 'react';
 import { Navbar } from './components/Navbar';
 import { ArticleCard } from './components/ArticleCard';
 import { ArticleModal } from './components/ArticleModal';
-import type { Article, AWSCategory } from './types';
+import { AuthModal } from './components/AuthModal';
+import { ProfileModal } from './components/ProfileModal';
+import type { Article, AWSCategory, CreatorProfile } from './types';
 import { INITIAL_ARTICLES } from './data/initialData';
 import { AWS_CATEGORIES } from './data/categories';
-import { Search, Heart, Sparkles, PlusCircle } from 'lucide-react';
+import { Search, Sparkles, CheckCircle, UserPlus, BookOpen } from 'lucide-react';
 
 export function App() {
-  // Modo oscuro / claro
+  // 🌙 Modo Espectral / ☀️ Modo Diurno
   const [darkMode, setDarkMode] = useState<boolean>(() => {
-    return localStorage.getItem('theme') === 'dark' || 
-      (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    return localStorage.getItem('awsug_theme') !== 'light';
   });
 
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
+      document.documentElement.classList.remove('light');
+      localStorage.setItem('awsug_theme', 'dark');
     } else {
       document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
+      document.documentElement.classList.add('light');
+      localStorage.setItem('awsug_theme', 'light');
     }
   }, [darkMode]);
 
-  // Artículos persistidos
+  // 👤 Sesión de Usuario (Inicia como visitante si no hay guardada)
+  const [currentUser, setCurrentUser] = useState<CreatorProfile | null>(() => {
+    const saved = localStorage.getItem('creadores_active_user');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
+
+  const handleLoginSuccess = (user: CreatorProfile) => {
+    setCurrentUser(user);
+    localStorage.setItem('creadores_active_user', JSON.stringify(user));
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    localStorage.removeItem('creadores_active_user');
+  };
+
+  const handleUpdateUser = (updated: CreatorProfile) => {
+    setCurrentUser(updated);
+    localStorage.setItem('creadores_active_user', JSON.stringify(updated));
+    // Actualizar también en los artículos del usuario si cambió el nombre
+    setArticles((prev) =>
+      prev.map((art) =>
+        art.authorId === updated.id
+          ? {
+              ...art,
+              authorName: updated.name,
+              authorBio: updated.bio,
+              authorBuilderUrl: updated.builderUrl,
+              authorLinkedinUrl: updated.linkedinUrl,
+              authorInstagramUrl: updated.instagramUrl,
+            }
+          : art
+      )
+    );
+  };
+
+  // 📝 Artículos del Hub
   const [articles, setArticles] = useState<Article[]>(() => {
     const saved = localStorage.getItem('creadores_articles');
     if (saved) {
@@ -38,7 +84,11 @@ export function App() {
     return INITIAL_ARTICLES;
   });
 
-  // Lista de artículos que el usuario ya apoyó (Checklist To-Do mutuo)
+  useEffect(() => {
+    localStorage.setItem('creadores_articles', JSON.stringify(articles));
+  }, [articles]);
+
+  // ❤️ Artículos que el usuario actual ya apoyó (Checklist personal)
   const [myLikedIds, setMyLikedIds] = useState<string[]>(() => {
     const saved = localStorage.getItem('creadores_likes');
     if (saved) {
@@ -51,24 +101,21 @@ export function App() {
     return [];
   });
 
+  useEffect(() => {
+    localStorage.setItem('creadores_likes', JSON.stringify(myLikedIds));
+  }, [myLikedIds]);
+
   // Filtros
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'liked'>('all');
 
-  // Modal
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // Modales
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isArticleModalOpen, setIsArticleModalOpen] = useState(false);
 
-  // Guardar en localStorage
-  useEffect(() => {
-    localStorage.setItem('creadores_articles', JSON.stringify(articles));
-  }, [articles]);
-
-  useEffect(() => {
-    localStorage.setItem('creadores_likes', JSON.stringify(myLikedIds));
-  }, [myLikedIds]);
-
-  // Toggle de Apoyo / Like
+  // Toggle de Apoyo
   const handleToggleLike = (articleId: string) => {
     const isLiked = myLikedIds.includes(articleId);
     if (isLiked) {
@@ -88,8 +135,10 @@ export function App() {
     }
   };
 
-  // Crear nuevo artículo
+  // Agregar artículo (desde el perfil)
   const handleAddArticle = (articleData: Partial<Article>) => {
+    if (!currentUser) return;
+
     const newArticle: Article = {
       id: `art_${Date.now()}`,
       title: articleData.title || '',
@@ -98,231 +147,316 @@ export function App() {
       builderUrl: articleData.builderUrl || '',
       linkedinPostUrl: articleData.linkedinPostUrl,
       instagramPostUrl: articleData.instagramPostUrl,
-      xPostUrl: articleData.xPostUrl,
-      authorId: `usr_${Date.now()}`,
-      authorName: articleData.authorName || 'Creador de la Comunidad',
-      authorBio: articleData.authorBio || 'Miembro del Bootcamp AWS Builder Center',
-      authorAvatarUrl: articleData.authorAvatarUrl || '/images/mascot_opt.png',
-      authorBuilderUrl: articleData.authorBuilderUrl || articleData.builderUrl || '',
-      authorLinkedinUrl: articleData.authorLinkedinUrl,
-      authorInstagramUrl: articleData.authorInstagramUrl,
-      authorXUrl: articleData.authorXUrl,
+      authorId: currentUser.id,
+      authorName: currentUser.name,
+      authorBio: currentUser.bio,
+      authorAvatarUrl: currentUser.avatarUrl || '/images/mascot_opt.png',
+      authorBuilderUrl: currentUser.builderUrl,
+      authorLinkedinUrl: currentUser.linkedinUrl,
+      authorInstagramUrl: currentUser.instagramUrl,
       createdAt: new Date().toISOString(),
-      likesCount: 0
+      likesCount: 0,
     };
 
     setArticles((prev) => [newArticle, ...prev]);
   };
 
-  // Eliminar artículo
   const handleDeleteArticle = (articleId: string) => {
-    if (confirm('¿Deseas retirar este artículo de la lista?')) {
+    if (confirm('¿Deseas retirar esta publicación del Hub?')) {
       setArticles((prev) => prev.filter((a) => a.id !== articleId));
-      setMyLikedIds((prev) => prev.filter((id) => id !== articleId));
     }
   };
 
-  // Artículos filtrados
+  // Filtrado reactivo
   const filteredArticles = useMemo(() => {
     return articles.filter((art) => {
-      // Texto
-      const matchesText =
-        art.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        art.authorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (art.summary && art.summary.toLowerCase().includes(searchQuery.toLowerCase()));
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchesTitle = art.title.toLowerCase().includes(q);
+        const matchesSummary = art.summary?.toLowerCase().includes(q);
+        const matchesAuthor = art.authorName.toLowerCase().includes(q);
+        if (!matchesTitle && !matchesSummary && !matchesAuthor) return false;
+      }
 
-      // Categoría
-      const matchesCat = selectedCategory === 'all' || art.category === selectedCategory;
+      if (selectedCategory !== 'all' && art.category !== selectedCategory) {
+        return false;
+      }
 
-      // Estado de apoyo
       const isLiked = myLikedIds.includes(art.id);
-      const matchesStatus =
-        statusFilter === 'all' ||
-        (statusFilter === 'liked' && isLiked) ||
-        (statusFilter === 'pending' && !isLiked);
+      if (statusFilter === 'pending' && isLiked) return false;
+      if (statusFilter === 'liked' && !isLiked) return false;
 
-      return matchesText && matchesCat && matchesStatus;
+      return true;
     });
   }, [articles, searchQuery, selectedCategory, statusFilter, myLikedIds]);
 
-  const total = articles.length;
-  const liked = myLikedIds.filter((id) => articles.some((a) => a.id === id)).length;
-  const percent = total > 0 ? Math.round((liked / total) * 100) : 0;
+  const stats = useMemo(() => {
+    const total = articles.length;
+    const supported = myLikedIds.filter((id) => articles.some((a) => a.id === id)).length;
+    const pending = Math.max(0, total - supported);
+    return { total, supported, pending };
+  }, [articles, myLikedIds]);
 
   return (
-    <div className="min-h-screen bg-background text-ink flex flex-col font-sans transition-colors duration-200">
-      
-      {/* 1. Barra de Navegación con identidad de Playa Vicente */}
+    <div className="min-h-screen bg-background text-ink flex flex-col transition-colors duration-300">
+      {/* 🔮 Barra superior espectral del UG Playa Vicente */}
+      <div className="spectrum-bar" />
+
+      {/* 🧭 Navbar Cápsula Flotante Oficial */}
       <Navbar
         darkMode={darkMode}
         onToggleDarkMode={() => setDarkMode(!darkMode)}
-        onOpenNewArticle={() => setIsModalOpen(true)}
+        currentUser={currentUser}
+        onOpenAuth={() => setIsAuthModalOpen(true)}
+        onOpenProfile={() => setIsProfileModalOpen(true)}
+        onLogout={handleLogout}
       />
 
-      {/* 2. Hero Section: Directo y sin florituras genéricas */}
-      <section className="relative border-b border-border bg-gradient-to-b from-surface/50 to-background pt-10 pb-8 px-4 sm:px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-bold uppercase tracking-wider mb-4 border border-amber-500/20">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Comunidad Oficial &bull; AWS User Group Playa Vicente</span>
+      {/* 🌟 Contenido Principal */}
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 sm:space-y-8">
+        
+        {/* ── HERO BANNER DEL HUB DE CREADORES ── */}
+        <section className="relative rounded-3xl p-6 sm:p-10 border border-border glass-card overflow-hidden">
+          {/* Luz de fondo ambiental púrpura */}
+          <div className="absolute -top-24 -right-24 w-72 h-72 bg-purple-600/15 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="relative z-10 max-w-3xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full badge-accent text-xs font-bold mb-3 sm:mb-4">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Bootcamp Creadores de Contenido LATAM</span>
+            </div>
+
+            <h1 className="font-display font-extrabold text-2xl sm:text-4xl text-ink tracking-tight leading-tight mb-3">
+              Hub Comunitario de Creadores{' '}
+              <span className="spectrum-text">AWS Builder Center</span>
+            </h1>
+
+            <p className="text-xs sm:text-sm text-muted leading-relaxed mb-6">
+              Lee, apoya y amplifica los artículos técnicos de la comunidad. Marca en tu checklist los que ya apoyaste en AWS Builder Center y LinkedIn para no perder el hilo.
+            </p>
+
+            {/* Aviso de acción según estado de sesión */}
+            {currentUser ? (
+              <div className="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <img
+                    src={currentUser.avatarUrl || '/images/mascot_opt.png'}
+                    alt={currentUser.name}
+                    className="w-10 h-10 rounded-xl object-cover border border-purple-500/30"
+                  />
+                  <div>
+                    <p className="text-xs font-bold text-ink">
+                      Hola, {currentUser.name}
+                    </p>
+                    <p className="text-[11px] text-muted">
+                      Gestiona tus redes o suma un nuevo artículo desde tu perfil.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setIsProfileModalOpen(true)}
+                  className="btn-primary-gradient px-4 py-2 rounded-xl text-xs font-bold shrink-0 self-start sm:self-auto"
+                >
+                  Mi Perfil y Publicaciones
+                </button>
+              </div>
+            ) : (
+              <div className="p-3.5 rounded-2xl bg-surface border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center shrink-0">
+                    <UserPlus className="w-5 h-5 text-purple-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-ink">
+                      ¿Participas en el Bootcamp de Creadores?
+                    </p>
+                    <p className="text-[11px] text-muted">
+                      Inicia sesión con tu perfil para registrar tus artículos de AWS Builder Center.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setIsAuthModalOpen(true)}
+                  className="btn-primary-gradient px-4 py-2 rounded-xl text-xs font-bold shrink-0 self-start sm:self-auto"
+                >
+                  Iniciar Sesión
+                </button>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* ── PANEL DE FILTROS & CHECKLIST TO-DO ── */}
+        <section className="space-y-3">
+          
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            {/* Buscador */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3.5 top-3 w-4 h-4 text-muted" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Buscar por título, tema o autor..."
+                className="w-full bg-surface border border-border rounded-xl pl-10 pr-4 py-2.5 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-purple-500 transition-colors shadow-sm"
+              />
+            </div>
+
+            {/* Selector de categoría */}
+            <div className="sm:w-64">
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="w-full bg-surface border border-border rounded-xl px-3 py-2.5 text-xs text-ink focus:outline-none focus:border-purple-500 transition-colors shadow-sm"
+              >
+                <option value="all">Todas las Categorías ({articles.length})</option>
+                {AWS_CATEGORIES.map((cat) => (
+                  <option key={cat.name} value={cat.name}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-            <div>
-              <h1 className="font-display font-black text-2xl sm:text-4xl text-ink tracking-tight leading-tight">
-                Hub de Creadores <span className="text-amber-500">AWS Builder Center</span>
-              </h1>
-              <p className="text-sm sm:text-base text-muted max-w-2xl mt-2 leading-relaxed">
-                Plataforma de apoyo mutuo para miembros del Bootcamp de Creadores y la comunidad. Conoce a cada builder, lee sus artículos técnicos y apoya las publicaciones donde los difundió.
+          {/* Filtros de Apoyo Comunitario (To-Do) */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+            <button
+              onClick={() => setStatusFilter('all')}
+              className={`px-3 py-1.5 rounded-lg font-semibold transition-all whitespace-nowrap ${
+                statusFilter === 'all'
+                  ? 'bg-purple-500 text-white shadow-sm'
+                  : 'bg-surface border border-border text-muted hover:text-ink'
+              }`}
+            >
+              Todos ({stats.total})
+            </button>
+
+            <button
+              onClick={() => setStatusFilter('pending')}
+              className={`px-3 py-1.5 rounded-lg font-semibold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                statusFilter === 'pending'
+                  ? 'bg-purple-500 text-white shadow-sm'
+                  : 'bg-surface border border-border text-muted hover:text-ink'
+              }`}
+            >
+              <span>Pendientes de apoyar</span>
+              <span className="px-1.5 py-0.2 rounded-full bg-purple-500/20 text-[10px] font-mono">
+                {stats.pending}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setStatusFilter('liked')}
+              className={`px-3 py-1.5 rounded-lg font-semibold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                statusFilter === 'liked'
+                  ? 'bg-purple-500 text-white shadow-sm'
+                  : 'bg-surface border border-border text-muted hover:text-ink'
+              }`}
+            >
+              <CheckCircle className="w-3.5 h-3.5" />
+              <span>Ya apoyados</span>
+              <span className="px-1.5 py-0.2 rounded-full bg-purple-500/20 text-[10px] font-mono">
+                {stats.supported}
+              </span>
+            </button>
+          </div>
+
+        </section>
+
+        {/* ── LISTA DE ARTÍCULOS ── */}
+        <section className="space-y-4">
+          {filteredArticles.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border p-12 text-center bg-surface/50">
+              <BookOpen className="w-8 h-8 text-muted mx-auto mb-2 opacity-50" />
+              <p className="text-sm font-semibold text-ink">
+                No se encontraron publicaciones con estos filtros.
+              </p>
+              <p className="text-xs text-muted mt-1">
+                Prueba ajustando el término de búsqueda o la categoría seleccionada.
               </p>
             </div>
-
-            {/* Barra de progreso de lectura y apoyo To-Do */}
-            <div className="w-full lg:w-80 shrink-0 bg-surface border border-border rounded-2xl p-4 shadow-sm">
-              <div className="flex items-center justify-between text-xs mb-2">
-                <span className="font-semibold text-ink flex items-center gap-1.5">
-                  <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
-                  Tu apoyo comunitario
-                </span>
-                <span className="font-mono text-amber-500 font-bold">{liked} de {total} ({percent}%)</span>
-              </div>
-              <div className="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
-                <div
-                  className="bg-amber-500 h-full transition-all duration-300 rounded-full"
-                  style={{ width: `${percent}%` }}
-                />
-              </div>
-              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/60 text-[11px]">
-                <button
-                  onClick={() => setStatusFilter('all')}
-                  className={`px-2 py-0.5 rounded-md font-medium transition-colors ${
-                    statusFilter === 'all' ? 'bg-amber-500/15 text-amber-500 font-bold' : 'text-muted hover:text-ink'
-                  }`}
-                >
-                  Todos ({total})
-                </button>
-                <button
-                  onClick={() => setStatusFilter('pending')}
-                  className={`px-2 py-0.5 rounded-md font-medium transition-colors ${
-                    statusFilter === 'pending' ? 'bg-amber-500/15 text-amber-500 font-bold' : 'text-muted hover:text-ink'
-                  }`}
-                >
-                  Pendientes ({total - liked})
-                </button>
-                <button
-                  onClick={() => setStatusFilter('liked')}
-                  className={`px-2 py-0.5 rounded-md font-medium transition-colors ${
-                    statusFilter === 'liked' ? 'bg-emerald-500/15 text-emerald-500 font-bold' : 'text-muted hover:text-ink'
-                  }`}
-                >
-                  Apoyados ({liked})
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. Filtros y Búsqueda */}
-      <section className="max-w-6xl w-full mx-auto px-4 sm:px-6 pt-6 pb-2">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          {/* Buscador */}
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 text-muted absolute left-3.5 top-3" />
-            <input
-              type="text"
-              placeholder="Buscar por creador, tema o título..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full text-sm pl-10 pr-4 py-2 rounded-xl border border-border bg-surface text-ink placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
-            />
-          </div>
-
-          {/* Selector de Categorías Oficiales */}
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="text-xs sm:text-sm px-3 py-2 rounded-xl border border-border bg-surface text-ink focus:outline-none focus:ring-2 focus:ring-amber-500/40"
-          >
-            <option value="all">Todas las categorías de AWS</option>
-            {AWS_CATEGORIES.map((cat) => (
-              <option key={cat.name} value={cat.name}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      </section>
-
-      {/* 4. Lista Principal de Creadores y sus Artículos (Mobile-First) */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6">
-        {filteredArticles.length > 0 ? (
-          <div className="space-y-4 sm:space-y-5">
-            {filteredArticles.map((article) => (
+          ) : (
+            filteredArticles.map((article) => (
               <ArticleCard
                 key={article.id}
                 article={article}
                 isLikedByMe={myLikedIds.includes(article.id)}
                 onToggleLike={handleToggleLike}
                 onDelete={handleDeleteArticle}
+                canDelete={currentUser ? currentUser.id === article.authorId : false}
               />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-16 px-4 bg-surface rounded-2xl border border-border">
-            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center mx-auto mb-3">
-              <PlusCircle className="w-6 h-6" />
-            </div>
-            <h3 className="font-display font-bold text-lg text-ink">
-              No se encontraron artículos con ese filtro
-            </h3>
-            <p className="text-xs sm:text-sm text-muted max-w-md mx-auto mt-1 mb-5">
-              Prueba cambiando la búsqueda o sé el primero en sumar un nuevo artículo de la comunidad.
-            </p>
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl transition-all"
-            >
-              <PlusCircle className="w-4 h-4" />
-              Sumar mi artículo
-            </button>
-          </div>
-        )}
+            ))
+          )}
+        </section>
+
       </main>
 
-      {/* 5. Footer con enlaces oficiales de AWS UG Playa Vicente */}
-      <footer className="border-t border-border bg-surface/50 py-8 px-4 sm:px-6 mt-12 text-center text-xs text-muted">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      {/* ── PIE DE PÁGINA COMUNITARIO ── */}
+      <footer className="border-t border-border mt-12 py-8 bg-surface/50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted">
           <div className="flex items-center gap-2">
-            <img src="/images/mascot_opt.png" alt="Mascota" className="w-6 h-6 object-contain" />
-            <span className="font-display font-bold text-ink">AWS User Group Playa Vicente</span>
-            <span>&bull;</span>
-            <span>Bootcamp Creadores LATAM</span>
+            <img src="/images/logo.svg" alt="AWSUG" className="w-4 h-4 object-contain" />
+            <span>AWS User Group Playa Vicente &middot; Creadores LATAM</span>
           </div>
-
-          <div className="flex items-center gap-4 text-xs font-medium">
-            <a href="https://awsugplayavicente.com" target="_blank" rel="noopener noreferrer" className="hover:text-amber-500 transition-colors">
-              Sitio Oficial
+          
+          <div className="flex items-center gap-4">
+            <a
+              href="https://awsugplayavicente.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-purple-400 transition-colors"
+            >
+              Sitio Oficial UG
             </a>
-            <a href="https://www.meetup.com/aws-user-group-playa-vicente" target="_blank" rel="noopener noreferrer" className="hover:text-amber-500 transition-colors">
-              Meetup
+            <a
+              href="https://t.me/AUGPlayaVicente"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-purple-400 transition-colors"
+            >
+              Telegram
             </a>
-            <a href="https://chat.whatsapp.com/LRSCG0GdTwY8datTlsNGXE" target="_blank" rel="noopener noreferrer" className="hover:text-amber-500 transition-colors">
-              Comunidad WhatsApp
-            </a>
-            <a href="https://www.linkedin.com/company/111588988" target="_blank" rel="noopener noreferrer" className="hover:text-amber-500 transition-colors">
-              LinkedIn
+            <a
+              href="https://chat.whatsapp.com/KXQYW7V00q12cSoeijob4h"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-purple-400 transition-colors"
+            >
+              WhatsApp
             </a>
           </div>
         </div>
       </footer>
 
-      {/* Modal para sumar artículos */}
-      <ArticleModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleAddArticle}
+      {/* ── MODALES ── */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onLoginSuccess={handleLoginSuccess}
       />
+
+      {currentUser && (
+        <>
+          <ProfileModal
+            isOpen={isProfileModalOpen}
+            onClose={() => setIsProfileModalOpen(false)}
+            currentUser={currentUser}
+            onUpdateUser={handleUpdateUser}
+            onOpenPublishArticle={() => setIsArticleModalOpen(true)}
+          />
+
+          <ArticleModal
+            isOpen={isArticleModalOpen}
+            onClose={() => setIsArticleModalOpen(false)}
+            author={currentUser}
+            onSubmit={handleAddArticle}
+          />
+        </>
+      )}
 
     </div>
   );

@@ -1,13 +1,13 @@
 import type { FC } from 'react';
 import { ExternalLink, Heart, Globe, Share2, Trash2 } from 'lucide-react';
 import type { Article } from '../types';
-import { getCategoryMeta } from '../data/categories';
 
 interface ArticleCardProps {
   article: Article;
   isLikedByMe: boolean;
   onToggleLike: (articleId: string) => void;
   onDelete?: (articleId: string) => void;
+  canDelete?: boolean;
 }
 
 const LinkedinIcon = ({ className }: { className?: string }) => (
@@ -26,14 +26,13 @@ export const ArticleCard: FC<ArticleCardProps> = ({
   article,
   isLikedByMe,
   onToggleLike,
-  onDelete
+  onDelete,
+  canDelete = false,
 }) => {
-  const meta = getCategoryMeta(article.category);
-
   return (
-    <article className="group relative rounded-2xl border border-border bg-surface shadow-[var(--card-shadow)] hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-200 overflow-hidden">
-      {/* Barra superior de acento con color temático de la categoría de AWS */}
-      <div className="h-1 w-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600" />
+    <article className="group relative rounded-2xl border border-border bg-surface glass-card transition-all duration-300 overflow-hidden">
+      {/* Barra superior espectral del UG */}
+      <div className="h-1 w-full bg-gradient-to-r from-purple-700 via-purple-500 to-indigo-500" />
 
       <div className="p-5 sm:p-6 flex flex-col md:flex-row gap-6 items-start">
         
@@ -43,10 +42,13 @@ export const ArticleCard: FC<ArticleCardProps> = ({
             <img
               src={article.authorAvatarUrl || '/images/mascot_opt.png'}
               alt={article.authorName}
-              className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover bg-slate-100 dark:bg-slate-800 p-1 border-2 border-border shadow-sm"
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover bg-purple-500/10 p-1 border-2 border-purple-500/30 shadow-sm"
               loading="lazy"
             />
-            <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 ring-2 ring-surface" title="Creador activo" />
+            <span
+              className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-purple-500 ring-2 ring-surface"
+              title="Creador verificado"
+            />
           </div>
 
           <div className="flex-1 min-w-0">
@@ -59,14 +61,14 @@ export const ArticleCard: FC<ArticleCardProps> = ({
               </p>
             )}
 
-            {/* Redes sociales del creador para conectar con él */}
+            {/* Redes sociales del creador */}
             <div className="flex items-center gap-2 mt-3 flex-wrap">
               {article.authorBuilderUrl && (
                 <a
                   href={article.authorBuilderUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 hover:bg-orange-500/20 font-medium transition-colors"
+                  className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 font-medium transition-colors"
                   title="Perfil en AWS Builder Center"
                 >
                   <Globe className="w-3.5 h-3.5" />
@@ -79,7 +81,7 @@ export const ArticleCard: FC<ArticleCardProps> = ({
                   href={article.authorLinkedinUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 font-medium transition-colors"
+                  className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 font-medium transition-colors"
                   title="Perfil en LinkedIn"
                 >
                   <LinkedinIcon className="w-3.5 h-3.5" />
@@ -92,7 +94,7 @@ export const ArticleCard: FC<ArticleCardProps> = ({
                   href={article.authorInstagramUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-500/20 font-medium transition-colors"
+                  className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-pink-500/10 text-pink-400 hover:bg-pink-500/20 font-medium transition-colors"
                   title="Perfil en Instagram"
                 >
                   <InstagramIcon className="w-3.5 h-3.5" />
@@ -108,15 +110,15 @@ export const ArticleCard: FC<ArticleCardProps> = ({
           <div>
             {/* Categoría y botón borrar opcional */}
             <div className="flex items-center justify-between gap-2 mb-2.5">
-              <span className={`inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-md border ${meta.badgeBg} ${meta.badgeColor} ${meta.borderCol}`}>
+              <span className="inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-md badge-accent">
                 {article.category}
               </span>
               
-              {onDelete && (
+              {canDelete && onDelete && (
                 <button
                   onClick={() => onDelete(article.id)}
-                  className="text-muted hover:text-red-500 p-1 rounded transition-colors"
-                  title="Eliminar artículo"
+                  className="text-muted hover:text-red-400 p-1 rounded transition-colors"
+                  title="Retirar artículo"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -124,7 +126,7 @@ export const ArticleCard: FC<ArticleCardProps> = ({
             </div>
 
             {/* Título del artículo */}
-            <h2 className="font-display font-bold text-lg sm:text-xl text-ink leading-snug group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+            <h2 className="font-display font-bold text-lg sm:text-xl text-ink leading-snug group-hover:text-purple-400 transition-colors">
               <a href={article.builderUrl} target="_blank" rel="noopener noreferrer">
                 {article.title}
               </a>
@@ -138,13 +140,13 @@ export const ArticleCard: FC<ArticleCardProps> = ({
             )}
           </div>
 
-          {/* Dónde se posteó + Botón de apoyo comunitario */}
+          {/* Dónde se difundió + Botón de apoyo comunitario */}
           <div className="mt-5 pt-4 border-t border-border flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             {/* Enlaces de difusión */}
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs text-muted font-medium flex items-center gap-1">
-                <Share2 className="w-3.5 h-3.5" />
-                Difundido en:
+                <Share2 className="w-3.5 h-3.5 text-purple-400" />
+                Difundido:
               </span>
 
               {article.builderUrl && (
@@ -152,9 +154,9 @@ export const ArticleCard: FC<ArticleCardProps> = ({
                   href={article.builderUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 hover:bg-amber-400 transition-colors shadow-sm"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg btn-primary-gradient shadow-sm"
                 >
-                  <span>Leer artículo</span>
+                  <span>Leer en Builder</span>
                   <ExternalLink className="w-3.5 h-3.5" />
                 </a>
               )}
@@ -166,7 +168,7 @@ export const ArticleCard: FC<ArticleCardProps> = ({
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-border bg-surface-hover hover:border-blue-500/50 text-ink transition-colors"
                 >
-                  <LinkedinIcon className="w-3.5 h-3.5 text-blue-500" />
+                  <LinkedinIcon className="w-3.5 h-3.5 text-blue-400" />
                   <span>Post LinkedIn</span>
                 </a>
               )}
@@ -178,22 +180,22 @@ export const ArticleCard: FC<ArticleCardProps> = ({
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-border bg-surface-hover hover:border-pink-500/50 text-ink transition-colors"
                 >
-                  <InstagramIcon className="w-3.5 h-3.5 text-pink-500" />
+                  <InstagramIcon className="w-3.5 h-3.5 text-pink-400" />
                   <span>Post IG</span>
                 </a>
               )}
             </div>
 
-            {/* Botón de apoyo To-Do mutuo */}
+            {/* Botón de apoyo mutuo To-Do */}
             <button
               onClick={() => onToggleLike(article.id)}
               className={`inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
                 isLikedByMe
-                  ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30'
-                  : 'bg-surface border border-border text-muted hover:text-amber-500 hover:border-amber-500/40 hover:bg-surface-hover'
+                  ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40 shadow-sm'
+                  : 'bg-surface border border-border text-muted hover:text-purple-400 hover:border-purple-500/30 hover:bg-surface-hover'
               }`}
             >
-              <Heart className={`w-4 h-4 ${isLikedByMe ? 'fill-emerald-500 text-emerald-500' : ''}`} />
+              <Heart className={`w-4 h-4 ${isLikedByMe ? 'fill-purple-400 text-purple-400' : ''}`} />
               <span>{isLikedByMe ? '¡Ya apoyé!' : 'Dar apoyo'}</span>
               <span className="ml-0.5 px-1.5 py-0.5 rounded-md bg-surface text-[11px] font-mono border border-border">
                 {article.likesCount}

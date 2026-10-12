@@ -2,28 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #f8fafc;
+/* ☀️ 1. Tema Diurno (Light) */
+:root, html.light {
+  --background: #ffffff;
   --surface: #ffffff;
-  --surface-hover: #f1f5f9;
-  --border-color: #e2e8f0;
+  --surface-glass: rgba(255, 255, 255, 0.92);
+  --surface-hover: #f8fafc;
   --ink: #0f172a;
   --muted: #475569;
-  --accent: #ff9900;
-  --accent-dark: #ec7211;
-  --card-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+  --border-color: #e2e8f0;
+  --accent: #7c3aed;
+  --accent-dark: #6d28d9;
+  --accent-light: rgba(124, 58, 237, 0.08);
+  --gradient-btn: linear-gradient(135deg, #7c3aed, #9333ea);
+  --gradient-text: linear-gradient(135deg, #581c87, #7c3aed, #9333ea);
+  --spectrum-bar: linear-gradient(90deg, #581c87, #7c3aed, #9333ea, #38bdf8);
+  --card-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+  --card-shadow-hover: 0 20px 40px rgba(124, 58, 237, 0.12);
 }
 
-.dark {
+/* 🌙 2. Tema Espectral (Dark — Púrpura Cósmico Espacial como AWSUG Playa Vicente) */
+.dark, html.dark {
   --background: #080c16;
   --surface: #10172a;
+  --surface-glass: rgba(16, 23, 42, 0.9);
   --surface-hover: #1b253b;
+  --ink: #ffffff;
+  --muted: #cbd5e1;
   --border-color: #1e293b;
-  --ink: #f8fafc;
-  --muted: #94a3b8;
-  --accent: #ff9900;
-  --accent-dark: #ec7211;
-  --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.4);
+  --accent: #a855f7;
+  --accent-dark: #7c3aed;
+  --accent-light: rgba(168, 85, 247, 0.15);
+  --gradient-btn: linear-gradient(135deg, #7c3aed, #a855f7);
+  --gradient-text: linear-gradient(135deg, #e9d5ff, #c084fc, #a855f7);
+  --spectrum-bar: linear-gradient(90deg, #5b21b6, #7c3aed, #a855f7, #60a5fa);
+  --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  --card-shadow-hover: 0 20px 45px rgba(168, 85, 247, 0.3);
 }
 
 body {
@@ -32,8 +46,77 @@ body {
   color: var(--ink);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
 }
 
 h1, h2, h3, h4, .font-display {
   font-family: 'Space Grotesk', system-ui, sans-serif;
+}
+
+/* Barra superior espectral del UG */
+.spectrum-bar {
+  height: 3px;
+  width: 100%;
+  background: var(--spectrum-bar);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  opacity: 0.9;
+}
+
+/* Navbar cápsula de vidrio flotante */
+.glass-pill {
+  background-color: var(--surface-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+}
+
+/* Tarjeta de superficie con micro-interacción */
+.glass-card {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--card-shadow);
+  transition: all 0.25s ease;
+}
+.glass-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--card-shadow-hover);
+}
+
+/* Texto degradado temático */
+.spectrum-text {
+  background: var(--gradient-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Botón primario de gradiente púrpura */
+.btn-primary-gradient {
+  background: var(--gradient-btn);
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.25);
+  transition: all 0.2s ease;
+}
+.btn-primary-gradient:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(168, 85, 247, 0.35);
+}
+
+/* Badges temáticos */
+.badge-accent {
+  background-color: var(--accent-light);
+  color: var(--accent);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+.badge-muted {
+  background-color: var(--surface-hover);
+  color: var(--muted);
+  border: 1px solid var(--border-color);
 }
