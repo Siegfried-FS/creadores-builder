@@ -8,6 +8,7 @@ import type { Article, AWSCategory, CreatorProfile } from './types';
 import { INITIAL_ARTICLES } from './data/initialData';
 import { AWS_CATEGORIES } from './data/categories';
 import { Search, Sparkles, CheckCircle, UserPlus, BookOpen, PlusCircle } from 'lucide-react';
+import { ConsoleSecurity, checkInputSecurity } from './components/ConsoleSecurity';
 
 export function App() {
   // 🌙 Modo Espectral / ☀️ Modo Diurno
@@ -53,7 +54,7 @@ export function App() {
   const handleUpdateUser = (updated: CreatorProfile) => {
     setCurrentUser(updated);
     localStorage.setItem('creadores_active_user', JSON.stringify(updated));
-    // Actualizar también en los artículos del usuario si cambió el nombre
+    // Actualizar también en los artículos del usuario si cambió el nombre, bio, avatar o redes
     setArticles((prev) =>
       prev.map((art) =>
         art.authorId === updated.id
@@ -61,6 +62,7 @@ export function App() {
               ...art,
               authorName: updated.name,
               authorBio: updated.bio,
+              authorAvatarUrl: updated.avatarUrl,
               authorBuilderUrl: updated.builderUrl,
               authorLinkedinUrl: updated.linkedinUrl,
               authorInstagramUrl: updated.instagramUrl,
@@ -225,6 +227,9 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-background text-ink flex flex-col transition-colors duration-300">
+      {/* 🔒 Auditoría y Mensaje de Seguridad en Consola (AWS UG Playa Vicente) */}
+      <ConsoleSecurity />
+
       {/* 🔮 Barra superior espectral del UG Playa Vicente */}
       <div className="spectrum-bar" />
 
@@ -350,7 +355,10 @@ export function App() {
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  checkInputSecurity(e.target.value);
+                }}
                 placeholder="Buscar por título, tema o autor..."
                 className="w-full bg-surface border border-border rounded-xl pl-10 pr-4 py-2.5 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-purple-500 transition-colors shadow-sm"
               />

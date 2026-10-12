@@ -1,4 +1,4 @@
-import { useState, useRef, type FC, type FormEvent } from 'react';
+import { useState, useEffect, useRef, type FC, type FormEvent } from 'react';
 import { X, User, Edit3, PlusCircle, AtSign, Check, ExternalLink, Camera, Image as ImageIcon } from 'lucide-react';
 import type { CreatorProfile } from '../types';
 import { formatBuilderUrl, formatLinkedInUrl, formatInstagramUrl, cleanUsername } from '../utils/sanitizer';
@@ -28,6 +28,18 @@ export const ProfileModal: FC<ProfileModalProps> = ({
   const [savedNotice, setSavedNotice] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Sincronizar estado cuando se abre el modal o cambia el usuario
+  useEffect(() => {
+    if (isOpen && currentUser) {
+      setName(currentUser.name || '');
+      setBio(currentUser.bio || '');
+      setAvatarUrl(currentUser.avatarUrl || '/images/mascot_opt.png');
+      setBuilderHandle(currentUser.builderHandle || '');
+      setLinkedinUrl(currentUser.linkedinUrl || '');
+      setInstagramUrl(currentUser.instagramUrl || '');
+    }
+  }, [isOpen, currentUser]);
 
   if (!isOpen) return null;
 

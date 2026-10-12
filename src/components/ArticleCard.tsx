@@ -29,82 +29,89 @@ export const ArticleCard: FC<ArticleCardProps> = ({
   onDelete,
   canDelete = false,
 }) => {
+  const hasSocials = Boolean(article.authorBuilderUrl || article.authorLinkedinUrl || article.authorInstagramUrl);
+
   return (
-    <article className="group relative rounded-2xl border border-border bg-surface glass-card transition-all duration-300 overflow-hidden">
+    <article className="group relative rounded-2xl border border-border bg-surface glass-card transition-all duration-300 overflow-hidden shadow-sm hover:shadow-md hover:border-purple-500/40">
       {/* Barra superior espectral del UG */}
       <div className="h-1 w-full bg-gradient-to-r from-purple-700 via-purple-500 to-indigo-500" />
 
-      <div className="p-5 sm:p-6 flex flex-col md:flex-row gap-6 items-start">
+      <div className="p-5 sm:p-6 flex flex-col md:flex-row gap-6 items-center md:items-stretch">
         
-        {/* ── COLUMNA 1: EL CREADOR (Completamente centrado) ── */}
-        <div className="w-full md:w-56 shrink-0 flex flex-col items-center justify-center text-center gap-2.5 pb-4 md:pb-0 border-b md:border-b-0 md:border-r border-border/80 md:pr-6">
-          <div className="relative shrink-0 mx-auto">
+        {/* ── COLUMNA 1: EL CREADOR (100% Centrado, Estético y Compacto) ── */}
+        <div className="w-full md:w-56 shrink-0 flex flex-col items-center justify-center text-center pb-5 md:pb-0 border-b md:border-b-0 md:border-r border-border/80 md:pr-6">
+          <div className="relative shrink-0 mx-auto mb-2.5">
             <img
               src={article.authorAvatarUrl || '/images/mascot_opt.png'}
               alt={article.authorName}
               onError={(e) => {
                 (e.currentTarget as HTMLImageElement).src = '/images/mascot_opt.png';
               }}
-              className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover bg-purple-500/10 p-1 border-2 border-purple-500/30 shadow-sm"
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover bg-purple-500/10 p-0.5 border-2 border-purple-500/30 shadow-sm"
               loading="lazy"
             />
             <span
               className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-purple-500 ring-2 ring-surface"
-              title="Creador verificado"
+              title="Creador verificado del Hub"
             />
           </div>
 
-          <div className="w-full">
-            <h3 className="font-display font-bold text-base sm:text-lg text-ink truncate">
+          <div className="w-full flex flex-col items-center">
+            <h3 className="font-display font-bold text-base sm:text-lg text-ink truncate max-w-full">
               {article.authorName}
             </h3>
             {article.authorBio && (
-              <p className="text-xs text-muted line-clamp-2 mt-0.5 leading-relaxed">
+              <p className="text-xs text-muted line-clamp-2 mt-1 leading-relaxed max-w-[200px]">
                 {article.authorBio}
               </p>
             )}
 
-            {/* Redes sociales del creador centradas */}
-            <div className="flex items-center justify-center gap-1.5 mt-3 flex-wrap">
-              {article.authorBuilderUrl && (
-                <a
-                  href={article.authorBuilderUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 font-medium transition-colors border border-purple-500/20"
-                  title="Perfil en AWS Builder Center"
-                >
-                  <img src="/images/builder_center_icon.png" alt="Builder" className="w-3.5 h-3.5 object-contain" />
-                  <span>Builder</span>
-                </a>
-              )}
+            {/* Redes sociales con leyenda sutil y solo iconos oficiales */}
+            {hasSocials && (
+              <div className="mt-3.5 pt-3 border-t border-border/60 w-full flex flex-col items-center">
+                <span className="text-[10px] text-muted/80 font-bold uppercase tracking-wider mb-2 select-none">
+                  Redes del Creador
+                </span>
+                
+                <div className="flex items-center justify-center gap-2">
+                  {article.authorBuilderUrl && (
+                    <a
+                      href={article.authorBuilderUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-8 h-8 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/25 flex items-center justify-center transition-transform hover:scale-110 shadow-sm"
+                      title="Perfil en AWS Builder Center"
+                    >
+                      <img src="/images/builder_center_icon.png" alt="Builder Center" className="w-4 h-4 object-contain" />
+                    </a>
+                  )}
 
-              {article.authorLinkedinUrl && (
-                <a
-                  href={article.authorLinkedinUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 font-medium transition-colors"
-                  title="Perfil en LinkedIn"
-                >
-                  <LinkedinIcon className="w-3.5 h-3.5" />
-                  <span>LinkedIn</span>
-                </a>
-              )}
+                  {article.authorLinkedinUrl && (
+                    <a
+                      href={article.authorLinkedinUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-8 h-8 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/25 flex items-center justify-center transition-transform hover:scale-110 shadow-sm"
+                      title="Perfil de LinkedIn"
+                    >
+                      <LinkedinIcon className="w-4 h-4" />
+                    </a>
+                  )}
 
-              {article.authorInstagramUrl && (
-                <a
-                  href={article.authorInstagramUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg bg-pink-500/10 text-pink-400 hover:bg-pink-500/20 font-medium transition-colors"
-                  title="Perfil en Instagram"
-                >
-                  <InstagramIcon className="w-3.5 h-3.5" />
-                  <span>IG</span>
-                </a>
-              )}
-            </div>
+                  {article.authorInstagramUrl && (
+                    <a
+                      href={article.authorInstagramUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-8 h-8 rounded-xl bg-pink-500/10 hover:bg-pink-500/20 text-pink-400 border border-pink-500/25 flex items-center justify-center transition-transform hover:scale-110 shadow-sm"
+                      title="Perfil de Instagram"
+                    >
+                      <InstagramIcon className="w-4 h-4" />
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -158,6 +165,7 @@ export const ArticleCard: FC<ArticleCardProps> = ({
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg btn-primary-gradient shadow-sm"
+                  title="Abrir artículo completo en AWS Builder Center"
                 >
                   <img src="/images/builder_center_icon.png" alt="Builder" className="w-3.5 h-3.5 object-contain" />
                   <span>Leer en Builder</span>
@@ -171,6 +179,7 @@ export const ArticleCard: FC<ArticleCardProps> = ({
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-border bg-surface-hover hover:border-blue-500/50 text-ink transition-colors"
+                  title="Ver post en LinkedIn para dar Like y Repost"
                 >
                   <LinkedinIcon className="w-3.5 h-3.5 text-blue-400" />
                   <span>Post LinkedIn</span>
@@ -183,6 +192,7 @@ export const ArticleCard: FC<ArticleCardProps> = ({
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-border bg-surface-hover hover:border-pink-500/50 text-ink transition-colors"
+                  title="Ver post en Instagram"
                 >
                   <InstagramIcon className="w-3.5 h-3.5 text-pink-400" />
                   <span>Post IG</span>
