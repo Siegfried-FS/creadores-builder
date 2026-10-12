@@ -42,8 +42,8 @@ export const ArticleCard: FC<ArticleCardProps> = ({
 
       <div className="p-5 sm:p-6 flex flex-col md:flex-row gap-6 items-center md:items-stretch">
         
-        {/* ── COLUMNA 1: EL CREADOR (100% Centrado, Estético y Compacto) ── */}
-        <div className="w-full md:w-56 shrink-0 flex flex-col items-center justify-center text-center pb-5 md:pb-0 border-b md:border-b-0 md:border-r border-border/80 md:pr-6">
+        {/* ── COLUMNA 1: EL CREADOR (100% Centrado, Amplio y Legible) ── */}
+        <div className="w-full md:w-64 shrink-0 flex flex-col items-center justify-center text-center pb-5 md:pb-0 border-b md:border-b-0 md:border-r border-border/80 md:pr-6">
           <div className="relative shrink-0 mx-auto mb-2.5">
             <img
               src={article.authorAvatarUrl || '/images/mascot_opt.png'}
@@ -60,12 +60,15 @@ export const ArticleCard: FC<ArticleCardProps> = ({
             />
           </div>
 
-          <div className="w-full flex flex-col items-center">
-            <h3 className="font-display font-bold text-base sm:text-lg text-ink truncate max-w-full">
+          <div className="w-full flex flex-col items-center px-1">
+            <h3 className="font-display font-bold text-base sm:text-lg text-ink break-words max-w-full">
               {article.authorName}
             </h3>
             {article.authorBio && (
-              <p className="text-xs text-muted line-clamp-2 mt-1 leading-relaxed max-w-[200px]">
+              <p
+                className="text-xs text-muted mt-1 leading-relaxed break-words text-center line-clamp-3 w-full"
+                title={article.authorBio}
+              >
                 {article.authorBio}
               </p>
             )}

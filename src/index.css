@@ -2,23 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ☀️ 1. Tema Diurno (Light) */
+/* ☀️ 1. Tema Diurno (Light — Cálido & Azul Pizarra con Alto Contraste) */
 :root, html.light {
-  --background: #ffffff;
+  --background: #f1f4f9;
   --surface: #ffffff;
-  --surface-glass: rgba(255, 255, 255, 0.92);
-  --surface-hover: #f8fafc;
+  --surface-glass: rgba(255, 255, 255, 0.95);
+  --surface-hover: #e8eef6;
   --ink: #0f172a;
-  --muted: #475569;
-  --border-color: #e2e8f0;
-  --accent: #7c3aed;
-  --accent-dark: #6d28d9;
-  --accent-light: rgba(124, 58, 237, 0.08);
-  --gradient-btn: linear-gradient(135deg, #7c3aed, #9333ea);
-  --gradient-text: linear-gradient(135deg, #581c87, #7c3aed, #9333ea);
-  --spectrum-bar: linear-gradient(90deg, #581c87, #7c3aed, #9333ea, #38bdf8);
-  --card-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
-  --card-shadow-hover: 0 20px 40px rgba(124, 58, 237, 0.12);
+  --muted: #334155;
+  --border-color: #cbd5e1;
+  --accent: #6d28d9;
+  --accent-dark: #581c87;
+  --accent-light: rgba(109, 40, 217, 0.1);
+  --gradient-btn: linear-gradient(135deg, #6d28d9, #8b5cf6);
+  --gradient-text: linear-gradient(135deg, #4c1d95, #6d28d9, #7c3aed);
+  --spectrum-bar: linear-gradient(90deg, #4c1d95, #6d28d9, #8b5cf6, #38bdf8);
+  --card-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+  --card-shadow-hover: 0 12px 28px rgba(109, 40, 217, 0.16);
 }
 
 /* 🌙 2. Tema Espectral (Dark — Púrpura Cósmico Espacial como AWSUG Playa Vicente) */
