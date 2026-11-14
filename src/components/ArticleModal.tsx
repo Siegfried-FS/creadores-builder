@@ -26,6 +26,8 @@ interface ArticleModalProps {
   author: CreatorProfile;
   initialArticle?: Article | null;
   onSubmit: (articleData: Partial<Article>) => void;
+  userCommentCount?: number;
+  userWishlistCount?: number;
 }
 
 export const ArticleModal: FC<ArticleModalProps> = ({
@@ -34,6 +36,8 @@ export const ArticleModal: FC<ArticleModalProps> = ({
   author,
   initialArticle,
   onSubmit,
+  userCommentCount = 0,
+  userWishlistCount = 0,
 }) => {
   const [itemType, setItemType] = useState<ItemType>('article');
   const [title, setTitle] = useState('');
@@ -43,6 +47,9 @@ export const ArticleModal: FC<ArticleModalProps> = ({
   const [linkedinPostUrl, setLinkedinPostUrl] = useState('');
   const [instagramPostUrl, setInstagramPostUrl] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
+
+  const nextCommentIndex = userCommentCount + 1;
+  const nextWishlistIndex = userWishlistCount + 1;
 
   useEffect(() => {
     if (isOpen) {
@@ -83,7 +90,7 @@ export const ArticleModal: FC<ArticleModalProps> = ({
 
     let finalTitle = title.trim();
 
-    // Validar y autogenerar títulos limpios para modos rápidos
+    // Validar y autogenerar títulos limpios para modos rápidos con conteo automático
     if (itemType === 'wishlist') {
       const wishValidation = isValidWishlistUrl(trimmedUrl);
       if (!wishValidation.isValid) {
@@ -91,17 +98,7 @@ export const ArticleModal: FC<ArticleModalProps> = ({
         return;
       }
       if (!finalTitle) {
-        try {
-          const pathSegments = new URL(trimmedUrl).pathname.split('/').filter(Boolean);
-          const slug = pathSegments[pathSegments.length - 1];
-          if (slug && slug !== 'wishlist') {
-            finalTitle = slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-          } else {
-            finalTitle = 'Propuesta en AWS Wishlist';
-          }
-        } catch {
-          finalTitle = 'Propuesta en AWS Wishlist';
-        }
+        finalTitle = `Propuesta #${nextWishlistIndex} de ${author.name}`;
       }
     } else if (itemType === 'comment') {
       const commentValidation = isValidCommentUrl(trimmedUrl);
@@ -110,7 +107,7 @@ export const ArticleModal: FC<ArticleModalProps> = ({
         return;
       }
       if (!finalTitle) {
-        finalTitle = `Comentario de ${author.name}`;
+        finalTitle = `Comentario #${nextCommentIndex} de ${author.name}`;
       }
     } else {
       const urlValidation = isValidAWSArticleUrl(trimmedUrl);
@@ -136,9 +133,9 @@ export const ArticleModal: FC<ArticleModalProps> = ({
     const finalSummary =
       summary.trim() ||
       (itemType === 'wishlist'
-        ? `Propuesta en la lista de deseos de AWS Builder Center compartida por ${author.name}.`
+        ? `Propuesta #${nextWishlistIndex} en la Wishlist de AWS Builder Center publicada por ${author.name}.`
         : itemType === 'comment'
-        ? `Comentario de ${author.name} en AWS Builder Center. Al abrir el enlace, dale like a su comentario (el apoyo real para sus misiones es el like en su comentario).`
+        ? `Comentario #${nextCommentIndex} publicado por ${author.name} en AWS Builder Center. Al abrir el enlace, busca el comentario de ${author.name} y dale like a su comentario (el apoyo real para sus misiones es el like en su comentario).`
         : '');
 
     // Enviar publicación heredando automáticamente los datos del perfil del autor
@@ -300,8 +297,10 @@ export const ArticleModal: FC<ArticleModalProps> = ({
                         : '¿Sobre qué tema es tu comentario? (Opcional)'}
                     </span>
                   </label>
-                  <span className="text-[10px] text-muted">
-                    {itemType === 'wishlist' ? 'Se autoextrae si lo omites' : `Por defecto: Comentario de ${author.name}`}
+                  <span className="text-[10px] text-muted font-mono">
+                    {itemType === 'wishlist'
+                      ? `Asignado: Propuesta #${nextWishlistIndex}`
+                      : `Asignado: Comentario #${nextCommentIndex}`}
                   </span>
                 </div>
                 <input
@@ -311,8 +310,8 @@ export const ArticleModal: FC<ArticleModalProps> = ({
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder={
                     itemType === 'wishlist'
-                      ? 'Ej. Offline SLM Bedrock model deployment on Greengrass'
-                      : 'Ej. Feedback en artículo sobre migraciones serverless'
+                      ? `Ej. Propuesta #${nextWishlistIndex} de ${author.name} (o escribe el tema)`
+                      : `Ej. Comentario #${nextCommentIndex} de ${author.name} (o escribe el tema)`
                   }
                   className={`w-full bg-surface border border-border rounded-xl px-3 py-2 text-xs text-ink placeholder:text-muted/60 transition-colors focus:outline-none ${
                     itemType === 'wishlist' ? 'focus:border-amber-500' : 'focus:border-emerald-500'

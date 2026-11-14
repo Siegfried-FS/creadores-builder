@@ -895,6 +895,8 @@ export function App() {
               author={currentUser}
               initialArticle={editingArticle}
               onSubmit={handleSaveArticle}
+              userCommentCount={articles.filter((a) => a.authorId === currentUser.id && a.itemType === 'comment').length}
+              userWishlistCount={articles.filter((a) => a.authorId === currentUser.id && a.itemType === 'wishlist').length}
             />
           </>
         )}
