@@ -1,5 +1,5 @@
-import type { FC } from 'react';
-import { ExternalLink, Heart, Share2, Trash2, Pencil, Calendar, Lightbulb, MessageSquare, FileText } from 'lucide-react';
+import { useState, type FC } from 'react';
+import { ExternalLink, Heart, Share2, Trash2, Pencil, Calendar, Lightbulb, MessageSquare, FileText, Copy } from 'lucide-react';
 import type { Article } from '../types';
 
 interface ArticleCardProps {
@@ -45,6 +45,29 @@ export const ArticleCard: FC<ArticleCardProps> = ({
 
   const itemType = article.itemType || 'article';
   const targetUrl = article.wishlistUrl || article.commentUrl || article.builderUrl;
+  const [copiedIguana, setCopiedIguana] = useState(false);
+
+  const handleCopyIguana = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText('🦎');
+      } else {
+        const input = document.createElement('textarea');
+        input.value = '🦎';
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+      }
+      setCopiedIguana(true);
+      setTimeout(() => setCopiedIguana(false), 2000);
+    } catch {
+      setCopiedIguana(true);
+      setTimeout(() => setCopiedIguana(false), 2000);
+    }
+  };
 
   const formattedDate = (() => {
     try {
@@ -194,6 +217,17 @@ export const ArticleCard: FC<ArticleCardProps> = ({
                   <ExternalLink className="w-3 h-3" />
                 </a>
               )}
+
+              {/* Botón para copiar el sello de la iguana para comentar en Builder Center */}
+              <button
+                type="button"
+                onClick={handleCopyIguana}
+                className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 transition-colors whitespace-nowrap cursor-pointer"
+                title="Copiar emoji de iguana para dejar tu sello al comentar en Builder Center"
+              >
+                <Copy className="w-3 h-3" />
+                <span>{copiedIguana ? '¡Iguana copiada!' : 'Copiar 🦎'}</span>
+              </button>
 
               {article.linkedinPostUrl && (
                 <a

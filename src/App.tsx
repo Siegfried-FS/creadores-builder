@@ -18,6 +18,7 @@ import {
   Award,
   Calendar,
   ExternalLink,
+  Copy,
 } from 'lucide-react';
 import { getArticles, createArticle, updateArticle, deleteArticle, toggleLike } from './services/api';
 
@@ -193,6 +194,27 @@ export function App() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isArticleModalOpen, setIsArticleModalOpen] = useState(false);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
+  const [copiedGlobalIguana, setCopiedGlobalIguana] = useState(false);
+
+  const handleCopyGlobalIguana = () => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText('🦎');
+      } else {
+        const input = document.createElement('textarea');
+        input.value = '🦎';
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+      }
+      setCopiedGlobalIguana(true);
+      setTimeout(() => setCopiedGlobalIguana(false), 2500);
+    } catch {
+      setCopiedGlobalIguana(true);
+      setTimeout(() => setCopiedGlobalIguana(false), 2500);
+    }
+  };
 
   // Toggle de Apoyo Idempotente (1 creador = 1 voto)
   const handleToggleLike = (articleId: string) => {
@@ -460,7 +482,7 @@ export function App() {
                     />
                     <div>
                       <p className="text-sm font-bold text-ink">
-                        ¡Hola de nuevo, {currentUser.name}! 👋
+                        ¡Hola de nuevo, {currentUser.name}!
                       </p>
                       <p className="text-xs text-muted">
                         Comparte tus artículos, deseos de Wishlist o comentarios de valor para recibir apoyo.
@@ -559,6 +581,39 @@ export function App() {
               <span>Eventos & Meetups UG</span>
               <ExternalLink className="w-3 h-3 opacity-75" />
             </a>
+          </div>
+        </section>
+
+        {/* ── BANNER COMUNITARIO: DAR PARA RECIBIR & EL SELLO DE LA IGUANA ── */}
+        <section className="rounded-2xl p-4 sm:p-5 border border-emerald-500/30 bg-emerald-500/5 backdrop-blur-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+          <div className="flex items-start gap-3.5">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shrink-0 mt-0.5 text-lg select-none">
+              🦎
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="font-display font-bold text-sm text-ink">
+                  Comunidad Creadores: Dar para recibir
+                </h3>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30">
+                  Sello de Trazabilidad
+                </span>
+              </div>
+              <p className="text-xs text-muted mt-1 leading-relaxed max-w-3xl">
+                Un like apoya, pero saber que tu contenido le llegó a la persona correcta y le sirvió es lo que hace crecer a un creador. Cuando leas el post de un compañero, deja un comentario con feedback real. Agrega una <strong>iguana 🦎</strong> al final de tu comentario en Builder Center para confirmar que llegaste desde este Hub.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
+            <button
+              onClick={handleCopyGlobalIguana}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-emerald-500/30 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-300 text-xs font-bold transition-all shadow-sm cursor-pointer"
+              title="Copiar emoji de iguana para pegar al final de tu comentario en AWS Builder Center"
+            >
+              <Copy className="w-3.5 h-3.5" />
+              <span>{copiedGlobalIguana ? '¡Iguana copiada!' : 'Copiar 🦎'}</span>
+            </button>
           </div>
         </section>
 
