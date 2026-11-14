@@ -178,10 +178,10 @@ export const ArticleCard: FC<ArticleCardProps> = ({
 
             {/* Nota de apoyo específica para comentarios (like en el comentario del autor, no en el artículo) */}
             {itemType === 'comment' && (
-              <div className="mt-2.5 p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-600 dark:text-emerald-300 flex items-start gap-1.5">
-                <MessageSquare className="w-3.5 h-3.5 shrink-0 mt-0.5 text-emerald-400" />
-                <span>
-                  <strong>Nota para apoyar:</strong> Dale like al <strong>comentario de {article.authorName}</strong> dentro de Builder Center (lo que cuenta es el like en su comentario, no en el artículo).
+              <div className="mt-2.5 p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-[11px] text-emerald-600 dark:text-emerald-300 flex items-start gap-2">
+                <MessageSquare className="w-4 h-4 shrink-0 mt-0.5 text-emerald-400" />
+                <span className="leading-relaxed">
+                  <strong>Instrucción para apoyar:</strong> Al entrar al enlace en Builder Center, busca el comentario de <strong>{article.authorName}</strong> y dale like a su comentario. Puedes darle like también al artículo donde comentó, pero el apoyo real que cuenta para sus misiones es el like en su comentario.
                 </span>
               </div>
             )}
@@ -221,7 +221,7 @@ export const ArticleCard: FC<ArticleCardProps> = ({
                     {itemType === 'wishlist'
                       ? 'Votar Deseo'
                       : itemType === 'comment'
-                      ? 'Ver Comentario'
+                      ? `Ver comentario de ${article.authorName.split(' ')[0]}`
                       : 'Leer'}
                   </span>
                   <ExternalLink className="w-3 h-3" />

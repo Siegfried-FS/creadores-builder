@@ -110,19 +110,7 @@ export const ArticleModal: FC<ArticleModalProps> = ({
         return;
       }
       if (!finalTitle) {
-        try {
-          const parsed = new URL(trimmedUrl);
-          const segments = parsed.pathname.split('/').filter(Boolean);
-          const lastSeg = segments[segments.length - 1];
-          if (lastSeg && lastSeg !== 'comment' && lastSeg !== 'comments') {
-            const formatted = lastSeg.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-            finalTitle = `Comentario en: ${formatted}`;
-          } else {
-            finalTitle = `Comentario de ${author.name} en Builder Center`;
-          }
-        } catch {
-          finalTitle = `Comentario de ${author.name} en Builder Center`;
-        }
+        finalTitle = `Comentario de ${author.name}`;
       }
     } else {
       const urlValidation = isValidAWSArticleUrl(trimmedUrl);
@@ -150,7 +138,7 @@ export const ArticleModal: FC<ArticleModalProps> = ({
       (itemType === 'wishlist'
         ? `Propuesta en la lista de deseos de AWS Builder Center compartida por ${author.name}.`
         : itemType === 'comment'
-        ? `Feedback dejado por ${author.name} en Builder Center. Apoya dando like a su comentario dentro del artículo.`
+        ? `Comentario de ${author.name} en AWS Builder Center. Al abrir el enlace, dale like a su comentario (el apoyo real para sus misiones es el like en su comentario).`
         : '');
 
     // Enviar publicación heredando automáticamente los datos del perfil del autor
@@ -294,10 +282,10 @@ export const ArticleModal: FC<ArticleModalProps> = ({
                   required
                   autoFocus
                 />
-                <p className="text-[10px] text-muted mt-1">
+                <p className="text-[10px] text-muted mt-1 leading-relaxed">
                   {itemType === 'wishlist'
                     ? 'Pega el enlace directo de tu propuesta en la Wishlist de AWS.'
-                    : `Nota importante: El apoyo es para darle like a TU comentario en Builder Center (identificado con el nombre ${author.name}), no al artículo donde comentaste.`}
+                    : `Nota importante: Pega el enlace de tu comentario (ej. https://builder.aws.com/comment/...). La comunidad buscará el comentario de ${author.name} para darle like a tu aporte (no al artículo donde comentaste).`}
                 </p>
               </div>
 
@@ -309,11 +297,11 @@ export const ArticleModal: FC<ArticleModalProps> = ({
                     <span>
                       {itemType === 'wishlist'
                         ? 'Título de la Propuesta (Opcional)'
-                        : '¿En qué artículo o tema comentaste? (Opcional)'}
+                        : '¿Sobre qué tema es tu comentario? (Opcional)'}
                     </span>
                   </label>
                   <span className="text-[10px] text-muted">
-                    Se autoextrae si lo omites
+                    {itemType === 'wishlist' ? 'Se autoextrae si lo omites' : `Por defecto: Comentario de ${author.name}`}
                   </span>
                 </div>
                 <input
@@ -324,7 +312,7 @@ export const ArticleModal: FC<ArticleModalProps> = ({
                   placeholder={
                     itemType === 'wishlist'
                       ? 'Ej. Offline SLM Bedrock model deployment on Greengrass'
-                      : 'Ej. Feedback en post de Phishing de Mariana'
+                      : 'Ej. Feedback en artículo sobre migraciones serverless'
                   }
                   className={`w-full bg-surface border border-border rounded-xl px-3 py-2 text-xs text-ink placeholder:text-muted/60 transition-colors focus:outline-none ${
                     itemType === 'wishlist' ? 'focus:border-amber-500' : 'focus:border-emerald-500'
