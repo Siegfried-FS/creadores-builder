@@ -10,7 +10,6 @@ import {
   FileText,
   Lightbulb,
   MessageSquare,
-  Copy,
 } from 'lucide-react';
 import type { Article, AWSCategory, CreatorProfile, ItemType } from '../types';
 import { AWS_CATEGORIES } from '../data/categories';
@@ -44,7 +43,6 @@ export const ArticleModal: FC<ArticleModalProps> = ({
   const [linkedinPostUrl, setLinkedinPostUrl] = useState('');
   const [instagramPostUrl, setInstagramPostUrl] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
-  const [copiedIguana, setCopiedIguana] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -66,31 +64,10 @@ export const ArticleModal: FC<ArticleModalProps> = ({
         setInstagramPostUrl('');
       }
       setValidationError(null);
-      setCopiedIguana(false);
     }
   }, [isOpen, initialArticle]);
 
   if (!isOpen) return null;
-
-  const handleCopyIguana = () => {
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText('🦎');
-      } else {
-        const input = document.createElement('textarea');
-        input.value = '🦎';
-        document.body.appendChild(input);
-        input.select();
-        document.execCommand('copy');
-        document.body.removeChild(input);
-      }
-      setCopiedIguana(true);
-      setTimeout(() => setCopiedIguana(false), 2500);
-    } catch {
-      setCopiedIguana(true);
-      setTimeout(() => setCopiedIguana(false), 2500);
-    }
-  };
 
   const isQuickLinkType = itemType === 'wishlist' || itemType === 'comment';
 
@@ -267,57 +244,6 @@ export const ArticleModal: FC<ArticleModalProps> = ({
             </button>
           </div>
         </div>
-
-        {/* 🦎 Banner Comunitario: Filosofía de Dar para Recibir & Tip de la Iguana */}
-        {itemType === 'comment' && (
-          <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-xs text-ink space-y-2.5">
-            <div className="flex items-start gap-2">
-              <MessageSquare className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-              <div className="leading-relaxed">
-                <span className="font-bold text-ink">Comunidad: Dar para recibir. </span>
-                <span className="text-muted">
-                  Un like apoya, pero saber que tu artículo le sirvió a alguien y recibir feedback real es lo que hace crecer a un creador. Cuando leas el contenido de otro compañero, no te limites a pedir apoyo: tómate dos minutos para leer el suyo y dejar un comentario constructivo.
-                </span>
-              </div>
-            </div>
-
-            <div className="pt-2 border-t border-emerald-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-emerald-500/5 p-2 rounded-lg">
-              <div className="text-[11px] text-muted">
-                <span className="font-bold text-emerald-400">Sello de la iguana: </span>
-                Deja una <strong className="text-ink">iguana 🦎</strong> al final de tu comentario en Builder Center para saber que llegaste desde este Hub.
-              </div>
-              <button
-                type="button"
-                onClick={handleCopyIguana}
-                className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-bold text-xs transition-colors border border-emerald-500/30 self-start sm:self-auto cursor-pointer"
-                title="Copiar emoji de iguana al portapapeles"
-              >
-                <Copy className="w-3.5 h-3.5" />
-                <span>{copiedIguana ? '¡Iguana copiada!' : 'Copiar 🦎'}</span>
-              </button>
-            </div>
-          </div>
-        )}
-
-        {itemType === 'article' && (
-          <div className="mb-4 p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-xs text-muted flex items-start gap-2">
-            <Sparkles className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
-            <div className="leading-relaxed">
-              <span className="font-bold text-ink">Regla de oro de la comunidad: </span>
-              Al publicar tu artículo, recuerda leer y dejar feedback en el de otro compañero. Una comunidad real es dar y recibir, no solo pedir.
-            </div>
-          </div>
-        )}
-
-        {itemType === 'wishlist' && (
-          <div className="mb-4 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-muted flex items-start gap-2">
-            <Lightbulb className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-            <div className="leading-relaxed">
-              <span className="font-bold text-ink">Solo ingresa el enlace de tu deseo: </span>
-              Pega la URL de tu propuesta en AWS Wishlist para que la comunidad vote y te ayude a llegar a oídos del equipo de AWS.
-            </div>
-          </div>
-        )}
 
         {validationError && (
           <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs flex items-center gap-2">

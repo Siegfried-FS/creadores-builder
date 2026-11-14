@@ -580,14 +580,14 @@ export function App() {
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="font-display font-bold text-sm text-ink">
-                  Comunidad Creadores: Dar para recibir
+                  Comunidad: Dar para recibir
                 </h3>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30">
-                  Sello de Trazabilidad
+                  Detalle Opcional
                 </span>
               </div>
               <p className="text-xs text-muted mt-1 leading-relaxed max-w-3xl">
-                Un like apoya, pero saber que tu contenido le llegó a la persona correcta y le sirvió es lo que hace crecer a un creador. Cuando leas el post de un compañero, deja un comentario con feedback real. Agrega una <strong>iguana 🦎</strong> al final de tu comentario en Builder Center para confirmar que llegaste desde este Hub.
+                Un like apoya, pero saber que tu artículo le sirvió a alguien y recibir feedback real es lo que hace crecer a un creador. Cuando leas el contenido de otro compañero, no te limites a pedir apoyo: tómate dos minutos para leer el suyo y dejar un comentario constructivo. Si gustas, puedes dejar una <strong>iguana 🦎</strong> al final de tu comentario en Builder Center como un guiño opcional para saber si alguien llegó gracias a esta herramienta.
               </p>
             </div>
           </div>
@@ -596,7 +596,7 @@ export function App() {
             <button
               onClick={handleCopyGlobalIguana}
               className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-emerald-500/30 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-600 dark:text-emerald-300 text-xs font-bold transition-all shadow-sm cursor-pointer"
-              title="Copiar emoji de iguana para pegar al final de tu comentario en AWS Builder Center"
+              title="Copiar emoji de iguana para pegar al final de tu comentario en AWS Builder Center (opcional)"
             >
               <Copy className="w-3.5 h-3.5" />
               <span>{copiedGlobalIguana ? '¡Iguana copiada!' : 'Copiar 🦎'}</span>
