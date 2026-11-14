@@ -175,6 +175,16 @@ export const ArticleCard: FC<ArticleCardProps> = ({
                 {article.summary}
               </p>
             )}
+
+            {/* Nota de apoyo específica para comentarios (like en el comentario del autor, no en el artículo) */}
+            {itemType === 'comment' && (
+              <div className="mt-2.5 p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-600 dark:text-emerald-300 flex items-start gap-1.5">
+                <MessageSquare className="w-3.5 h-3.5 shrink-0 mt-0.5 text-emerald-400" />
+                <span>
+                  <strong>Nota para apoyar:</strong> Dale like al <strong>comentario de {article.authorName}</strong> dentro de Builder Center (lo que cuenta es el like en su comentario, no en el artículo).
+                </span>
+              </div>
+            )}
           </div>
 
           {/* ── SECCIÓN DE DIFUSIÓN & BOTÓN DE APOYO ── */}
@@ -202,7 +212,7 @@ export const ArticleCard: FC<ArticleCardProps> = ({
                     itemType === 'wishlist'
                       ? 'Abrir y votar propuesta en AWS Builder Center Wishlist'
                       : itemType === 'comment'
-                      ? 'Abrir comentario y participar en el debate de Builder Center'
+                      ? `Abrir y dar like al comentario de ${article.authorName} en Builder Center`
                       : 'Abrir artículo completo en AWS Builder Center'
                   }
                 >

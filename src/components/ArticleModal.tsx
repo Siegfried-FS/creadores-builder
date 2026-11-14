@@ -285,7 +285,7 @@ export const ArticleModal: FC<ArticleModalProps> = ({
                 <p className="text-[10px] text-muted mt-1">
                   {itemType === 'wishlist'
                     ? 'Pega el enlace directo de tu propuesta en la Wishlist de AWS.'
-                    : 'Pega el enlace donde comentaste para que la comunidad pueda leer tu feedback.'}
+                    : `Nota importante: El apoyo es para darle like a TU comentario en Builder Center (identificado con el nombre ${author.name}), no al artículo donde comentaste.`}
                 </p>
               </div>
 
