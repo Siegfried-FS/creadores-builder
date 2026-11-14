@@ -135,7 +135,7 @@ export const ArticleModal: FC<ArticleModalProps> = ({
       (itemType === 'wishlist'
         ? `Propuesta #${nextWishlistIndex} en la Wishlist de AWS Builder Center publicada por ${author.name}.`
         : itemType === 'comment'
-        ? `Comentario #${nextCommentIndex} publicado por ${author.name} en AWS Builder Center. Al abrir el enlace, busca el comentario de ${author.name} y dale like a su comentario (el apoyo real para sus misiones es el like en su comentario).`
+        ? `Comentario #${nextCommentIndex} publicado por ${author.name} en AWS Builder Center. Al abrir el enlace, busca el comentario de ${author.name} y dale like a su comentario (el apoyo real para sus misiones en Builder Center es el like en su comentario).`
         : '');
 
     // Enviar publicación heredando automáticamente los datos del perfil del autor

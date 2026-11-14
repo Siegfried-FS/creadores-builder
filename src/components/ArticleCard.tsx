@@ -181,7 +181,7 @@ export const ArticleCard: FC<ArticleCardProps> = ({
               <div className="mt-2.5 p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-[11px] text-emerald-600 dark:text-emerald-300 flex items-start gap-2">
                 <MessageSquare className="w-4 h-4 shrink-0 mt-0.5 text-emerald-400" />
                 <span className="leading-relaxed">
-                  <strong>Instrucción para apoyar:</strong> Al entrar al enlace en Builder Center, busca el comentario de <strong>{article.authorName}</strong> y dale like a su comentario. Puedes darle like también al artículo donde comentó, pero el apoyo real que cuenta para sus misiones es el like en su comentario.
+                  <strong>Instrucción para apoyar:</strong> Al entrar al enlace en AWS Builder Center, busca el comentario de <strong>{article.authorName}</strong> y dale like a su comentario. Lo que cuenta para sus misiones en Builder Center es el like en su comentario (no en el artículo).
                 </span>
               </div>
             )}

@@ -15,8 +15,6 @@ import {
   Lightbulb,
   MessageSquare,
   FileText,
-  Award,
-  Calendar,
   ExternalLink,
   Copy,
 } from 'lucide-react';
@@ -532,42 +530,6 @@ export function App() {
                 className="w-full h-full object-contain filter drop-shadow-[0_0_16px_rgba(168,85,247,0.55)] transition-transform hover:scale-105"
               />
             </div>
-          </div>
-        </section>
-
-        {/* ── CARD INFORMATIVO: LAS 21 MISIONES DE AWS BUILDER CENTER & LINKTREE ── */}
-        <section className="rounded-2xl p-4 sm:p-5 border border-purple-500/30 bg-purple-500/5 backdrop-blur-sm flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
-          <div className="flex items-start gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center shrink-0 mt-0.5">
-              <Award className="w-6 h-6 text-purple-400" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="font-display font-bold text-sm sm:text-base text-ink">
-                  Estrategia Comunitaria: Las 21 Misiones de AWS Builder Center
-                </h2>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-500 border border-amber-500/30">
-                  Voucher 100% Examen AWS
-                </span>
-              </div>
-              <p className="text-xs text-muted mt-1 leading-relaxed max-w-3xl">
-                Al completar las 21 misiones (lectura, artículos, votos en <strong>Wishlist</strong> y <strong>comentarios de alto valor</strong>), AWS entrega hasta $30 USD en créditos y un voucher del 100% para certificación Foundational (CLF-C02 o AIF-C01). ¡Colaboremos para que ningún builder se quede sin su insignia!
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0 self-end lg:self-center">
-            <a
-              href="https://linktr.ee/awsusergroupplayavicente"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-purple-500/30 bg-purple-500/15 hover:bg-purple-500/25 text-purple-600 dark:text-purple-300 text-xs font-bold transition-all shadow-sm"
-              title="Acceder a todos los canales, meetups y redes del AWS User Group Playa Vicente"
-            >
-              <Calendar className="w-3.5 h-3.5" />
-              <span>Eventos & Meetups UG</span>
-              <ExternalLink className="w-3 h-3 opacity-75" />
-            </a>
           </div>
         </section>
 
