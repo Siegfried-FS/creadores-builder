@@ -571,7 +571,7 @@ export function App() {
           </div>
         </section>
 
-        {/* ── BANNER COMUNITARIO: DAR PARA RECIBIR & EL SELLO DE LA IGUANA ── */}
+        {/* ── BANNER COMUNITARIO: EL HUB ES PARA AYUDARNOS ── */}
         <section className="rounded-2xl p-4 sm:p-5 border border-emerald-500/30 bg-emerald-500/5 backdrop-blur-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
           <div className="flex items-start gap-3.5">
             <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shrink-0 mt-0.5 text-lg select-none">
@@ -580,14 +580,17 @@ export function App() {
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="font-display font-bold text-sm text-ink">
-                  Comunidad: Dar para recibir
+                  El Hub es para ayudarnos entre todos
                 </h3>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30">
-                  Detalle Opcional
+                  Cultura de Apoyo Mutuo
                 </span>
               </div>
               <p className="text-xs text-muted mt-1 leading-relaxed max-w-3xl">
-                Un like apoya, pero saber que tu artículo le sirvió a alguien y recibir feedback real es lo que hace crecer a un creador. Cuando leas el contenido de otro compañero, no te limites a pedir apoyo: tómate dos minutos para leer el suyo y dejar un comentario constructivo. Si gustas, puedes dejar una <strong>iguana 🦎</strong> al final de tu comentario en Builder Center como un guiño opcional para saber si alguien llegó gracias a esta herramienta.
+                No vengas solo a dejar tu publicación esperando que todos voten por ti: tómate dos minutos para leer el artículo o comentario de alguien más y dejarle apoyo sincero. Una comunidad real crece cuando damos y recibimos, no solo cuando pedimos votos.
+              </p>
+              <p className="text-[11px] text-muted/80 mt-1">
+                <strong className="text-emerald-500 dark:text-emerald-400">Detalle opcional:</strong> Si gustas, puedes dejar una iguana 🦎 al final de tu comentario en Builder Center para saber que nos estamos apoyando a través de este Hub.
               </p>
             </div>
           </div>

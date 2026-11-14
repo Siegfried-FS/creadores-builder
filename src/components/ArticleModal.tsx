@@ -110,7 +110,19 @@ export const ArticleModal: FC<ArticleModalProps> = ({
         return;
       }
       if (!finalTitle) {
-        finalTitle = 'Comentario de Feedback en AWS Builder Center';
+        try {
+          const parsed = new URL(trimmedUrl);
+          const segments = parsed.pathname.split('/').filter(Boolean);
+          const lastSeg = segments[segments.length - 1];
+          if (lastSeg && lastSeg !== 'comment' && lastSeg !== 'comments') {
+            const formatted = lastSeg.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+            finalTitle = `Comentario en: ${formatted}`;
+          } else {
+            finalTitle = `Comentario de ${author.name} en Builder Center`;
+          }
+        } catch {
+          finalTitle = `Comentario de ${author.name} en Builder Center`;
+        }
       }
     } else {
       const urlValidation = isValidAWSArticleUrl(trimmedUrl);
@@ -136,9 +148,9 @@ export const ArticleModal: FC<ArticleModalProps> = ({
     const finalSummary =
       summary.trim() ||
       (itemType === 'wishlist'
-        ? 'Propuesta en la lista de deseos de AWS Builder Center para votación comunitaria.'
+        ? `Propuesta en la lista de deseos de AWS Builder Center compartida por ${author.name}.`
         : itemType === 'comment'
-        ? 'Comentario de apoyo y feedback constructivo para la comunidad.'
+        ? `Feedback dejado por ${author.name} en Builder Center. Apoya dando like a su comentario dentro del artículo.`
         : '');
 
     // Enviar publicación heredando automáticamente los datos del perfil del autor
@@ -289,34 +301,45 @@ export const ArticleModal: FC<ArticleModalProps> = ({
                 </p>
               </div>
 
+              {/* Tema o título opcional visible para que sea fácil identificarlo */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[11px] font-semibold text-ink flex items-center gap-1">
+                    <Bookmark className={`w-3.5 h-3.5 ${itemType === 'wishlist' ? 'text-amber-400' : 'text-emerald-400'}`} />
+                    <span>
+                      {itemType === 'wishlist'
+                        ? 'Título de la Propuesta (Opcional)'
+                        : '¿En qué artículo o tema comentaste? (Opcional)'}
+                    </span>
+                  </label>
+                  <span className="text-[10px] text-muted">
+                    Se autoextrae si lo omites
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  value={title}
+                  maxLength={140}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder={
+                    itemType === 'wishlist'
+                      ? 'Ej. Offline SLM Bedrock model deployment on Greengrass'
+                      : 'Ej. Feedback en post de Phishing de Mariana'
+                  }
+                  className={`w-full bg-surface border border-border rounded-xl px-3 py-2 text-xs text-ink placeholder:text-muted/60 transition-colors focus:outline-none ${
+                    itemType === 'wishlist' ? 'focus:border-amber-500' : 'focus:border-emerald-500'
+                  }`}
+                />
+              </div>
+
               {/* Opciones avanzadas opcionales (colapsadas) */}
               <details className="pt-1 text-xs text-muted group">
                 <summary className={`cursor-pointer font-semibold text-ink transition-colors py-1 select-none ${
                   itemType === 'wishlist' ? 'hover:text-amber-400' : 'hover:text-emerald-400'
                 }`}>
-                  + Agregar título o notas adicionales (Opcional)
+                  + Agregar extracto o nota adicional (Opcional)
                 </summary>
                 <div className="space-y-3 pt-3 pl-2 border-l-2 border-border/60 mt-2">
-                  <div>
-                    <label className="block text-[11px] font-semibold text-ink mb-1">
-                      {itemType === 'wishlist'
-                        ? 'Título de la Propuesta (Opcional - se autoextrae de la URL)'
-                        : 'Tema o nota breve (Opcional)'}
-                    </label>
-                    <input
-                      type="text"
-                      value={title}
-                      maxLength={140}
-                      onChange={(e) => setTitle(e.target.value)}
-                      placeholder={
-                        itemType === 'wishlist'
-                          ? 'Ej. Offline SLM Bedrock model deployment on Greengrass'
-                          : 'Ej. Feedback sobre migración serverless'
-                      }
-                      className="w-full bg-surface border border-border rounded-xl px-3 py-2 text-xs text-ink focus:outline-none"
-                    />
-                  </div>
-
                   <div>
                     <label className="block text-[11px] font-semibold text-ink mb-1">
                       {itemType === 'wishlist'
@@ -331,7 +354,7 @@ export const ArticleModal: FC<ArticleModalProps> = ({
                       placeholder={
                         itemType === 'wishlist'
                           ? 'Explica el problema o limitación actual...'
-                          : 'Breve nota sobre qué te gustó o qué sugeriste...'
+                          : 'Breve nota sobre qué sugeriste o comentaste...'
                       }
                       className="w-full bg-surface border border-border rounded-xl px-3 py-2 text-xs text-ink resize-none focus:outline-none"
                     />
