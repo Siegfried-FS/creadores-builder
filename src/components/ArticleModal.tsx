@@ -74,7 +74,10 @@ export const ArticleModal: FC<ArticleModalProps> = ({
     e.preventDefault();
     setValidationError(null);
 
-    if (!title.trim()) {
+    let finalTitle = title.trim();
+    if (itemType === 'comment' && !finalTitle) {
+      finalTitle = 'Feedback en AWS Builder Center';
+    } else if (!finalTitle) {
       setValidationError('Por favor escribe un título.');
       return;
     }
@@ -91,7 +94,7 @@ export const ArticleModal: FC<ArticleModalProps> = ({
     } else if (itemType === 'comment') {
       const commentValidation = isValidCommentUrl(trimmedUrl);
       if (!commentValidation.isValid) {
-        setValidationError(commentValidation.error || 'La URL del comentario no es válida');
+        setValidationError(commentValidation.error || 'La URL del comentario no es válida (debe ser de builder.aws.com)');
         return;
       }
     } else {
@@ -111,12 +114,14 @@ export const ArticleModal: FC<ArticleModalProps> = ({
       }
     }
 
+    const finalSummary = summary.trim() || (itemType === 'comment' ? 'Comentario y feedback constructivo para apoyar al creador en la comunidad.' : '');
+
     // Enviar publicación heredando automáticamente los datos del perfil del autor
     onSubmit({
       id: initialArticle?.id,
       itemType,
-      title: title.trim().slice(0, 140),
-      summary: summary.trim().slice(0, 300),
+      title: finalTitle.slice(0, 140),
+      summary: finalSummary.slice(0, 300),
       category,
       builderUrl: trimmedUrl,
       wishlistUrl: itemType === 'wishlist' ? trimmedUrl : undefined,
@@ -238,8 +243,8 @@ export const ArticleModal: FC<ArticleModalProps> = ({
           <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-start gap-2.5 text-xs text-muted leading-relaxed">
             <MessageSquare className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
             <div>
-              <span className="font-bold text-ink">Filosofía Del Toro (Cero comentarios vacíos): </span>
-              Un simple <em>"nice post"</em> no ayuda a nadie a crecer. Comparte comentarios donde des feedback honesto, hagas preguntas de arquitectura o compartas qué falló en tu experiencia real para ganar likes legítimos.
+              <span className="font-bold text-ink">Apoyo mutuo en comentarios: </span>
+              Al leer un artículo y dar like, comentar feedback constructivo ayuda al creador a crecer y confirma que su publicación fue leída. Pega aquí el enlace de tu comentario en AWS Builder Center para que la comunidad lo apoye con likes.
             </div>
           </div>
         )}
@@ -289,158 +294,230 @@ export const ArticleModal: FC<ArticleModalProps> = ({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           
-          {/* Título */}
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-xs font-semibold text-ink flex items-center gap-1">
-                <Bookmark className="w-3.5 h-3.5 text-purple-400" />
-                <span>
+          {/* Si es comentario, el campo estelar y prioritario es el enlace directo */}
+          {itemType === 'comment' ? (
+            <>
+              {/* Enlace directo al comentario */}
+              <div>
+                <label className="block text-xs font-semibold text-ink mb-1 flex items-center gap-1">
+                  <LinkIcon className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Enlace al comentario en AWS Builder Center *</span>
+                </label>
+                <input
+                  type="url"
+                  value={builderUrl}
+                  onChange={(e) => setBuilderUrl(e.target.value)}
+                  placeholder="https://builder.aws.com/comment/... o enlace del artículo comentado"
+                  className="w-full bg-surface border border-border rounded-xl px-3.5 py-2.5 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-emerald-500 font-mono transition-colors"
+                  required
+                  autoFocus
+                />
+                <p className="text-[10px] text-muted mt-1">
+                  Pega el enlace de tu comentario para que la comunidad pueda leer tu aporte y darle like.
+                </p>
+              </div>
+
+              {/* Tema o título breve */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-semibold text-ink flex items-center gap-1">
+                    <Bookmark className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Tema o título del post comentado (Opcional)</span>
+                  </label>
+                  <span className="text-[10px] font-mono text-muted">
+                    {title.length}/140
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  value={title}
+                  maxLength={140}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Ej. Feedback en artículo sobre migraciones serverless"
+                  className="w-full bg-surface border border-border rounded-xl px-3.5 py-2 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-emerald-500 transition-colors"
+                />
+              </div>
+
+              {/* Opciones adicionales colapsadas para no estorbar */}
+              <details className="pt-1 text-xs text-muted group">
+                <summary className="cursor-pointer font-semibold text-ink hover:text-emerald-400 transition-colors py-1 select-none">
+                  + Agregar extracto de texto o redes (Opcional)
+                </summary>
+                <div className="space-y-3 pt-3 pl-2 border-l-2 border-border/60 mt-2">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-ink mb-1">
+                      Extracto breve de tu comentario
+                    </label>
+                    <textarea
+                      value={summary}
+                      maxLength={300}
+                      onChange={(e) => setSummary(e.target.value)}
+                      rows={2}
+                      placeholder="Breve nota sobre qué te gustó o qué recomendaste..."
+                      className="w-full bg-surface border border-border rounded-xl px-3 py-2 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-emerald-500 transition-colors resize-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-ink mb-1">
+                      Categoría
+                    </label>
+                    <select
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value as AWSCategory)}
+                      className="w-full bg-surface border border-border rounded-xl px-3 py-1.5 text-xs text-ink focus:outline-none focus:border-emerald-500"
+                    >
+                      {AWS_CATEGORIES.map((cat) => (
+                        <option key={cat.name} value={cat.name}>
+                          {cat.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </details>
+            </>
+          ) : (
+            <>
+              {/* Título normal para Artículos y Wishlists */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-semibold text-ink flex items-center gap-1">
+                    <Bookmark className="w-3.5 h-3.5 text-purple-400" />
+                    <span>
+                      {itemType === 'wishlist'
+                        ? 'Título de la Propuesta en Wishlist *'
+                        : 'Título del Artículo *'}
+                    </span>
+                  </label>
+                  <span className={`text-[10px] font-mono ${title.length > 120 ? 'text-amber-400 font-semibold' : 'text-muted'}`}>
+                    {title.length}/140
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  value={title}
+                  maxLength={140}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder={
+                    itemType === 'wishlist'
+                      ? 'Ej. Offline SLM Bedrock model deployment and local inference on Greengrass'
+                      : 'Ej. ¿Ya tienes tu mes de Kiro Pro gratis? (Incluso un año...)'
+                  }
+                  className="w-full bg-surface border border-border rounded-xl px-3.5 py-2.5 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-purple-500 transition-colors"
+                  required
+                />
+              </div>
+
+              {/* Categoría Oficial AWS */}
+              <div>
+                <label className="block text-xs font-semibold text-ink mb-1">
+                  Categoría Oficial de AWS *
+                </label>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value as AWSCategory)}
+                  className="w-full bg-surface border border-border rounded-xl px-3 py-2 text-xs text-ink focus:outline-none focus:border-purple-500 transition-colors"
+                >
+                  {AWS_CATEGORIES.map((cat) => (
+                    <option key={cat.name} value={cat.name}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Resumen o Aprendizaje */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-semibold text-ink">
+                    {itemType === 'wishlist'
+                      ? '¿Por qué AWS debería construir esto y qué problema resuelve?'
+                      : 'Resumen breve / ¿Qué aprenderá la comunidad?'}
+                  </label>
+                  <span className={`text-[10px] font-mono ${summary.length > 270 ? 'text-amber-400 font-bold' : 'text-muted'}`}>
+                    {summary.length}/300 máx
+                  </span>
+                </div>
+                <textarea
+                  value={summary}
+                  maxLength={300}
+                  onChange={(e) => setSummary(e.target.value)}
+                  rows={3}
+                  placeholder={
+                    itemType === 'wishlist'
+                      ? 'Explica el caso de uso concreto, limitaciones actuales y por qué beneficia a desarrolladores en LATAM...'
+                      : 'Explica en 2 líneas qué construiste, qué se rompió o qué aprendiste...'
+                  }
+                  className="w-full bg-surface border border-border rounded-xl px-3.5 py-2 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-purple-500 transition-colors resize-none"
+                />
+              </div>
+
+              {/* Enlace en AWS Builder Center */}
+              <div>
+                <label className="block text-xs font-semibold text-ink mb-1 flex items-center gap-1">
+                  <LinkIcon className="w-3.5 h-3.5 text-purple-400" />
+                  <span>
+                    {itemType === 'wishlist'
+                      ? 'Enlace al deseo en AWS Wishlist *'
+                      : 'Enlace al artículo en AWS Builder Center / Community *'}
+                  </span>
+                </label>
+                <input
+                  type="url"
+                  value={builderUrl}
+                  onChange={(e) => setBuilderUrl(e.target.value)}
+                  placeholder={
+                    itemType === 'wishlist'
+                      ? 'https://builder.aws.com/wishlist/3IOUvq66za4u348ILRaakYa5dhW_w/offline-slm-bedrock...'
+                      : 'https://builder.aws.com/content/... o https://community.aws/@...'
+                  }
+                  className="w-full bg-surface border border-border rounded-xl px-3.5 py-2.5 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-purple-500 font-mono transition-colors"
+                  required
+                />
+                <p className="text-[10px] text-muted mt-1">
                   {itemType === 'wishlist'
-                    ? 'Título de la Propuesta en Wishlist *'
-                    : itemType === 'comment'
-                    ? 'Tema del Debate o Artículo Comentado *'
-                    : 'Título del Artículo *'}
-                </span>
-              </label>
-              <span className={`text-[10px] font-mono ${title.length > 120 ? 'text-amber-400 font-semibold' : 'text-muted'}`}>
-                {title.length}/140
-              </span>
-            </div>
-            <input
-              type="text"
-              value={title}
-              maxLength={140}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder={
-                itemType === 'wishlist'
-                  ? 'Ej. Offline SLM Bedrock model deployment and local inference on Greengrass'
-                  : itemType === 'comment'
-                  ? 'Ej. Feedback sobre migración de bases de datos a Aurora Serverless v2'
-                  : 'Ej. ¿Ya tienes tu mes de Kiro Pro gratis? (Incluso un año...)'
-              }
-              className="w-full bg-surface border border-border rounded-xl px-3.5 py-2.5 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-purple-500 transition-colors"
-              required
-            />
-          </div>
-
-          {/* Categoría Oficial AWS */}
-          <div>
-            <label className="block text-xs font-semibold text-ink mb-1">
-              Categoría Oficial de AWS *
-            </label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value as AWSCategory)}
-              className="w-full bg-surface border border-border rounded-xl px-3 py-2 text-xs text-ink focus:outline-none focus:border-purple-500 transition-colors"
-            >
-              {AWS_CATEGORIES.map((cat) => (
-                <option key={cat.name} value={cat.name}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Resumen o Aprendizaje */}
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-xs font-semibold text-ink">
-                {itemType === 'wishlist'
-                  ? '¿Por qué AWS debería construir esto y qué problema resuelve?'
-                  : itemType === 'comment'
-                  ? 'Extracto de tu comentario o feedback aportado'
-                  : 'Resumen breve / ¿Qué aprenderá la comunidad?'}
-              </label>
-              <span className={`text-[10px] font-mono ${summary.length > 270 ? 'text-amber-400 font-bold' : 'text-muted'}`}>
-                {summary.length}/300 máx
-              </span>
-            </div>
-            <textarea
-              value={summary}
-              maxLength={300}
-              onChange={(e) => setSummary(e.target.value)}
-              rows={3}
-              placeholder={
-                itemType === 'wishlist'
-                  ? 'Explica el caso de uso concreto, limitaciones actuales y por qué beneficia a desarrolladores en LATAM...'
-                  : itemType === 'comment'
-                  ? 'Comparte el núcleo de tu aporte o pregunta técnica para invitar a la comunidad a continuar el debate...'
-                  : 'Explica en 2 líneas qué construiste, qué se rompió o qué aprendiste...'
-              }
-              className="w-full bg-surface border border-border rounded-xl px-3.5 py-2 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-purple-500 transition-colors resize-none"
-            />
-          </div>
-
-          {/* Enlace en AWS Builder Center */}
-          <div>
-            <label className="block text-xs font-semibold text-ink mb-1 flex items-center gap-1">
-              <LinkIcon className="w-3.5 h-3.5 text-purple-400" />
-              <span>
-                {itemType === 'wishlist'
-                  ? 'Enlace al deseo en AWS Wishlist *'
-                  : itemType === 'comment'
-                  ? 'Enlace directo al comentario con ancla *'
-                  : 'Enlace al artículo en AWS Builder Center / Community *'}
-              </span>
-            </label>
-            <input
-              type="url"
-              value={builderUrl}
-              onChange={(e) => setBuilderUrl(e.target.value)}
-              placeholder={
-                itemType === 'wishlist'
-                  ? 'https://builder.aws.com/wishlist/3IOUvq66za4u348ILRaakYa5dhW_w/offline-slm-bedrock...'
-                  : itemType === 'comment'
-                  ? 'https://builder.aws.com/comment/3M55nfbgkkjc8d1Yc3rHogivOu3#comments'
-                  : 'https://builder.aws.com/content/... o https://community.aws/@...'
-              }
-              className="w-full bg-surface border border-border rounded-xl px-3.5 py-2.5 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-purple-500 font-mono transition-colors"
-              required
-            />
-            <p className="text-[10px] text-muted mt-1">
-              {itemType === 'wishlist'
-                ? 'Debe ser un enlace que comience con https://builder.aws.com/wishlist/'
-                : itemType === 'comment'
-                ? 'Debe ser un enlace directo a un comentario oficial en builder.aws.com'
-                : 'Permite enlaces de community.aws o builder.aws.com.'}
-            </p>
-          </div>
-
-          {/* Difusión en Redes */}
-          <div className="pt-2 border-t border-border">
-            <label className="block text-xs font-semibold text-ink mb-2 flex items-center gap-1">
-              <Share2 className="w-3.5 h-3.5 text-purple-400" />
-              <span>Enlaces de Difusión (Para dar likes y reposts)</span>
-            </label>
-
-            <div className="space-y-3">
-              <div>
-                <label className="block text-[11px] text-muted mb-1">
-                  Enlace del post en LinkedIn (Opcional)
-                </label>
-                <input
-                  type="url"
-                  value={linkedinPostUrl}
-                  onChange={(e) => setLinkedinPostUrl(e.target.value)}
-                  placeholder="https://www.linkedin.com/posts/... o https://lnkd.in/..."
-                  className="w-full bg-surface border border-border rounded-xl px-3 py-2 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-purple-500 font-mono transition-colors"
-                />
+                    ? 'Debe ser un enlace que comience con https://builder.aws.com/wishlist/'
+                    : 'Permite enlaces de community.aws o builder.aws.com.'}
+                </p>
               </div>
 
-              <div>
-                <label className="block text-[11px] text-muted mb-1">
-                  Enlace del post en Instagram (Opcional)
+              {/* Difusión en Redes */}
+              <div className="pt-2 border-t border-border">
+                <label className="block text-xs font-semibold text-ink mb-2 flex items-center gap-1">
+                  <Share2 className="w-3.5 h-3.5 text-purple-400" />
+                  <span>Enlaces de Difusión (Para dar likes y reposts)</span>
                 </label>
-                <input
-                  type="url"
-                  value={instagramPostUrl}
-                  onChange={(e) => setInstagramPostUrl(e.target.value)}
-                  placeholder="https://www.instagram.com/p/..."
-                  className="w-full bg-surface border border-border rounded-xl px-3 py-2 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-purple-500 font-mono transition-colors"
-                />
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-[11px] text-muted mb-1">
+                      Enlace del post en LinkedIn (Opcional)
+                    </label>
+                    <input
+                      type="url"
+                      value={linkedinPostUrl}
+                      onChange={(e) => setLinkedinPostUrl(e.target.value)}
+                      placeholder="https://www.linkedin.com/posts/... o https://lnkd.in/..."
+                      className="w-full bg-surface border border-border rounded-xl px-3 py-2 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-purple-500 font-mono transition-colors"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] text-muted mb-1">
+                      Enlace del post en Instagram (Opcional)
+                    </label>
+                    <input
+                      type="url"
+                      value={instagramPostUrl}
+                      onChange={(e) => setInstagramPostUrl(e.target.value)}
+                      placeholder="https://www.instagram.com/p/..."
+                      className="w-full bg-surface border border-border rounded-xl px-3 py-2 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-purple-500 font-mono transition-colors"
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
+            </>
+          )}
 
           {/* Acciones */}
           <div className="pt-3 flex items-center justify-end gap-3 border-t border-border">

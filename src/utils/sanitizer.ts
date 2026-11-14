@@ -155,7 +155,7 @@ export function isValidWishlistUrl(url: string): { isValid: boolean; error?: str
   }
 }
 
-// Valida si una URL pertenece a un comentario con feedback en AWS Builder Center (builder.aws.com/comment/... o #comments)
+// Valida si una URL pertenece a un comentario con feedback en AWS Builder Center
 export function isValidCommentUrl(url: string): { isValid: boolean; error?: string } {
   if (!url) {
     return { isValid: false, error: 'La URL del comentario es obligatoria' };
@@ -163,12 +163,11 @@ export function isValidCommentUrl(url: string): { isValid: boolean; error?: stri
 
   try {
     const parsed = new URL(url);
-    if (!parsed.hostname.includes('builder.aws.com') && !parsed.hostname.includes('community.aws')) {
-      return { isValid: false, error: 'Debe ser un enlace oficial de builder.aws.com' };
+    if (parsed.protocol !== 'https:') {
+      return { isValid: false, error: 'La URL debe utilizar protocolo seguro https://' };
     }
-    const isCommentPath = parsed.pathname.includes('/comment/') || parsed.hash.includes('comments');
-    if (!isCommentPath) {
-      return { isValid: false, error: 'La URL debe ser un enlace directo a un comentario (ej. https://builder.aws.com/comment/...#comments)' };
+    if (!parsed.hostname.includes('builder.aws.com') && !parsed.hostname.includes('community.aws')) {
+      return { isValid: false, error: 'Debe ser un enlace oficial de builder.aws.com o community.aws' };
     }
     return { isValid: true };
   } catch {

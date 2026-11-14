@@ -38,8 +38,7 @@ function validateTargetUrl(url, itemType) {
 
     if (itemType === 'comment') {
       const isBuilder = parsed.hostname.includes('builder.aws.com') || parsed.hostname.includes('community.aws');
-      const isCommentPath = parsed.pathname.includes('/comment/') || parsed.hash.includes('comments');
-      return isBuilder && isCommentPath;
+      return isBuilder;
     }
 
     // Default 'article'
