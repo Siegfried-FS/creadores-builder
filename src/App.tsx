@@ -111,26 +111,13 @@ export function App() {
     return INITIAL_ARTICLES;
   });
 
-  // Carga inicial y sincronización fluida desde DynamoDB Serverless (sin saltos ni demoras)
+  // Carga inicial y sincronización fluida desde DynamoDB Serverless
   useEffect(() => {
     getArticles().then((data) => {
       if (Array.isArray(data) && data.length > 0) {
-        setArticles((prev) => {
-          const map = new Map<string, Article>();
-          prev.forEach((art) => map.set(art.id, art));
-          data.forEach((art) => {
-            const existing = map.get(art.id);
-            map.set(art.id, {
-              ...existing,
-              ...art,
-              itemType: art.itemType || existing?.itemType || 'article',
-              likedBy: Array.isArray(art.likedBy) ? art.likedBy : existing?.likedBy || [],
-            });
-          });
-          return Array.from(map.values()).sort(
-            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          );
-        });
+        setArticles(
+          data.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        );
       }
     });
   }, []);
