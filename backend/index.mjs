@@ -12,16 +12,38 @@ const client = new DynamoDBClient({ region: process.env.AWS_REGION || 'us-east-1
 const docClient = DynamoDBDocumentClient.from(client);
 const TABLE_NAME = process.env.TABLE_NAME || 'creadores-builder-articles';
 
-const corsHeaders = {
+const ALLOWED_ORIGINS = [
+  'https://creadores.awsugplayavicente.com',
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173',
+];
+
+function getCorsHeaders(event) {
+  const origin = event?.headers?.origin || event?.headers?.Origin || '';
+  const allowedOrigin = ALLOWED_ORIGINS.includes(origin)
+    ? origin
+    : 'https://creadores.awsugplayavicente.com';
+
+  return {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': allowedOrigin,
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Api-Key',
+    'Vary': 'Origin',
+  };
+}
+
+let activeCorsHeaders = {
   'Content-Type': 'application/json',
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': 'https://creadores.awsugplayavicente.com',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Api-Key',
 };
 
 const sendResponse = (statusCode, body) => ({
   statusCode,
-  headers: corsHeaders,
+  headers: activeCorsHeaders,
   body: JSON.stringify(body),
 });
 
@@ -61,6 +83,7 @@ function validateOptionalSocialUrl(url, allowedDomains) {
 }
 
 export const handler = async (event) => {
+  activeCorsHeaders = getCorsHeaders(event);
   const method = event.requestContext?.http?.method || event.httpMethod || 'GET';
   const path = event.rawPath || event.path || '/';
 
@@ -68,7 +91,7 @@ export const handler = async (event) => {
   if (method === 'OPTIONS') {
     return {
       statusCode: 204,
-      headers: corsHeaders,
+      headers: activeCorsHeaders,
       body: '',
     };
   }

@@ -17,11 +17,11 @@ El objetivo es identificar debilidades en el diseño actual, explicar su mecanis
 
 | ID | Vulnerabilidad / Control | Clasificación OWASP | Severidad | Estado |
 | :--- | :--- | :--- | :--- | :--- |
-| **SEC-01** | Inserción, Edición y Borrado sin Autenticación Criptográfica | OWASP API2:2023 (Broken Authentication) | **Alta** | Documentada / Guía de remediación |
-| **SEC-02** | Suplantación de Identidad de Autor (BOLA / IDOR) | OWASP API1:2023 (Broken Object Level Auth) | **Alta** | Documentada / Guía de remediación |
-| **SEC-03** | Política CORS Permisiva Universal (`Access-Control-Allow-Origin: *`) | OWASP API8:2023 (Security Misconfiguration) | **Media** | Documentada / Remediar en Lambda |
-| **SEC-04** | Falta de Rate Limiting y Throttling en API Gateway | OWASP API4:2023 (Unrestricted Resource Consumption) | **Media** | Mitigación FinOps recomendada |
-| **SEC-05** | Validación de URLs y Esquemas en Entrada de Usuario | OWASP API7:2023 (Server Side Request Forgery / XSS) | **Baja** | Remediada en Sanitizer |
+| **SEC-01** | Inserción, Edición y Borrado sin Autenticación Criptográfica | OWASP API2:2023 (Broken Authentication) | **Alta** | Mitigado en Frontend & Lambda |
+| **SEC-02** | Suplantación de Identidad de Autor (BOLA / IDOR) | OWASP API1:2023 (Broken Object Level Auth) | **Alta** | Mitigado en Frontend & Lambda |
+| **SEC-03** | Política CORS Permisiva Universal (`Access-Control-Allow-Origin: *`) | OWASP API8:2023 (Security Misconfiguration) | **Media** | **Remediado** (CORS estricto en API Gateway y Lambda) |
+| **SEC-04** | Falta de Rate Limiting y Throttling en API Gateway | OWASP API4:2023 (Unrestricted Resource Consumption) | **Media** | **Remediado** (Throttling 20 req/s, Burst 40 en stage $default) |
+| **SEC-05** | Validación de URLs y Esquemas en Entrada de Usuario | OWASP API7:2023 (Server Side Request Forgery / XSS) | **Baja** | **Remediado** (Sanitizer estricto para dominios AWS) |
 
 ---
 
