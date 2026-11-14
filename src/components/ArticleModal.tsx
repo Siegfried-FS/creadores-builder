@@ -1,8 +1,25 @@
 import { useState, useEffect, type FC, type FormEvent } from 'react';
-import { X, Sparkles, AlertCircle, Bookmark, Link as LinkIcon, Share2, Clock, Check } from 'lucide-react';
-import type { Article, AWSCategory, CreatorProfile } from '../types';
+import {
+  X,
+  Sparkles,
+  AlertCircle,
+  Bookmark,
+  Link as LinkIcon,
+  Share2,
+  Check,
+  FileText,
+  Lightbulb,
+  MessageSquare,
+  ShieldCheck,
+} from 'lucide-react';
+import type { Article, AWSCategory, CreatorProfile, ItemType } from '../types';
 import { AWS_CATEGORIES } from '../data/categories';
-import { isValidAWSArticleUrl, isValidLinkedInPostUrl } from '../utils/sanitizer';
+import {
+  isValidAWSArticleUrl,
+  isValidLinkedInPostUrl,
+  isValidWishlistUrl,
+  isValidCommentUrl,
+} from '../utils/sanitizer';
 
 interface ArticleModalProps {
   isOpen: boolean;
@@ -19,6 +36,7 @@ export const ArticleModal: FC<ArticleModalProps> = ({
   initialArticle,
   onSubmit,
 }) => {
+  const [itemType, setItemType] = useState<ItemType>('article');
   const [title, setTitle] = useState('');
   const [summary, setSummary] = useState('');
   const [category, setCategory] = useState<AWSCategory>('Developer Tools');
@@ -30,13 +48,15 @@ export const ArticleModal: FC<ArticleModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       if (initialArticle) {
+        setItemType(initialArticle.itemType || 'article');
         setTitle(initialArticle.title || '');
         setSummary(initialArticle.summary || '');
         setCategory(initialArticle.category || 'Developer Tools');
-        setBuilderUrl(initialArticle.builderUrl || '');
+        setBuilderUrl(initialArticle.builderUrl || initialArticle.wishlistUrl || initialArticle.commentUrl || '');
         setLinkedinPostUrl(initialArticle.linkedinPostUrl || '');
         setInstagramPostUrl(initialArticle.instagramPostUrl || '');
       } else {
+        setItemType('article');
         setTitle('');
         setSummary('');
         setCategory('Developer Tools');
@@ -55,15 +75,31 @@ export const ArticleModal: FC<ArticleModalProps> = ({
     setValidationError(null);
 
     if (!title.trim()) {
-      setValidationError('Por favor escribe el título del artículo.');
+      setValidationError('Por favor escribe un título.');
       return;
     }
 
-    // Validar URL de AWS Builder Center
-    const urlValidation = isValidAWSArticleUrl(builderUrl.trim());
-    if (!urlValidation.isValid) {
-      setValidationError(urlValidation.error || 'La URL del artículo no es válida');
-      return;
+    const trimmedUrl = builderUrl.trim();
+
+    // Validar según el tipo de publicación
+    if (itemType === 'wishlist') {
+      const wishValidation = isValidWishlistUrl(trimmedUrl);
+      if (!wishValidation.isValid) {
+        setValidationError(wishValidation.error || 'La URL de la Wishlist no es válida');
+        return;
+      }
+    } else if (itemType === 'comment') {
+      const commentValidation = isValidCommentUrl(trimmedUrl);
+      if (!commentValidation.isValid) {
+        setValidationError(commentValidation.error || 'La URL del comentario no es válida');
+        return;
+      }
+    } else {
+      const urlValidation = isValidAWSArticleUrl(trimmedUrl);
+      if (!urlValidation.isValid) {
+        setValidationError(urlValidation.error || 'La URL del artículo no es válida');
+        return;
+      }
     }
 
     // Validar URL de LinkedIn si se ingresó
@@ -75,13 +111,16 @@ export const ArticleModal: FC<ArticleModalProps> = ({
       }
     }
 
-    // Enviar artículo heredando automáticamente los datos del perfil del autor
+    // Enviar publicación heredando automáticamente los datos del perfil del autor
     onSubmit({
       id: initialArticle?.id,
-      title: title.trim().slice(0, 120),
-      summary: summary.trim().slice(0, 220),
+      itemType,
+      title: title.trim().slice(0, 140),
+      summary: summary.trim().slice(0, 300),
       category,
-      builderUrl: builderUrl.trim(),
+      builderUrl: trimmedUrl,
+      wishlistUrl: itemType === 'wishlist' ? trimmedUrl : undefined,
+      commentUrl: itemType === 'comment' ? trimmedUrl : undefined,
       linkedinPostUrl: linkedinPostUrl.trim() || undefined,
       instagramPostUrl: instagramPostUrl.trim() || undefined,
       authorId: author.id,
@@ -118,23 +157,99 @@ export const ArticleModal: FC<ArticleModalProps> = ({
           </div>
           <div>
             <h2 className="font-display font-bold text-lg text-ink">
-              {isEditing ? 'Editar Artículo en el Hub' : 'Publicar Artículo en el Hub'}
+              {isEditing ? 'Editar Publicación' : 'Nueva Publicación en el Hub'}
             </h2>
             <p className="text-xs text-muted">
               {isEditing
-                ? 'Actualiza los enlaces o la información de tu publicación'
-                : 'Comparte tu contenido técnico para recibir apoyo de la comunidad'}
+                ? 'Actualiza los enlaces o información de tu publicación'
+                : 'Impulsa las 21 misiones de AWS Builder Center con apoyo de la comunidad'}
             </p>
           </div>
         </div>
 
-        {/* ⏱️ Aviso claro sobre los 30 días de vigencia (TTL deslizante) */}
-        <div className="mb-4 p-3 rounded-xl bg-purple-500/10 border border-purple-500/25 flex items-start gap-2.5">
-          <Clock className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
-          <div className="text-xs text-muted leading-relaxed">
-            <span className="font-bold text-ink">Vigencia de 30 días deslizantes: </span>
-            Tu publicación estará activa en el Hub durante 30 días exactos para mantener el contenido siempre fresco y dinámico. Al cumplirse el plazo, se depura automáticamente mediante TTL en Amazon DynamoDB.
+        {/* 🌟 Selector de Tipo: Artículo vs Wishlist vs Comentarios de Valor */}
+        <div className="mb-4">
+          <label className="block text-xs font-semibold text-ink mb-2">
+            ¿Qué deseas compartir hoy en la comunidad?
+          </label>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <button
+              type="button"
+              onClick={() => setItemType('article')}
+              className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs font-semibold transition-all text-left ${
+                itemType === 'article'
+                  ? 'border-purple-500 bg-purple-500/15 text-purple-400 shadow-sm'
+                  : 'border-border bg-surface hover:bg-surface-hover text-muted'
+              }`}
+            >
+              <FileText className="w-4 h-4 shrink-0 text-purple-400" />
+              <div>
+                <div className="font-bold">Artículo</div>
+                <div className="text-[10px] opacity-75">Tutorial / Guía</div>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setItemType('wishlist')}
+              className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs font-semibold transition-all text-left ${
+                itemType === 'wishlist'
+                  ? 'border-amber-500 bg-amber-500/15 text-amber-400 shadow-sm'
+                  : 'border-border bg-surface hover:bg-surface-hover text-muted'
+              }`}
+            >
+              <Lightbulb className="w-4 h-4 shrink-0 text-amber-400" />
+              <div>
+                <div className="font-bold">Wishlist</div>
+                <div className="text-[10px] opacity-75">Propuesta AWS</div>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setItemType('comment')}
+              className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs font-semibold transition-all text-left ${
+                itemType === 'comment'
+                  ? 'border-emerald-500 bg-emerald-500/15 text-emerald-400 shadow-sm'
+                  : 'border-border bg-surface hover:bg-surface-hover text-muted'
+              }`}
+            >
+              <MessageSquare className="w-4 h-4 shrink-0 text-emerald-400" />
+              <div>
+                <div className="font-bold">Comentario</div>
+                <div className="text-[10px] opacity-75">Feedback de valor</div>
+              </div>
+            </button>
           </div>
+        </div>
+
+        {/* 💡 Guía según el tipo seleccionado (Inspiración Del Toro / AWS Content Creator) */}
+        {itemType === 'wishlist' && (
+          <div className="mb-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-start gap-2.5 text-xs text-muted leading-relaxed">
+            <Lightbulb className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+            <div>
+              <span className="font-bold text-ink">Misión Wishlist (Idea Crafter): </span>
+              Comparte tu propuesta en la lista de deseos de AWS Builder Center. La comunidad votará tu idea para que los ingenieros de producto de AWS escuchen las necesidades de LATAM.
+            </div>
+          </div>
+        )}
+
+        {itemType === 'comment' && (
+          <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-start gap-2.5 text-xs text-muted leading-relaxed">
+            <MessageSquare className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+            <div>
+              <span className="font-bold text-ink">Filosofía Del Toro (Cero comentarios vacíos): </span>
+              Un simple <em>"nice post"</em> no ayuda a nadie a crecer. Comparte comentarios donde des feedback honesto, hagas preguntas de arquitectura o compartas qué falló en tu experiencia real para ganar likes legítimos.
+            </div>
+          </div>
+        )}
+
+        {/* Estado permanente */}
+        <div className="mb-4 p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center gap-2 text-[11px] text-muted">
+          <ShieldCheck className="w-4 h-4 text-purple-400 shrink-0" />
+          <span>
+            <strong className="text-ink">Publicación Permanente:</strong> Esta contribución permanecerá siempre visible en el Hub para apoyar tu historial en las 21 misiones.
+          </span>
         </div>
 
         {/* Autor vinculado automáticamente */}
@@ -174,23 +289,35 @@ export const ArticleModal: FC<ArticleModalProps> = ({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           
-          {/* Título del artículo */}
+          {/* Título */}
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="text-xs font-semibold text-ink flex items-center gap-1">
                 <Bookmark className="w-3.5 h-3.5 text-purple-400" />
-                <span>Título del Artículo *</span>
+                <span>
+                  {itemType === 'wishlist'
+                    ? 'Título de la Propuesta en Wishlist *'
+                    : itemType === 'comment'
+                    ? 'Tema del Debate o Artículo Comentado *'
+                    : 'Título del Artículo *'}
+                </span>
               </label>
-              <span className={`text-[10px] font-mono ${title.length > 100 ? 'text-amber-400 font-semibold' : 'text-muted'}`}>
-                {title.length}/120
+              <span className={`text-[10px] font-mono ${title.length > 120 ? 'text-amber-400 font-semibold' : 'text-muted'}`}>
+                {title.length}/140
               </span>
             </div>
             <input
               type="text"
               value={title}
-              maxLength={120}
+              maxLength={140}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Ej. ¿Ya tienes tu mes de Kiro Pro gratis? (Incluso un año...)"
+              placeholder={
+                itemType === 'wishlist'
+                  ? 'Ej. Offline SLM Bedrock model deployment and local inference on Greengrass'
+                  : itemType === 'comment'
+                  ? 'Ej. Feedback sobre migración de bases de datos a Aurora Serverless v2'
+                  : 'Ej. ¿Ya tienes tu mes de Kiro Pro gratis? (Incluso un año...)'
+              }
               className="w-full bg-surface border border-border rounded-xl px-3.5 py-2.5 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-purple-500 transition-colors"
               required
             />
@@ -214,45 +341,68 @@ export const ArticleModal: FC<ArticleModalProps> = ({
             </select>
           </div>
 
-          {/* Resumen / Aprendizaje clave con límite de caracteres para no romper la retícula */}
+          {/* Resumen o Aprendizaje */}
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="text-xs font-semibold text-ink">
-                Resumen breve / ¿Qué aprenderá la comunidad?
+                {itemType === 'wishlist'
+                  ? '¿Por qué AWS debería construir esto y qué problema resuelve?'
+                  : itemType === 'comment'
+                  ? 'Extracto de tu comentario o feedback aportado'
+                  : 'Resumen breve / ¿Qué aprenderá la comunidad?'}
               </label>
-              <span className={`text-[10px] font-mono ${summary.length > 200 ? 'text-amber-400 font-bold' : 'text-muted'}`}>
-                {summary.length}/220 máx
+              <span className={`text-[10px] font-mono ${summary.length > 270 ? 'text-amber-400 font-bold' : 'text-muted'}`}>
+                {summary.length}/300 máx
               </span>
             </div>
             <textarea
               value={summary}
-              maxLength={220}
+              maxLength={300}
               onChange={(e) => setSummary(e.target.value)}
               rows={3}
-              placeholder="Explica en 2 líneas qué construiste, qué se rompió o qué aprendiste (máx. 220 caracteres)..."
+              placeholder={
+                itemType === 'wishlist'
+                  ? 'Explica el caso de uso concreto, limitaciones actuales y por qué beneficia a desarrolladores en LATAM...'
+                  : itemType === 'comment'
+                  ? 'Comparte el núcleo de tu aporte o pregunta técnica para invitar a la comunidad a continuar el debate...'
+                  : 'Explica en 2 líneas qué construiste, qué se rompió o qué aprendiste...'
+              }
               className="w-full bg-surface border border-border rounded-xl px-3.5 py-2 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-purple-500 transition-colors resize-none"
             />
-            <p className="text-[10px] text-muted mt-1">
-              Mantén el resumen conciso para que se adapte perfectamente a la cuadrícula de lectura.
-            </p>
           </div>
 
-          {/* Enlace al Artículo en AWS Builder Center */}
+          {/* Enlace en AWS Builder Center */}
           <div>
             <label className="block text-xs font-semibold text-ink mb-1 flex items-center gap-1">
               <LinkIcon className="w-3.5 h-3.5 text-purple-400" />
-              <span>Enlace al artículo en AWS Builder Center / Community *</span>
+              <span>
+                {itemType === 'wishlist'
+                  ? 'Enlace al deseo en AWS Wishlist *'
+                  : itemType === 'comment'
+                  ? 'Enlace directo al comentario con ancla *'
+                  : 'Enlace al artículo en AWS Builder Center / Community *'}
+              </span>
             </label>
             <input
               type="url"
               value={builderUrl}
               onChange={(e) => setBuilderUrl(e.target.value)}
-              placeholder="https://builder.aws.com/content/... o https://community.aws/@..."
+              placeholder={
+                itemType === 'wishlist'
+                  ? 'https://builder.aws.com/wishlist/3IOUvq66za4u348ILRaakYa5dhW_w/offline-slm-bedrock...'
+                  : itemType === 'comment'
+                  ? 'https://builder.aws.com/comment/3M55nfbgkkjc8d1Yc3rHogivOu3#comments'
+                  : 'https://builder.aws.com/content/... o https://community.aws/@...'
+              }
               className="w-full bg-surface border border-border rounded-xl px-3.5 py-2.5 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-purple-500 font-mono transition-colors"
               required
             />
             <p className="text-[10px] text-muted mt-1">
-              Permite enlaces oficiales de <code className="text-purple-400">community.aws</code> o <code className="text-purple-400">builder.aws.com</code>.
+              {itemType === 'wishlist'
+                ? 'Debe ser un enlace que comience con https://builder.aws.com/wishlist/'
+                : itemType === 'comment'
+                ? 'Debe ser un enlace directo a un comentario oficial en builder.aws.com'
+                : 'Permite enlaces de community.aws o builder.aws.com.'}
             </p>
           </div>
 
@@ -266,7 +416,7 @@ export const ArticleModal: FC<ArticleModalProps> = ({
             <div className="space-y-3">
               <div>
                 <label className="block text-[11px] text-muted mb-1">
-                  Enlace del post en LinkedIn
+                  Enlace del post en LinkedIn (Opcional)
                 </label>
                 <input
                   type="url"
@@ -311,7 +461,7 @@ export const ArticleModal: FC<ArticleModalProps> = ({
                   <span>Guardar Cambios</span>
                 </>
               ) : (
-                <span>Publicar Artículo</span>
+                <span>Publicar en el Hub</span>
               )}
             </button>
           </div>

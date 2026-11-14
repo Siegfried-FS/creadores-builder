@@ -1,17 +1,31 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { Navbar } from './components/Navbar';
 import { ArticleCard } from './components/ArticleCard';
-import { ArticleModal } from './components/ArticleModal';
-import { AuthModal } from './components/AuthModal';
-import { ProfileModal } from './components/ProfileModal';
 import { ParticlesBg } from './components/ParticlesBg';
-import type { Article, AWSCategory, CreatorProfile } from './types';
+import type { Article, AWSCategory, CreatorProfile, ItemType } from './types';
 import { INITIAL_ARTICLES } from './data/initialData';
 import { AWS_CATEGORIES } from './data/categories';
-import { Search, Sparkles, CheckCircle, UserPlus, BookOpen, PlusCircle } from 'lucide-react';
-import { ConsoleSecurity } from './components/ConsoleSecurity';
-import { SecurityHoneypotModal } from './components/SecurityHoneypotModal';
+import {
+  Search,
+  Sparkles,
+  CheckCircle,
+  UserPlus,
+  BookOpen,
+  PlusCircle,
+  Lightbulb,
+  MessageSquare,
+  FileText,
+  Award,
+  Calendar,
+  ExternalLink,
+} from 'lucide-react';
 import { getArticles, createArticle, updateArticle, deleteArticle, toggleLike } from './services/api';
+
+const ArticleModal = lazy(() => import('./components/ArticleModal').then((m) => ({ default: m.ArticleModal })));
+const AuthModal = lazy(() => import('./components/AuthModal').then((m) => ({ default: m.AuthModal })));
+const ProfileModal = lazy(() => import('./components/ProfileModal').then((m) => ({ default: m.ProfileModal })));
+const SecurityHoneypotModal = lazy(() => import('./components/SecurityHoneypotModal').then((m) => ({ default: m.SecurityHoneypotModal })));
+const ConsoleSecurity = lazy(() => import('./components/ConsoleSecurity').then((m) => ({ default: m.ConsoleSecurity })));
 
 export function App() {
   // 🎨 Gestión de los 2 Temas Oficiales Independientes (Diurno ☀️ vs Espectral 🌙)
@@ -64,7 +78,6 @@ export function App() {
   const handleUpdateUser = (updated: CreatorProfile) => {
     setCurrentUser(updated);
     localStorage.setItem('creadores_active_user', JSON.stringify(updated));
-    // Actualizar también en los artículos del usuario si cambió el nombre, bio, avatar o redes
     setArticles((prev) =>
       prev.map((art) =>
         art.authorId === updated.id
@@ -83,15 +96,24 @@ export function App() {
     );
   };
 
-  // 📝 Artículos del Hub (Carga reactiva desde DynamoDB Serverless)
+  // 📝 Publicaciones del Hub (Carga reactiva desde DynamoDB Serverless)
   const [articles, setArticles] = useState<Article[]>(() => {
+    const saved = localStorage.getItem('creadores_articles');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch {
+        // ignore
+      }
+    }
     return INITIAL_ARTICLES;
   });
 
   // Carga inicial desde DynamoDB Serverless
   useEffect(() => {
     getArticles().then((data) => {
-      if (Array.isArray(data)) {
+      if (Array.isArray(data) && data.length > 0) {
         setArticles(data);
       }
     });
@@ -101,7 +123,7 @@ export function App() {
     localStorage.setItem('creadores_articles', JSON.stringify(articles));
   }, [articles]);
 
-  // ❤️ Artículos que el usuario actual ya apoyó (Checklist personal por cada creador)
+  // ❤️ Checklist personal de apoyos por cada creador
   const [myLikedIds, setMyLikedIds] = useState<string[]>(() => {
     if (!currentUser) return [];
     const saved = localStorage.getItem(`creadores_likes_${currentUser.id}`);
@@ -115,23 +137,29 @@ export function App() {
     return [];
   });
 
-  // Cargar checklist individual cuando cambia el usuario logueado
+  // Cargar checklist individual sincronizado con DynamoDB (likedBy) y localStorage
   useEffect(() => {
     if (currentUser) {
+      const dbLikedIds = articles
+        .filter((a) => Array.isArray(a.likedBy) && a.likedBy.includes(currentUser.id))
+        .map((a) => a.id);
+
       const saved = localStorage.getItem(`creadores_likes_${currentUser.id}`);
+      let localLikedIds: string[] = [];
       if (saved) {
         try {
-          setMyLikedIds(JSON.parse(saved));
-          return;
+          localLikedIds = JSON.parse(saved);
         } catch {
           // ignore
         }
       }
-      setMyLikedIds([]);
+
+      const merged = Array.from(new Set([...dbLikedIds, ...localLikedIds]));
+      setMyLikedIds(merged);
     } else {
       setMyLikedIds([]);
     }
-  }, [currentUser]);
+  }, [currentUser, articles]);
 
   useEffect(() => {
     if (currentUser) {
@@ -143,6 +171,7 @@ export function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'liked'>('all');
+  const [typeFilter, setTypeFilter] = useState<'all' | ItemType>('all');
 
   // Modales
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -150,7 +179,7 @@ export function App() {
   const [isArticleModalOpen, setIsArticleModalOpen] = useState(false);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
 
-  // Toggle de Apoyo (Solo para usuarios registrados para llevar control real y evitar spam)
+  // Toggle de Apoyo Idempotente (1 creador = 1 voto)
   const handleToggleLike = (articleId: string) => {
     if (!currentUser) {
       setIsAuthModalOpen(true);
@@ -163,39 +192,55 @@ export function App() {
     if (isLiked) {
       setMyLikedIds((prev) => prev.filter((id) => id !== articleId));
       setArticles((prev) =>
-        prev.map((art) =>
-          art.id === articleId ? { ...art, likesCount: Math.max(0, art.likesCount - 1) } : art
-        )
+        prev.map((art) => {
+          if (art.id !== articleId) return art;
+          const newLikedBy = (art.likedBy || []).filter((id) => id !== currentUser.id);
+          return {
+            ...art,
+            likedBy: newLikedBy,
+            likesCount: Math.max(0, art.likesCount - 1),
+          };
+        })
       );
     } else {
       setMyLikedIds((prev) => [...prev, articleId]);
       setArticles((prev) =>
-        prev.map((art) =>
-          art.id === articleId ? { ...art, likesCount: art.likesCount + 1 } : art
-        )
+        prev.map((art) => {
+          if (art.id !== articleId) return art;
+          const currentLiked = art.likedBy || [];
+          const newLikedBy = currentLiked.includes(currentUser.id) ? currentLiked : [...currentLiked, currentUser.id];
+          return {
+            ...art,
+            likedBy: newLikedBy,
+            likesCount: art.likesCount + 1,
+          };
+        })
       );
     }
 
-    // Sincronización en segundo plano con Amazon DynamoDB
-    toggleLike(articleId, delta).catch(() => {});
+    // Sincronización en segundo plano con Amazon DynamoDB pasando el userId real
+    toggleLike(articleId, currentUser.id, delta).catch(() => {});
   };
 
-  // Crear o Actualizar artículo (con vigencia de 30 días deslizantes y persistencia DynamoDB)
+  // Crear o Actualizar publicación permanente
   const handleSaveArticle = async (articleData: Partial<Article>) => {
     if (!currentUser) return;
 
     if (articleData.id) {
-      // ✏️ Actualización de artículo existente por su autor
+      // ✏️ Actualización de publicación existente por su autor
       const articleId = articleData.id;
       setArticles((prev) =>
         prev.map((art) =>
           art.id === articleId
             ? {
                 ...art,
+                itemType: articleData.itemType || art.itemType || 'article',
                 title: articleData.title || art.title,
                 summary: articleData.summary || art.summary,
                 category: (articleData.category || art.category) as AWSCategory,
                 builderUrl: articleData.builderUrl || art.builderUrl,
+                wishlistUrl: articleData.wishlistUrl || art.wishlistUrl,
+                commentUrl: articleData.commentUrl || art.commentUrl,
                 linkedinPostUrl: articleData.linkedinPostUrl,
                 instagramPostUrl: articleData.instagramPostUrl,
               }
@@ -210,14 +255,17 @@ export function App() {
         authorId: currentUser.id,
       }).catch((err) => console.warn('Error actualizando en DynamoDB:', err));
     } else {
-      // 🚀 Publicación de nuevo artículo con TTL de 30 días deslizantes
+      // 🚀 Publicación permanente sin expiración por TTL
       const now = Date.now();
       const localNewArticle: Article = {
-        id: `art_${now}`,
+        id: `hub_${now}`,
+        itemType: articleData.itemType || 'article',
         title: articleData.title || '',
         summary: articleData.summary || '',
         category: (articleData.category || 'Developer Tools') as AWSCategory,
         builderUrl: articleData.builderUrl || '',
+        wishlistUrl: articleData.wishlistUrl,
+        commentUrl: articleData.commentUrl,
         linkedinPostUrl: articleData.linkedinPostUrl,
         instagramPostUrl: articleData.instagramPostUrl,
         authorId: currentUser.id,
@@ -229,8 +277,6 @@ export function App() {
         authorGithubUrl: currentUser.githubUrl,
         authorInstagramUrl: currentUser.instagramUrl,
         createdAt: new Date().toISOString(),
-        expiresAt: new Date(now + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        ttl: Math.floor(now / 1000) + 30 * 24 * 60 * 60,
         likesCount: 0,
       };
 
@@ -271,18 +317,15 @@ export function App() {
 
   // 🛡️ Derecho al olvido: Eliminar cuenta, sesión y todas las publicaciones del usuario
   const handleDeleteAccount = async (userId: string) => {
-    // 1. Eliminar publicaciones del autor en DynamoDB
     const userArticles = articles.filter((a) => a.authorId === userId);
     for (const art of userArticles) {
       deleteArticle(art.id, userId).catch(() => {});
     }
 
-    // 2. Limpiar del estado y almacenamiento local
     setArticles((prev) => prev.filter((a) => a.authorId !== userId));
     localStorage.removeItem('creadores_active_user');
     localStorage.removeItem(`creadores_likes_${userId}`);
 
-    // 3. Resetear sesión y cerrar modales
     setMyLikedIds([]);
     setCurrentUser(null);
     setIsProfileModalOpen(false);
@@ -290,9 +333,15 @@ export function App() {
     alert('Tu cuenta, checklist y publicaciones han sido eliminados correctamente del Hub.');
   };
 
-  // Filtrado reactivo (coincide por título, resumen, autor y también por categoría/etiquetas)
+  // Filtrado reactivo (coincide por tipo, título, resumen, autor y categoría)
   const filteredArticles = useMemo(() => {
     return articles.filter((art) => {
+      // Filtro por tipo de contribución (Artículo, Wishlist, Comentario)
+      if (typeFilter !== 'all') {
+        const currentType = art.itemType || 'article';
+        if (currentType !== typeFilter) return false;
+      }
+
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
         const matchesTitle = art.title.toLowerCase().includes(q);
@@ -312,15 +361,14 @@ export function App() {
 
       return true;
     });
-  }, [articles, searchQuery, selectedCategory, statusFilter, myLikedIds]);
+  }, [articles, typeFilter, searchQuery, selectedCategory, statusFilter, myLikedIds]);
 
-  // Paginación inteligente: Solo muestra los primeros 20 artículos inicialmente para no saturar
+  // Paginación inteligente: 20 publicaciones iniciales
   const [visibleCount, setVisibleCount] = useState<number>(20);
 
-  // Reiniciar a 20 artículos si cambia la búsqueda o categoría
   useEffect(() => {
     setVisibleCount(20);
-  }, [searchQuery, selectedCategory, statusFilter]);
+  }, [searchQuery, selectedCategory, statusFilter, typeFilter]);
 
   const displayedArticles = useMemo(() => {
     return filteredArticles.slice(0, visibleCount);
@@ -328,15 +376,20 @@ export function App() {
 
   const stats = useMemo(() => {
     const total = articles.length;
+    const articlesCount = articles.filter((a) => (a.itemType || 'article') === 'article').length;
+    const wishlistsCount = articles.filter((a) => a.itemType === 'wishlist').length;
+    const commentsCount = articles.filter((a) => a.itemType === 'comment').length;
     const supported = myLikedIds.filter((id) => articles.some((a) => a.id === id)).length;
     const pending = Math.max(0, total - supported);
-    return { total, supported, pending };
+    return { total, articlesCount, wishlistsCount, commentsCount, supported, pending };
   }, [articles, myLikedIds]);
 
   return (
     <div className="min-h-screen bg-background text-ink flex flex-col transition-colors duration-300 relative overflow-x-hidden">
-      {/* 🔒 Auditoría y Mensaje de Seguridad en Consola (AWS UG Playa Vicente) */}
-      <ConsoleSecurity />
+      {/* Auditoría y Mensaje de Seguridad en Consola (AWS UG Playa Vicente) */}
+      <Suspense fallback={null}>
+        <ConsoleSecurity />
+      </Suspense>
 
       {/* 🔮 Canvas de Partículas Global: Animación interactiva en TODO el sitio web */}
       <ParticlesBg />
@@ -359,7 +412,6 @@ export function App() {
         
         {/* ── HERO BANNER DEL HUB DE CREADORES ── */}
         <section className="relative rounded-3xl p-6 sm:p-10 border border-border glass-card overflow-hidden">
-          {/* Orbes de luz ambientales con pulso suave estilo UG Playa Vicente */}
           <div className="absolute -top-24 -right-24 w-72 h-72 bg-accent/20 rounded-full blur-3xl pointer-events-none animate-pulse" />
           <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-accent/15 rounded-full blur-3xl pointer-events-none animate-pulse" />
 
@@ -367,16 +419,16 @@ export function App() {
             <div className="max-w-2xl flex-1">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full badge-accent text-xs font-bold mb-3 sm:mb-4">
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Comunidad Abierta &middot; AWS Builder Center & Creadores LATAM</span>
+                <span>AWS Builder Center & Creadores LATAM &middot; AWS UG Playa Vicente</span>
               </div>
 
               <h1 className="font-display font-extrabold text-2xl sm:text-4xl text-ink tracking-tight leading-tight mb-3">
-                Hub Comunitario de Creadores{' '}
+                Hub de Creadores y Misiones{' '}
                 <span className="spectrum-text">AWS Builder Center</span>
               </h1>
 
               <p className="text-xs sm:text-sm text-muted leading-relaxed mb-6">
-                Lee, apoya y amplifica los artículos técnicos de la comunidad. Aunque esta plataforma nació inspirada en el Bootcamp de Creación de Contenido LATAM, está abierta para que cualquier builder comparta sus aprendizajes, dé visibilidad a sus publicaciones y lleve su propio checklist interactivo.
+                Impulsa tus publicaciones técnicas, vota propuestas en la <strong>Wishlist de AWS</strong> y participa en debates con <strong>feedback constructivo</strong>. Ayudémonos como comunidad hispanohablante a desbloquear las <strong>21 misiones</strong> de AWS Builder Center.
               </p>
 
               {/* Aviso de acción según estado de sesión */}
@@ -393,10 +445,10 @@ export function App() {
                     />
                     <div>
                       <p className="text-sm font-bold text-ink">
-                        ¡Bienvenido/a, {currentUser.name}! 👋
+                        ¡Hola de nuevo, {currentUser.name}! 👋
                       </p>
                       <p className="text-xs text-muted">
-                        Comparte tus posts de AWS Builder Center para recibir apoyo mutuo.
+                        Comparte tus artículos, deseos de Wishlist o comentarios de valor para recibir apoyo.
                       </p>
                     </div>
                   </div>
@@ -410,7 +462,7 @@ export function App() {
                       className="btn-primary-gradient px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md"
                     >
                       <PlusCircle className="w-4 h-4" />
-                      <span>Publicar mi Artículo</span>
+                      <span>Nueva Publicación</span>
                     </button>
                     <button
                       onClick={() => setIsProfileModalOpen(true)}
@@ -429,10 +481,10 @@ export function App() {
                     </div>
                     <div>
                       <p className="text-xs font-bold text-ink">
-                        ¿Creas o compartes contenido técnico en AWS?
+                        ¿Participas en AWS Builder Center o Creadores LATAM?
                       </p>
                       <p className="text-[11px] text-muted">
-                        Cualquier builder de la comunidad puede iniciar sesión para registrar sus posts de AWS Builder Center, dar difusión y recibir apoyo.
+                        Inicia sesión con Google para compartir tus artículos, votar en la Wishlist y llevar tu checklist de apoyos mutuos.
                       </p>
                     </div>
                   </div>
@@ -447,7 +499,7 @@ export function App() {
               )}
             </div>
 
-            {/* Emblema Oficial AWSUG Playa Vicente con Aura Espectral */}
+            {/* Emblema Oficial AWSUG Playa Vicente */}
             <div className="relative shrink-0 hidden md:flex items-center justify-center w-36 h-36 lg:w-44 lg:h-44">
               <div className="absolute inset-0 bg-purple-500/25 rounded-full blur-2xl animate-pulse pointer-events-none" />
               <img
@@ -459,23 +511,109 @@ export function App() {
           </div>
         </section>
 
-        {/* ── PANEL DE FILTROS & CHECKLIST TO-DO ── */}
-        <section className="space-y-3">
+        {/* ── CARD INFORMATIVO: LAS 21 MISIONES DE AWS BUILDER CENTER & LINKTREE ── */}
+        <section className="rounded-2xl p-4 sm:p-5 border border-purple-500/30 bg-purple-500/5 backdrop-blur-sm flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+          <div className="flex items-start gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center shrink-0 mt-0.5">
+              <Award className="w-6 h-6 text-purple-400" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="font-display font-bold text-sm sm:text-base text-ink">
+                  Estrategia Comunitaria: Las 21 Misiones de AWS Builder Center
+                </h2>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-500 border border-amber-500/30">
+                  Voucher 100% Examen AWS
+                </span>
+              </div>
+              <p className="text-xs text-muted mt-1 leading-relaxed max-w-3xl">
+                Al completar las 21 misiones (lectura, artículos, votos en <strong>Wishlist</strong> y <strong>comentarios de alto valor</strong>), AWS entrega hasta $30 USD en créditos y un voucher del 100% para certificación Foundational (CLF-C02 o AIF-C01). ¡Colaboremos para que ningún builder se quede sin su insignia!
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0 self-end lg:self-center">
+            <a
+              href="https://linktr.ee/awsusergroupplayavicente"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-purple-500/30 bg-purple-500/15 hover:bg-purple-500/25 text-purple-600 dark:text-purple-300 text-xs font-bold transition-all shadow-sm"
+              title="Acceder a todos los canales, meetups y redes del AWS User Group Playa Vicente"
+            >
+              <Calendar className="w-3.5 h-3.5" />
+              <span>Eventos & Meetups UG</span>
+              <ExternalLink className="w-3 h-3 opacity-75" />
+            </a>
+          </div>
+        </section>
+
+        {/* ── PANEL DE FILTROS & PESTAÑAS DE CONTRIBUCIÓN ── */}
+        <section className="space-y-3.5">
           
+          {/* Pestañas Maestras: Todos vs Artículos vs Wishlist vs Comentarios */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs no-scrollbar">
+            <button
+              onClick={() => setTypeFilter('all')}
+              className={`px-3.5 py-2 rounded-xl font-bold transition-all whitespace-nowrap flex items-center gap-2 ${
+                typeFilter === 'all'
+                  ? 'bg-purple-600 text-white shadow-md'
+                  : 'bg-surface border border-border text-muted hover:text-ink hover:bg-surface-hover'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Todo el Hub ({stats.total})</span>
+            </button>
+
+            <button
+              onClick={() => setTypeFilter('article')}
+              className={`px-3.5 py-2 rounded-xl font-bold transition-all whitespace-nowrap flex items-center gap-2 ${
+                typeFilter === 'article'
+                  ? 'bg-purple-600 text-white shadow-md'
+                  : 'bg-surface border border-border text-muted hover:text-ink hover:bg-surface-hover'
+              }`}
+            >
+              <FileText className="w-3.5 h-3.5 text-purple-400" />
+              <span>Artículos Técnicos ({stats.articlesCount})</span>
+            </button>
+
+            <button
+              onClick={() => setTypeFilter('wishlist')}
+              className={`px-3.5 py-2 rounded-xl font-bold transition-all whitespace-nowrap flex items-center gap-2 ${
+                typeFilter === 'wishlist'
+                  ? 'bg-amber-600 text-white shadow-md'
+                  : 'bg-surface border border-border text-muted hover:text-ink hover:bg-surface-hover'
+              }`}
+            >
+              <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
+              <span>Wishlist AWS ({stats.wishlistsCount})</span>
+            </button>
+
+            <button
+              onClick={() => setTypeFilter('comment')}
+              className={`px-3.5 py-2 rounded-xl font-bold transition-all whitespace-nowrap flex items-center gap-2 ${
+                typeFilter === 'comment'
+                  ? 'bg-emerald-600 text-white shadow-md'
+                  : 'bg-surface border border-border text-muted hover:text-ink hover:bg-surface-hover'
+              }`}
+            >
+              <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Comentarios & Feedback ({stats.commentsCount})</span>
+            </button>
+          </div>
+
+          {/* Barra de búsqueda y selector de categoría */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            {/* Buscador */}
             <div className="relative flex-1">
               <Search className="absolute left-3.5 top-3 w-4 h-4 text-muted" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Buscar por título, tema o autor..."
+                placeholder="Buscar por título, propuesta, debate o autor..."
                 className="w-full bg-surface border border-border rounded-xl pl-10 pr-4 py-2.5 text-xs text-ink placeholder:text-muted/60 focus:outline-none focus:border-purple-500 transition-colors shadow-sm"
               />
             </div>
 
-            {/* Selector de categoría */}
             <div className="sm:w-64">
               <select
                 value={selectedCategory}
@@ -492,24 +630,24 @@ export function App() {
             </div>
           </div>
 
-          {/* Filtros de Apoyo Comunitario (To-Do) */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+          {/* Filtros de Apoyo Comunitario (Checklist To-Do) */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs no-scrollbar">
             <button
               onClick={() => setStatusFilter('all')}
               className={`px-3 py-1.5 rounded-lg font-semibold transition-all whitespace-nowrap ${
                 statusFilter === 'all'
-                  ? 'bg-purple-500 text-white shadow-sm'
+                  ? 'bg-purple-500/20 text-purple-600 dark:text-purple-300 border border-purple-500/40'
                   : 'bg-surface border border-border text-muted hover:text-ink'
               }`}
             >
-              Todos ({stats.total})
+              Ver todos
             </button>
 
             <button
               onClick={() => setStatusFilter('pending')}
               className={`px-3 py-1.5 rounded-lg font-semibold transition-all whitespace-nowrap flex items-center gap-1.5 ${
                 statusFilter === 'pending'
-                  ? 'bg-purple-500 text-white shadow-sm'
+                  ? 'bg-purple-500/20 text-purple-600 dark:text-purple-300 border border-purple-500/40'
                   : 'bg-surface border border-border text-muted hover:text-ink'
               }`}
             >
@@ -523,7 +661,7 @@ export function App() {
               onClick={() => setStatusFilter('liked')}
               className={`px-3 py-1.5 rounded-lg font-semibold transition-all whitespace-nowrap flex items-center gap-1.5 ${
                 statusFilter === 'liked'
-                  ? 'bg-purple-500 text-white shadow-sm'
+                  ? 'bg-purple-500/20 text-purple-600 dark:text-purple-300 border border-purple-500/40'
                   : 'bg-surface border border-border text-muted hover:text-ink'
               }`}
             >
@@ -537,7 +675,7 @@ export function App() {
 
         </section>
 
-        {/* ── LISTA DE ARTÍCULOS ── */}
+        {/* ── LISTA DE PUBLICACIONES ── */}
         <section className="space-y-4">
           {articles.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-border p-12 text-center bg-surface/50">
@@ -546,7 +684,7 @@ export function App() {
                 ¡Aún no hay publicaciones registradas!
               </p>
               <p className="text-xs text-muted mt-1 max-w-md mx-auto">
-                Sé el primer builder de la comunidad en compartir tus artículos de AWS Builder Center, LinkedIn o Instagram para dar difusión mutua.
+                Sé el primer builder de la comunidad en compartir tus artículos, deseos de Wishlist o comentarios con feedback para recibir apoyo mutuo.
               </p>
               <button
                 onClick={() => {
@@ -560,7 +698,7 @@ export function App() {
                 className="btn-primary-gradient px-5 py-2.5 rounded-xl text-xs font-bold inline-flex items-center gap-2 mt-4 shadow-md"
               >
                 <PlusCircle className="w-4 h-4" />
-                <span>Publicar mi primer artículo</span>
+                <span>Publicar mi primera contribución</span>
               </button>
             </div>
           ) : filteredArticles.length === 0 ? (
@@ -570,7 +708,7 @@ export function App() {
                 No se encontraron publicaciones con estos filtros.
               </p>
               <p className="text-xs text-muted mt-1">
-                Prueba ajustando el término de búsqueda o la categoría seleccionada.
+                Prueba ajustando el término de búsqueda, la pestaña o la categoría seleccionada.
               </p>
             </div>
           ) : (
@@ -591,14 +729,14 @@ export function App() {
                 />
               ))}
 
-              {/* Botón de paginación / Ver más cuando hay más de 20 artículos */}
+              {/* Botón de paginación */}
               {visibleCount < filteredArticles.length && (
                 <div className="pt-4 pb-2 text-center">
                   <button
                     onClick={() => setVisibleCount((prev) => prev + 20)}
                     className="px-6 py-2.5 rounded-xl border border-border bg-surface hover:bg-surface-hover text-ink text-xs font-bold transition-all shadow-sm hover:border-purple-500/50"
                   >
-                    <span>Cargar más publicaciones ({filteredArticles.length - visibleCount} restantes)</span>
+                    <span>Cargar más ({filteredArticles.length - visibleCount} restantes)</span>
                   </button>
                 </div>
               )}
@@ -620,7 +758,16 @@ export function App() {
             <span className="font-medium text-ink">AWS User Group Playa Vicente &middot; Creadores LATAM</span>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-wrap">
+            <a
+              href="https://linktr.ee/awsusergroupplayavicente"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-purple-400 font-semibold hover:underline flex items-center gap-1"
+            >
+              <span>Linktree Oficial</span>
+              <ExternalLink className="w-3 h-3" />
+            </a>
             <a
               href="https://awsugplayavicente.com"
               target="_blank"
@@ -649,48 +796,49 @@ export function App() {
         </div>
       </footer>
 
-      {/* 🛡️ Honeypot Visual de Seguridad DevSecOps (Captura /admin/, /wp-admin/, SQLi, XSS) */}
-      <SecurityHoneypotModal />
+      {/* Honeypot y Modales cargados dinámicamente bajo demanda */}
+      <Suspense fallback={null}>
+        <SecurityHoneypotModal />
 
-      {/* ── MODALES ── */}
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        onLoginSuccess={handleLoginSuccess}
-      />
+        <AuthModal
+          isOpen={isAuthModalOpen}
+          onClose={() => setIsAuthModalOpen(false)}
+          onLoginSuccess={handleLoginSuccess}
+        />
 
-      {currentUser && (
-        <>
-          <ProfileModal
-            isOpen={isProfileModalOpen}
-            onClose={() => setIsProfileModalOpen(false)}
-            currentUser={currentUser}
-            onUpdateUser={handleUpdateUser}
-            onOpenPublishArticle={() => {
-              setEditingArticle(null);
-              setIsArticleModalOpen(true);
-            }}
-            onDeleteAccount={handleDeleteAccount}
-            userArticles={articles.filter((a) => a.authorId === currentUser.id)}
-            onEditArticle={(art) => {
-              setEditingArticle(art);
-              setIsArticleModalOpen(true);
-            }}
-            onDeleteArticle={handleDeleteArticle}
-          />
+        {currentUser && (
+          <>
+            <ProfileModal
+              isOpen={isProfileModalOpen}
+              onClose={() => setIsProfileModalOpen(false)}
+              currentUser={currentUser}
+              onUpdateUser={handleUpdateUser}
+              onOpenPublishArticle={() => {
+                setEditingArticle(null);
+                setIsArticleModalOpen(true);
+              }}
+              onDeleteAccount={handleDeleteAccount}
+              userArticles={articles.filter((a) => a.authorId === currentUser.id)}
+              onEditArticle={(art) => {
+                setEditingArticle(art);
+                setIsArticleModalOpen(true);
+              }}
+              onDeleteArticle={handleDeleteArticle}
+            />
 
-          <ArticleModal
-            isOpen={isArticleModalOpen}
-            onClose={() => {
-              setIsArticleModalOpen(false);
-              setEditingArticle(null);
-            }}
-            author={currentUser}
-            initialArticle={editingArticle}
-            onSubmit={handleSaveArticle}
-          />
-        </>
-      )}
+            <ArticleModal
+              isOpen={isArticleModalOpen}
+              onClose={() => {
+                setIsArticleModalOpen(false);
+                setEditingArticle(null);
+              }}
+              author={currentUser}
+              initialArticle={editingArticle}
+              onSubmit={handleSaveArticle}
+            />
+          </>
+        )}
+      </Suspense>
 
     </div>
   );

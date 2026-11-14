@@ -1,26 +1,49 @@
-# 🦎 Hub Comunitario de Creadores — AWS Builder Center LATAM
-> **Iniciativa de apoyo mutuo para los participantes del Bootcamp de Creación de Contenido Tech LATAM 2026**  
-> Desarrollado por **AWS User Group Playa Vicente** con arquitectura 100% Serverless ($0.00 USD de costo operativo).
+# 🦎 Hub Comunitario de Creadores & Misiones — AWS Builder Center LATAM
+> **Iniciativa de apoyo mutuo para creadores técnicos y participantes del programa de misiones de AWS Builder Center**  
+> Desarrollado por **AWS User Group Playa Vicente** con arquitectura 100% Serverless ($0.00 USD de costo operativo).  
+> **Comunidad & Eventos:** [https://linktr.ee/awsusergroupplayavicente](https://linktr.ee/awsusergroupplayavicente) | **Sitio en vivo:** [https://creadores.awsugplayavicente.com](https://creadores.awsugplayavicente.com)
 
 ---
 
-## 🎯 ¿Qué es este proyecto y por qué existe?
+## 🎯 ¿Qué es este proyecto y qué resuelve?
 
-En el **Bootcamp de Creadores de Contenido Tech LATAM 2026** (AWS Builder Center), muchos participantes comparten sus artículos técnicos en LinkedIn y en la plataforma de AWS, pero a veces los posts se pierden en el feed o no sabemos a quiénes ya apoyamos con lecturas, likes y reposts.
+En la comunidad de **AWS Builder Center** y en el programa de creadores de LATAM, los builders enfrentan dos grandes retos:
+1. **Pérdida de visibilidad:** Muchos artículos de valor, propuestas en la lista de deseos (**Wishlist**) y debates técnicos se pierden en el feed general sin recibir la retroalimentación que merecen.
+2. **El reto de las 21 Misiones de AWS Builder Center:** Para que los estudiantes y creadores desbloqueen los hitos del programa (hasta **$30 USD en créditos AWS** y un **voucher del 100% para certificación AWS Foundational**), es obligatorio acumular lecturas, votos en Wishlist y likes en comentarios de valor.
 
-Este **Hub Comunitario** resuelve ese problema de raíz:
-1. **Un solo lugar centralizado:** Cada creador registra el enlace oficial de su post en AWS Builder Center y su publicación de difusión en LinkedIn o Instagram.
-2. **Checklist personal de apoyo:** Cada miembro inicia sesión y tiene su propio panel interactivo para marcar qué artículos ya apoyó y cuáles tiene pendientes, con una barra de progreso que motiva el apoyo mutuo.
-3. **Cero posts eternos (Vigencia de 30 días deslizantes):** Para mantener el contenido siempre fresco y dinámico, cada artículo vive exactamente **30 días continuos** en el Hub. Mediante la funcionalidad nativa de **TTL (Time to Live) en Amazon DynamoDB**, los posts antiguos se depuran de forma automática sin necesidad de intervención manual ni costos residuales.
+Este **Hub Comunitario** centraliza todo el esfuerzo colectivo en un solo lugar:
+* 📝 **Artículos Técnicos:** Comparte guías, tutoriales y casos reales para recibir lecturas y difusión en LinkedIn/Instagram.
+* 💡 **Wishlist de AWS:** Propón ideas de nuevas funcionalidades para los servicios de AWS (`https://builder.aws.com/wishlist/...`) y recibe votos comunitarios para que los Product Managers de AWS escuchen las necesidades de LATAM.
+* 💬 **Comentarios de Alto Valor (Feedback & Debate):** Comparte enlaces directos a hilos de discusión (`https://builder.aws.com/comment/...#comments`). Bajo la filosofía *"Cero comentarios vacíos tipo 'nice post'"*, fomentamos preguntas técnicas, análisis de arquitectura y lecciones de experiencia real.
+* 🗄️ **Publicaciones Permanentes:** A diferencia de la versión inicial con expiración de 30 días, ahora todas las publicaciones son **permanentes**, conservando la memoria histórica y el portafolio de cada creador.
+* ❤️ **Checklist personal de apoyo:** Cada usuario lleva el control de qué publicaciones ya apoyó y cuáles tiene pendientes.
+
+---
+
+## 🎖️ Estrategia: Las 21 Misiones de AWS Builder Center
+
+El programa de gamificación de AWS Builder Center premia el compromiso activo con recompensas acumulativas:
+* **Hito 1 (7 Insignias):** $10 USD en Créditos de AWS.
+* **Hito 2 (14 Insignias):** $20 USD adicionales en Créditos de AWS ($30 USD acumulados).
+* **Hito 3 (21 Insignias):** Voucher oficial del 100% para examen de certificación AWS Foundational (CLF-C02 o AIF-C01, $100 USD de valor).
+
+### ¿Cómo ayuda el Hub a desbloquearlas?
+1. **Insignias de Arranque (Día 1):** Registro de perfil, avatar y publicación del primer artículo y primer deseo en Wishlist.
+2. **Insignias de Racha (Streaks):** Votación semanal en la Wishlist y aportes continuos durante 30 y 90 días.
+3. **Insignias de Impacto Comunitario (Peer Interaction):**
+   * *Conversation Starter:* Comentarios que reciben respuestas de otros miembros.
+   * *Idea Influencer:* Votos acumulados en tus deseos de Wishlist.
+   * *Meaningful Contributor:* Likes recibidos en tus comentarios sustanciales.
+   * *Valued Creator:* Likes recibidos en tus artículos técnicos.
 
 ---
 
 ## 🏗️ Arquitectura Serverless ($0.00 USD en Free Tier)
 
-Siguiendo el principio de **cuidado del bolsillo** de nuestra comunidad, todo el sistema está diseñado para operar permanentemente sin costos de infraestructura:
+Todo el sistema está optimizado para operar permanentemente sin costos de infraestructura:
 
 ```
-[ Navegador del Usuario / Creador ]
+[ Navegador del Creador / Visitante ]
         │
         ├─► [ Google OAuth 2.0 / Cognito ]  --> Autenticación oficial sin contraseñas locales
         │
@@ -35,48 +58,25 @@ Siguiendo el principio de **cuidado del bolsillo** de nuestra comunidad, todo el
             [ Amazon DynamoDB NoSQL ]
                • Tabla: creadores-builder-articles
                • Facturación: On-Demand (PAY_PER_REQUEST)
-               • TTL automático: 30 días deslizantes por artículo
+               • Persistencia: Permanente (Sin expiración forzada)
 ```
 
-### Componentes de AWS Desplegados y Activos:
-* **Persistencia:** Tabla Amazon DynamoDB `creadores-builder-articles` en `us-east-1`, con modo de facturación `PAY_PER_REQUEST` ($0.00 USD en reposo) y atributo TTL `ttl`.
-* **Backend Serverless:** Función AWS Lambda `creadores-builder-api` (Node.js 20.x, arquitectura ligera con AWS SDK v3) integrada con **Amazon API Gateway HTTP API v2** (`https://6qxtspu588.execute-api.us-east-1.amazonaws.com`).
-* **Seguridad IAM:** Rol dedicado `creadores-builder-lambda-role` con políticas estrictas de menor privilegio limitadas únicamente a la tabla de DynamoDB y CloudWatch Logs.
-* **Autenticación Federada:** Google Identity Services (`VITE_GOOGLE_CLIENT_ID`) con dominios autorizados y User Pool de respaldo en Amazon Cognito (`us-east-1_5oIhdYrO6`).
+---
+
+## 🛡️ Auditoría de Seguridad & DevSecOps (Lead Auditor ISO 27001)
+
+El proyecto cuenta con un informe de seguridad técnico detallado:  
+📄 **[AUDITORIA_SEGURIDAD_OWASP.md](file:///home/siegfried_fs/Documents/proyectos/creadores-builder/AUDITORIA_SEGURIDAD_OWASP.md)**
+
+### Hallazgos clave documentados para estudio y remediación:
+1. **OWASP API2:2023 (Broken Authentication):** La Lambda actual no verifica criptográficamente el JWT en `POST/PUT/DELETE`; confía en el campo `authorId` del payload JSON. Remediación: Implementar JWT Authorizer en API Gateway v2 conectado a Cognito o Google.
+2. **OWASP API1:2023 (BOLA / IDOR):** Al estar expuesto el `authorId`, un actor externo podría intentar modificar o borrar registros de otros creadores. Remediación: Extraer el `sub` directamente del token verificado por el Authorizer.
+3. **OWASP API8:2023 (CORS Permisivo):** Restringir `Access-Control-Allow-Origin` únicamente al dominio de producción y desarrollo local.
+4. **Honeypot en Consola (F12) y Rutas Administrativas:** Trampas educativas para visitantes curiosos que intentan inyecciones SQL o accesos a `/admin/` o `/.env`.
 
 ---
 
-## 🔒 Seguridad Práctica (Sello AWS UG Playa Vicente)
-
-Inspirado en la cultura de ciberseguridad y auditoría del grupo de usuarios:
-* **Honeypot en Consola de Desarrollador:** Si alguien abre la consola del navegador (`F12`), es recibido con un banner ASCII oficial de bienvenida y detalles educativos de la arquitectura.
-* **Auditoría de Entradas en Tiempo Real:** Si un curioso intenta inyectar patrones SQL (`union select`, `' or 1=1 --`), scripts XSS (`<script>`, `alert(`) o escaneo de rutas administrativas (`/admin`, `/wp-admin`, `/.env`) en la URL o en el buscador, la aplicación emite explicaciones pedagógicas sobre por qué DynamoDB NoSQL y React sanitizado neutralizan estos vectores.
-* **Límites Estrictos Anti-Desbordamiento:**
-  * **Título del Artículo:** Máximo 120 caracteres con contador en vivo.
-  * **Resumen / Aprendizaje:** Máximo 220 caracteres con contador en vivo y `line-clamp-3` en tarjeta.
-  * **Nombre de Autor:** Máximo 50 caracteres.
-  * **Biografía / Rol de Autor:** Máximo 100 caracteres.
-* **Autorización de Autor (Ownership):** Solo el creador que registró un artículo puede ver los botones para **editarlo (`Pencil`)** o **eliminarlo (`Trash2`)**.
-
----
-
-## 📋 Checklist de Producción: ¿Se puede publicar ya?
-
-### ✅ Lo que ya está 100% probado y funcionando en producción:
-* [x] **Dominio y SSL en vivo**: Disponible en [`https://creadores.awsugplayavicente.com`](https://creadores.awsugplayavicente.com) con certificado AWS ACM y Route 53.
-* [x] **Despliegue continuo en rama `bankai`**: Integrado con AWS Amplify Hosting.
-* [x] **Base de datos DynamoDB activa y conectada** con la API Serverless en AWS (`https://6qxtspu588.execute-api.us-east-1.amazonaws.com`).
-* [x] **Endpoints funcionales** de creación (`POST`), consulta (`GET`), edición (`PUT`), eliminación (`DELETE`) y likes atómicos (`POST /like`).
-* [x] **Resiliencia offline / fallback**: si la red falla, la aplicación respalda y lee automáticamente desde `localStorage` sin romperse.
-* [x] **Autenticación con Google e identidad determinista**: vinculación transparente de cuentas por correo electrónico con opción de eliminar cuenta (`GDPR / Privacidad`).
-* [x] **Checklist individual de apoyos** persistido por usuario con barra de progreso.
-* [x] **Formato canónico de perfiles de Builder Center**: auto-resolución estricta a `https://builder.aws.com/community/@usuario`.
-* [x] **Temas visuales independientes**: Diurno ☀️ (gris perla suave anti-reflejo) y Espectral 🌙 con fondo animado de partículas interactivo.
-* [x] **Build de TypeScript y Vite limpio** (0 errores, tiempos de carga < 1s).
-
----
-
-## 💻 Desarrollo Local
+## 💻 Desarrollo Local y Pasos de Ejecución
 
 ```bash
 # 1. Clonar el repositorio y entrar al proyecto
@@ -91,13 +91,14 @@ cp .env.example .env
 # 4. Iniciar servidor local
 npm run dev
 
-# 5. Compilar para producción
+# 5. Compilar para producción (TypeScript + Vite)
 npm run build
 ```
 
 ---
 
-## 🤝 Filosofía Editorial (Bootcamp de Creadores)
-* **Conectar > Impresionar:** Hablamos con humildad, transparencia y curiosidad, de builder a builder. Cero lenguaje inflado o corporativo.
-* **Experiencias Reales:** Compartimos qué construimos, qué se rompió en el camino y qué aprendimos tras bambalinas.
-* **Comunidad:** Si participas en el Bootcamp de Creación de Contenido LATAM, publica tu artículo y apoya el de tus compañeros.
+## 🌐 Enlaces Oficiales de la Comunidad
+* **Linktree Maestro (Eventos, Meetups, Redes):** [https://linktr.ee/awsusergroupplayavicente](https://linktr.ee/awsusergroupplayavicente)
+* **Portal Oficial:** [https://awsugplayavicente.com](https://awsugplayavicente.com)
+* **Canal de Telegram:** [https://t.me/AUGPlayaVicente](https://t.me/AUGPlayaVicente)
+* **Comunidad de WhatsApp:** [https://chat.whatsapp.com/KXQYW7V00q12cSoeijob4h](https://chat.whatsapp.com/KXQYW7V00q12cSoeijob4h)

@@ -122,3 +122,13 @@ h1, h2, h3, h4, .font-display {
   color: var(--muted);
   border: 1px solid var(--border-color);
 }
+
+/* Soporte touch nativo y ocultar barras toscas en listas horizontales de filtros */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}

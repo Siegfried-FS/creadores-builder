@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { Sun, Moon, ExternalLink } from 'lucide-react';
+import { Sun, Moon, ExternalLink, Calendar } from 'lucide-react';
 import type { CreatorProfile } from '../types';
 
 interface NavbarProps {
@@ -58,15 +58,29 @@ export const Navbar: FC<NavbarProps> = ({
 
         {/* Acciones de Navegación y Sesión */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {/* Enlace al Linktree oficial de eventos y redes del User Group */}
+          <a
+            href="https://linktr.ee/awsusergroupplayavicente"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-300 text-xs font-semibold transition-all shadow-sm"
+            title="Ver próximos eventos, Meetups y todas las redes sociales oficiales del AWS UG Playa Vicente"
+          >
+            <Calendar className="w-3.5 h-3.5 text-purple-500" />
+            <span className="hidden sm:inline">Eventos & Redes</span>
+            <span className="sm:hidden">Eventos</span>
+            <ExternalLink className="w-3 h-3 opacity-70" />
+          </a>
+
           {/* Enlace al sitio web oficial de la comunidad */}
           <a
             href="https://awsugplayavicente.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border bg-surface hover:bg-surface-hover text-muted hover:text-ink text-xs font-medium transition-colors"
+            className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border bg-surface hover:bg-surface-hover text-muted hover:text-ink text-xs font-medium transition-colors"
             title="Ir al portal principal de la comunidad AWSUG Playa Vicente"
           >
-            <span>Comunidad</span>
+            <span>Portal</span>
             <ExternalLink className="w-3 h-3 text-purple-600" />
           </a>
 

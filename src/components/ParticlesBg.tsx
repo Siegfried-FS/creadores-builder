@@ -121,13 +121,14 @@ export function ParticlesBg() {
         ctx.globalAlpha = isLight ? 0.75 : 0.85;
         ctx.fill();
 
-        // Líneas entre partículas
+        // Líneas entre partículas con filtro cuadrático previo (evita Math.sqrt innecesario)
         for (let j = i + 1; j < pts.length; j++) {
           const dx = pts[i].x - pts[j].x;
           const dy = pts[i].y - pts[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
+          const distSq = dx * dx + dy * dy;
 
-          if (dist < 135) {
+          if (distSq < 18225) { // 135 * 135
+            const dist = Math.sqrt(distSq);
             ctx.beginPath();
             ctx.moveTo(pts[i].x, pts[i].y);
             ctx.lineTo(pts[j].x, pts[j].y);
@@ -145,9 +146,10 @@ export function ParticlesBg() {
         const my = mouse.current.y;
         const dxm = p.x - mx;
         const dym = p.y - my;
-        const distm = Math.sqrt(dxm * dxm + dym * dym);
+        const distmSq = dxm * dxm + dym * dym;
 
-        if (distm < 150) {
+        if (distmSq < 22500) { // 150 * 150
+          const distm = Math.sqrt(distmSq);
           ctx.beginPath();
           ctx.moveTo(p.x, p.y);
           ctx.lineTo(mx, my);
@@ -158,7 +160,18 @@ export function ParticlesBg() {
         }
       }
 
-      animRef.current = requestAnimationFrame(draw);
+      if (!document.hidden) {
+        animRef.current = requestAnimationFrame(draw);
+      } else {
+        // Si la pestaña está oculta, pausar el ciclo hasta que vuelva a ser visible
+        const onVisible = () => {
+          if (!document.hidden) {
+            document.removeEventListener('visibilitychange', onVisible);
+            animRef.current = requestAnimationFrame(draw);
+          }
+        };
+        document.addEventListener('visibilitychange', onVisible);
+      }
     };
 
     draw();

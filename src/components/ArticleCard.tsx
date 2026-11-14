@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { ExternalLink, Heart, Share2, Trash2, Pencil, Clock } from 'lucide-react';
+import { ExternalLink, Heart, Share2, Trash2, Pencil, Calendar, Lightbulb, MessageSquare, FileText } from 'lucide-react';
 import type { Article } from '../types';
 
 interface ArticleCardProps {
@@ -43,39 +43,76 @@ export const ArticleCard: FC<ArticleCardProps> = ({
     article.authorBuilderUrl || article.authorLinkedinUrl || article.authorGithubUrl || article.authorInstagramUrl
   );
 
+  const itemType = article.itemType || 'article';
+  const targetUrl = article.wishlistUrl || article.commentUrl || article.builderUrl;
+
+  const formattedDate = (() => {
+    try {
+      return new Date(article.createdAt).toLocaleDateString('es-MX', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      });
+    } catch {
+      return 'Reciente';
+    }
+  })();
+
   return (
     <article className="group relative rounded-2xl border border-border bg-surface glass-card transition-all duration-300 overflow-hidden shadow-sm hover:shadow-md hover:border-purple-500/40">
-      {/* Barra superior espectral del UG */}
-      <div className="h-1 w-full bg-gradient-to-r from-purple-700 via-purple-500 to-indigo-500" />
+      {/* Barra superior de acento según el tipo */}
+      <div
+        className={`h-1 w-full ${
+          itemType === 'wishlist'
+            ? 'bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-400'
+            : itemType === 'comment'
+            ? 'bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-400'
+            : 'bg-gradient-to-r from-purple-700 via-purple-500 to-indigo-500'
+        }`}
+      />
 
       <div className="p-4 sm:p-6 flex flex-col md:flex-row gap-5 items-stretch">
         
-        {/* ── CUERPO PRINCIPAL DEL ARTÍCULO (Primero en móvil, derecha en desktop) ── */}
+        {/* ── CUERPO PRINCIPAL (Primero en móvil, derecha en desktop) ── */}
         <div className="flex-1 w-full flex flex-col justify-between min-w-0 order-1 md:order-2">
           <div>
-            {/* Meta superior: Categoría, Vigencia y Controles de edición */}
+            {/* Meta superior: Tipo de Publicación, Categoría y Fecha permanente */}
             <div className="flex items-center justify-between gap-2 mb-2.5">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-md badge-accent">
+                {/* Badge por Tipo */}
+                {itemType === 'wishlist' && (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-500 dark:text-amber-300">
+                    <Lightbulb className="w-3 h-3" />
+                    <span>Wishlist AWS</span>
+                  </span>
+                )}
+
+                {itemType === 'comment' && (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-300">
+                    <MessageSquare className="w-3 h-3" />
+                    <span>Feedback & Debate</span>
+                  </span>
+                )}
+
+                {itemType === 'article' && (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-md bg-purple-500/15 border border-purple-500/30 text-purple-600 dark:text-purple-300">
+                    <FileText className="w-3 h-3" />
+                    <span>Artículo Técnico</span>
+                  </span>
+                )}
+
+                <span className="inline-flex items-center text-xs font-semibold px-2.5 py-0.5 rounded-md badge-accent">
                   {article.category}
                 </span>
 
-                {/* Vigencia de 30 días (DynamoDB TTL) */}
-                {(() => {
-                  const createdTime = new Date(article.createdAt).getTime();
-                  const now = Date.now();
-                  const daysElapsed = Math.floor((now - createdTime) / (1000 * 60 * 60 * 24));
-                  const daysRemaining = Math.max(1, 30 - daysElapsed);
-                  return (
-                    <span
-                      className="inline-flex items-center gap-1 text-[11px] text-muted font-medium px-2 py-0.5 rounded-full bg-surface border border-border"
-                      title="Publicación activa por 30 días continuos con TTL automático en Amazon DynamoDB"
-                    >
-                      <Clock className="w-3 h-3 text-purple-400" />
-                      <span>{daysRemaining > 0 ? `${daysRemaining}d activo` : 'Por renovar'}</span>
-                    </span>
-                  );
-                })()}
+                {/* Fecha Permanente */}
+                <span
+                  className="inline-flex items-center gap-1 text-[11px] text-muted font-medium px-2 py-0.5 rounded-full bg-surface border border-border"
+                  title="Publicación permanente en el Hub"
+                >
+                  <Calendar className="w-3 h-3 text-purple-400" />
+                  <span>{formattedDate}</span>
+                </span>
               </div>
               
               {/* Acciones del autor */}
@@ -84,7 +121,7 @@ export const ArticleCard: FC<ArticleCardProps> = ({
                   <button
                     onClick={() => onEdit(article)}
                     className="text-muted hover:text-purple-400 p-2 rounded-lg hover:bg-purple-500/10 transition-colors"
-                    title="Editar mi artículo"
+                    title="Editar mi publicación"
                   >
                     <Pencil className="w-4 h-4" />
                   </button>
@@ -94,7 +131,7 @@ export const ArticleCard: FC<ArticleCardProps> = ({
                   <button
                     onClick={() => onDelete(article.id)}
                     className="text-muted hover:text-red-400 p-2 rounded-lg hover:bg-red-500/10 transition-colors"
-                    title="Retirar mi artículo"
+                    title="Retirar mi publicación"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -102,14 +139,14 @@ export const ArticleCard: FC<ArticleCardProps> = ({
               </div>
             </div>
 
-            {/* Título del artículo: Grande, destacado y legible */}
+            {/* Título */}
             <h2 className="font-display font-bold text-lg sm:text-xl text-ink leading-snug group-hover:text-purple-400 transition-colors break-words">
-              <a href={article.builderUrl} target="_blank" rel="noopener noreferrer">
+              <a href={targetUrl} target="_blank" rel="noopener noreferrer">
                 {article.title}
               </a>
             </h2>
 
-            {/* Resumen / Aprendizaje */}
+            {/* Resumen / Aprendizaje / Propuesta */}
             {article.summary && (
               <p className="text-xs sm:text-sm text-muted mt-2.5 leading-relaxed line-clamp-3 break-words">
                 {article.summary}
@@ -117,25 +154,43 @@ export const ArticleCard: FC<ArticleCardProps> = ({
             )}
           </div>
 
-          {/* ── SECCIÓN DE DIFUSIÓN & BOTÓN DE APOYO (Compacto en 1 sola línea) ── */}
+          {/* ── SECCIÓN DE DIFUSIÓN & BOTÓN DE APOYO ── */}
           <div className="mt-5 pt-3.5 border-t border-border flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            {/* Botones de Difusión compactos */}
+            {/* Botones de acción directa */}
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-xs text-muted font-medium flex items-center gap-1 mr-1">
                 <Share2 className="w-3.5 h-3.5 text-purple-400" />
-                Difundido:
+                Acción:
               </span>
 
-              {article.builderUrl && (
+              {targetUrl && (
                 <a
-                  href={article.builderUrl}
+                  href={targetUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg btn-primary-gradient shadow-sm whitespace-nowrap"
-                  title="Abrir artículo completo en AWS Builder Center"
+                  className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg shadow-sm whitespace-nowrap ${
+                    itemType === 'wishlist'
+                      ? 'bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold'
+                      : itemType === 'comment'
+                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white font-bold'
+                      : 'btn-primary-gradient'
+                  }`}
+                  title={
+                    itemType === 'wishlist'
+                      ? 'Abrir y votar propuesta en AWS Builder Center Wishlist'
+                      : itemType === 'comment'
+                      ? 'Abrir comentario y participar en el debate de Builder Center'
+                      : 'Abrir artículo completo en AWS Builder Center'
+                  }
                 >
                   <img src="/images/builder_center_icon.png" alt="Builder" className="w-3.5 h-3.5 object-contain" />
-                  <span>Leer</span>
+                  <span>
+                    {itemType === 'wishlist'
+                      ? 'Votar Deseo'
+                      : itemType === 'comment'
+                      ? 'Ver Comentario'
+                      : 'Leer'}
+                  </span>
                   <ExternalLink className="w-3 h-3" />
                 </a>
               )}
@@ -149,7 +204,7 @@ export const ArticleCard: FC<ArticleCardProps> = ({
                   title="Ver post en LinkedIn para dar Like y Repost"
                 >
                   <LinkedinIcon className="w-3.5 h-3.5 text-blue-400" />
-                  <span>Post</span>
+                  <span>LinkedIn</span>
                 </a>
               )}
 
@@ -162,7 +217,7 @@ export const ArticleCard: FC<ArticleCardProps> = ({
                   title="Ver post en Instagram"
                 >
                   <InstagramIcon className="w-3.5 h-3.5 text-pink-400" />
-                  <span>Post</span>
+                  <span>Instagram</span>
                 </a>
               )}
             </div>
@@ -177,7 +232,15 @@ export const ArticleCard: FC<ArticleCardProps> = ({
               }`}
             >
               <Heart className={`w-4 h-4 ${isLikedByMe ? 'fill-purple-400 text-purple-400' : ''}`} />
-              <span>{isLikedByMe ? '¡Ya apoyé!' : 'Dar apoyo'}</span>
+              <span>
+                {isLikedByMe
+                  ? itemType === 'wishlist'
+                    ? '¡Ya voté!'
+                    : '¡Ya apoyé!'
+                  : itemType === 'wishlist'
+                  ? 'Voto Comunitario'
+                  : 'Dar apoyo'}
+              </span>
               <span className="ml-0.5 px-2 py-0.5 rounded-md bg-surface text-[11px] font-mono border border-border">
                 {article.likesCount}
               </span>
@@ -194,54 +257,40 @@ export const ArticleCard: FC<ArticleCardProps> = ({
               <img
                 src={article.authorAvatarUrl || '/images/mascot_opt.png'}
                 alt={article.authorName}
+                loading="lazy"
+                decoding="async"
                 onError={(e) => {
                   (e.currentTarget as HTMLImageElement).src = '/images/mascot_opt.png';
                 }}
                 className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-2xl object-cover bg-purple-500/10 p-0.5 border-2 border-purple-500/30 shadow-sm"
-                loading="lazy"
-              />
-              <span
-                className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-purple-500 ring-2 ring-surface"
-                title="Creador de la comunidad"
               />
             </div>
 
-            {/* Info del creador centrada */}
-            <div className="w-full min-w-0">
-              <span className="text-[10px] text-purple-400 font-bold uppercase tracking-wider block">
-                Builder
-              </span>
-              <h3 className="font-display font-bold text-base sm:text-lg text-ink break-words leading-tight">
+            {/* Datos del Creador */}
+            <div className="min-w-0 w-full">
+              <div className="font-display font-bold text-sm sm:text-base text-ink truncate">
                 {article.authorName}
-              </h3>
+              </div>
+
               {article.authorBio && (
-                <p
-                  className="text-xs text-muted mt-1 leading-snug line-clamp-2 md:line-clamp-3 text-center"
-                  title={article.authorBio}
-                >
+                <p className="text-[11px] text-muted line-clamp-2 mt-0.5 leading-tight">
                   {article.authorBio}
                 </p>
               )}
             </div>
 
-          </div>
-
-          {/* Redes sociales del creador centradas */}
-          {hasSocials && (
-            <div className="mt-3 pt-2.5 border-t border-border/70 w-full flex flex-col items-center">
-              <span className="text-[11px] font-bold text-muted/90 uppercase tracking-wider mb-2 select-none text-center">
-                Redes Sociales
-              </span>
-              <div className="flex items-center justify-center gap-2.5 flex-wrap">
+            {/* Redes Sociales del autor */}
+            {hasSocials && (
+              <div className="w-full pt-2 border-t border-border/60 flex items-center justify-center gap-2 flex-wrap">
                 {article.authorBuilderUrl && (
                   <a
                     href={article.authorBuilderUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-8 h-8 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/25 flex items-center justify-center transition-transform hover:scale-110 shadow-sm"
+                    className="p-1.5 rounded-lg border border-border bg-surface hover:bg-surface-hover text-muted hover:text-ink transition-colors"
                     title="Perfil oficial en AWS Builder Center"
                   >
-                    <img src="/images/builder_center_icon.png" alt="AWS Builder Center" className="w-4 h-4 object-contain" />
+                    <img src="/images/builder_center_icon.png" alt="Builder" className="w-3.5 h-3.5 object-contain" />
                   </a>
                 )}
 
@@ -250,10 +299,10 @@ export const ArticleCard: FC<ArticleCardProps> = ({
                     href={article.authorLinkedinUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-8 h-8 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/25 flex items-center justify-center transition-transform hover:scale-110 shadow-sm"
-                    title="Perfil profesional en LinkedIn"
+                    className="p-1.5 rounded-lg border border-border bg-surface hover:bg-surface-hover text-muted hover:text-blue-400 transition-colors"
+                    title="Perfil en LinkedIn"
                   >
-                    <LinkedinIcon className="w-4 h-4" />
+                    <LinkedinIcon className="w-3.5 h-3.5" />
                   </a>
                 )}
 
@@ -262,10 +311,10 @@ export const ArticleCard: FC<ArticleCardProps> = ({
                     href={article.authorGithubUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-8 h-8 rounded-xl bg-slate-500/10 hover:bg-slate-500/20 text-ink border border-border flex items-center justify-center transition-transform hover:scale-110 shadow-sm"
-                    title="Perfil de código en GitHub"
+                    className="p-1.5 rounded-lg border border-border bg-surface hover:bg-surface-hover text-muted hover:text-ink transition-colors"
+                    title="Perfil en GitHub"
                   >
-                    <GithubIcon className="w-4 h-4" />
+                    <GithubIcon className="w-3.5 h-3.5" />
                   </a>
                 )}
 
@@ -274,15 +323,16 @@ export const ArticleCard: FC<ArticleCardProps> = ({
                     href={article.authorInstagramUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-8 h-8 rounded-xl bg-pink-500/10 hover:bg-pink-500/20 text-pink-400 border border-pink-500/25 flex items-center justify-center transition-transform hover:scale-110 shadow-sm"
-                    title="Perfil personal en Instagram"
+                    className="p-1.5 rounded-lg border border-border bg-surface hover:bg-surface-hover text-muted hover:text-pink-400 transition-colors"
+                    title="Perfil en Instagram"
                   >
-                    <InstagramIcon className="w-4 h-4" />
+                    <InstagramIcon className="w-3.5 h-3.5" />
                   </a>
                 )}
               </div>
-            </div>
-          )}
+            )}
+
+          </div>
         </div>
 
       </div>

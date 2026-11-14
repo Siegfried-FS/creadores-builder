@@ -38,11 +38,14 @@ export async function createArticle(articleData: Partial<Article>): Promise<Arti
     console.warn('[API Serverless] Error en POST DynamoDB, guardando en local:', error);
     const now = Date.now();
     return {
-      id: `art_${now}`,
+      id: `hub_${now}`,
+      itemType: articleData.itemType || 'article',
       title: articleData.title || '',
       summary: articleData.summary || '',
       category: articleData.category || 'Developer Tools',
       builderUrl: articleData.builderUrl || '',
+      wishlistUrl: articleData.wishlistUrl,
+      commentUrl: articleData.commentUrl,
       linkedinPostUrl: articleData.linkedinPostUrl,
       instagramPostUrl: articleData.instagramPostUrl,
       authorId: articleData.authorId || '',
@@ -51,10 +54,9 @@ export async function createArticle(articleData: Partial<Article>): Promise<Arti
       authorAvatarUrl: articleData.authorAvatarUrl || '/images/mascot_opt.png',
       authorBuilderUrl: articleData.authorBuilderUrl || '',
       authorLinkedinUrl: articleData.authorLinkedinUrl,
+      authorGithubUrl: articleData.authorGithubUrl,
       authorInstagramUrl: articleData.authorInstagramUrl,
       createdAt: new Date().toISOString(),
-      expiresAt: new Date(now + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      ttl: Math.floor(now / 1000) + 30 * 24 * 60 * 60,
       likesCount: 0,
     };
   }
@@ -89,16 +91,20 @@ export async function deleteArticle(id: string, authorId: string): Promise<boole
   }
 }
 
-export async function toggleLike(id: string, delta: number): Promise<number | null> {
+export async function toggleLike(
+  id: string,
+  userId: string,
+  delta?: number
+): Promise<{ likesCount: number; isLikedByMe: boolean } | null> {
   try {
     const res = await fetch(`${API_BASE_URL}/articles/${id}/like`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ delta }),
+      body: JSON.stringify({ userId, delta }),
     });
     if (!res.ok) return null;
     const data = await res.json();
-    return data.likesCount;
+    return { likesCount: data.likesCount, isLikedByMe: data.isLikedByMe };
   } catch (error) {
     console.warn('[API Serverless] Error en Like DynamoDB:', error);
     return null;

@@ -105,7 +105,7 @@ export function isValidGitHubUrl(input: string): { isValid: boolean; error?: str
 // Valida si una URL de artículo pertenece a un dominio legítimo de AWS
 export function isValidAWSArticleUrl(url: string): { isValid: boolean; error?: string } {
   if (!url) {
-    return { isValid: false, error: 'La URL del artículo es obligatoria' };
+    return { isValid: false, error: 'La URL es obligatoria' };
   }
   
   try {
@@ -129,6 +129,47 @@ export function isValidAWSArticleUrl(url: string): { isValid: boolean; error?: s
       };
     }
     
+    return { isValid: true };
+  } catch {
+    return { isValid: false, error: 'Formato de URL no válido (debe incluir https://)' };
+  }
+}
+
+// Valida si una URL pertenece a la Wishlist de AWS Builder Center (builder.aws.com/wishlist/...)
+export function isValidWishlistUrl(url: string): { isValid: boolean; error?: string } {
+  if (!url) {
+    return { isValid: false, error: 'La URL del deseo en Wishlist es obligatoria' };
+  }
+
+  try {
+    const parsed = new URL(url);
+    if (!parsed.hostname.includes('builder.aws.com') && !parsed.hostname.includes('community.aws')) {
+      return { isValid: false, error: 'Debe ser un enlace oficial de builder.aws.com' };
+    }
+    if (!parsed.pathname.includes('/wishlist/')) {
+      return { isValid: false, error: 'La URL debe contener la ruta /wishlist/ (ej. https://builder.aws.com/wishlist/...)' };
+    }
+    return { isValid: true };
+  } catch {
+    return { isValid: false, error: 'Formato de URL no válido (debe incluir https://)' };
+  }
+}
+
+// Valida si una URL pertenece a un comentario con feedback en AWS Builder Center (builder.aws.com/comment/... o #comments)
+export function isValidCommentUrl(url: string): { isValid: boolean; error?: string } {
+  if (!url) {
+    return { isValid: false, error: 'La URL del comentario es obligatoria' };
+  }
+
+  try {
+    const parsed = new URL(url);
+    if (!parsed.hostname.includes('builder.aws.com') && !parsed.hostname.includes('community.aws')) {
+      return { isValid: false, error: 'Debe ser un enlace oficial de builder.aws.com' };
+    }
+    const isCommentPath = parsed.pathname.includes('/comment/') || parsed.hash.includes('comments');
+    if (!isCommentPath) {
+      return { isValid: false, error: 'La URL debe ser un enlace directo a un comentario (ej. https://builder.aws.com/comment/...#comments)' };
+    }
     return { isValid: true };
   } catch {
     return { isValid: false, error: 'Formato de URL no válido (debe incluir https://)' };

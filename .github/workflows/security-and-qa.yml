@@ -1,0 +1,49 @@
+name: 🛡️ Security Audit, QA & Build Validation
+
+on:
+  push:
+    branches: [ bankai, shikai, zanpakuto ]
+  pull_request:
+    branches: [ bankai, shikai ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  qa_and_build:
+    name: 🧪 QA Test & Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js (20.x)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: TypeScript & Vite Build
+        run: npm run build
+
+  codeql_security_scan:
+    name: 🔒 CodeQL Security & SAST Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:javascript-typescript"

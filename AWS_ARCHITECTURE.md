@@ -1,4 +1,4 @@
-# 🏛️ Arquitectura AWS Serverless y Estrategia de Cuentas
+# Arquitectura AWS Serverless y estrategia de cuentas
 
 > **Proyecto:** Creadores Bootcamp AWS Builder Center  
 > **Dominio:** `creadores.awsugplayavicente.com`  
@@ -82,7 +82,7 @@ lambda_client = boto3.client('lambda')
 cloudfront_client = boto3.client('cloudfront')
 
 def lambda_handler(event, context):
-    print("🚨 ALERTA CRÍTICA DE PRESUPUESTO: Disparando Kill Switch...")
+    print("ALERTA CRITICA DE PRESUPUESTO: Disparando Kill Switch...")
     
     # 1. Poner concurrencia de las Lambdas del backend en 0 (corta ejecuciones a $0 de inmediato)
     backend_functions = [
@@ -96,7 +96,7 @@ def lambda_handler(event, context):
                 FunctionName=fn,
                 ReservedConcurrentExecutions=0
             )
-            print(f"🔒 Concurrencia de {fn} ajustada a 0.")
+            print(f"Concurrencia de {fn} ajustada a 0.")
         except Exception as e:
             print(f"Error ajustando concurrencia en {fn}: {e}")
             

@@ -10,6 +10,8 @@ export type AWSCategory =
   | 'Networking & Content Delivery'
   | 'Storage';
 
+export type ItemType = 'article' | 'wishlist' | 'comment';
+
 export interface CreatorProfile {
   id: string;
   name: string;
@@ -26,11 +28,14 @@ export interface CreatorProfile {
 
 export interface Article {
   id: string;
+  itemType?: ItemType;             // 'article' | 'wishlist' | 'comment' (por defecto 'article')
   title: string;
   summary?: string;
   category: AWSCategory;
-  // Enlaces del artículo y difusión
-  builderUrl: string;              // Enlace al artículo en AWS Builder Center
+  // Enlaces del artículo, deseo o comentario y difusión
+  builderUrl: string;              // Enlace oficial en AWS Builder Center
+  wishlistUrl?: string;            // Enlace directo a la Wishlist de AWS
+  commentUrl?: string;             // Enlace directo al comentario con ancla #comments
   linkedinPostUrl?: string;        // Dónde lo posteó en LinkedIn
   instagramPostUrl?: string;       // Dónde lo posteó en Instagram
   xPostUrl?: string;               // Dónde lo posteó en X / Twitter
@@ -47,7 +52,6 @@ export interface Article {
   authorXUrl?: string;
 
   createdAt: string;
-  expiresAt?: string;             // ISO date para cálculo de vigencia de 30 días
-  ttl?: number;                   // Timestamp Unix epoch (segundos) para TTL de DynamoDB
   likesCount: number;
+  likedBy?: string[];             // Lista de IDs de usuarios que apoyaron (idempotencia y 1 voto por usuario)
 }
